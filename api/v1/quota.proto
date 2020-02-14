@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package v1;
+
+import "google/protobuf/wrappers.proto";
+
+// QuotaSet defines the types of possible Quotas
+// might be specified by project or tenant
+// whatever quota is reached first counts
+// it always defines the max amount of this type
+message QuotaSet {
+    // cluster the amount of clusters
+    Quota cluster = 1;
+    // machine the amount of machines
+    Quota machine = 2;
+    // ip the amount of aquired ip´s
+    Quota ip = 3;
+    // project the amount of projects of a tenant
+    Quota project = 4;
+}
+
+// Quota is the actual maximum amount
+message Quota {
+    // quota is the maximum amount for the current QuotaSet, can be nil
+    google.protobuf.Int32Value quota = 1;
+}

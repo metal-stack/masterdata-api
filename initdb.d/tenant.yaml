@@ -1,0 +1,44 @@
+---
+meta:
+  id: customer-1
+  kind: Tenant
+  apiversion: v1
+  version: 0
+name: customer-1
+description: Demo Tenant
+default_quotas:
+  cluster:
+    quota:
+      value: 3
+  machine:
+    quota:
+      value: 3
+  ip:
+    quota:
+      value: 3
+quotas:
+  cluster:
+    quota:
+      value: 30
+  machine:
+    quota:
+      value: 30
+  ip:
+    quota:
+      value: 30
+---
+meta:
+  id: demo
+  kind: Tenant
+  apiversion: v1
+  version: 0
+name: Demo
+iam_config:
+  issuer_config:
+    url: "https://dex.demo.io/dex"
+    client_id: "demo"
+  idm_config:
+    idm_type: "UX"
+  group_config:
+    namespace_max_length: 20
+description: Demo-Tenant

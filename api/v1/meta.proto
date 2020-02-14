@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Meta {
+    string id = 1;
+    string kind = 2;
+    string apiversion = 3;
+    int64 version = 4;
+    google.protobuf.Timestamp created_time = 5;
+    google.protobuf.Timestamp updated_time = 6;
+}

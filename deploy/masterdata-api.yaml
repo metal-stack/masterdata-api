@@ -1,0 +1,200 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: masterdata
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-tenant
+  namespace: masterdata
+data:
+  tenant.yaml: |
+    ---
+    meta:
+      id: tnnt
+      kind: Tenant
+      apiversion: v1
+      version: 0
+    name: TNNT
+    iam_config:
+      issuer_config:
+        url: "https://dex.metal-stack.io/dex"
+        client_id: "metal-stack"
+      idm_config:
+        idm_type: "UX"
+      group_config:
+        namespace_max_length: 20
+    description: TNNT tenant, which is provider
+    ---
+    meta:
+      id: demo
+      kind: Tenant
+      apiversion: v1
+      version: 0
+    name: Demo
+    iam_config:
+      issuer_config:
+        url: "https://dex.test.metal-stack.io/dex"
+        client_id: "metal-stack"
+      idm_config:
+        idm_type: "AD"
+      group_config:
+        namespace_max_length: 20
+    description: Demo-Tenant
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-project
+  namespace: masterdata
+data:
+  project.yaml: |
+    ---
+    meta:
+      id: 00000000-0000-0000-0000-000000000000
+      kind: Project
+      apiversion: v1
+      version: 0
+    name: metal-system
+    description: Metal Master Project
+    tenant_id: metal
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: masterdata-api-tls
+  namespace: masterdata
+type: Opaque
+data:
+  server-key.pem: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUwzY21acWxqUVQ1T0QyaWgrUWRXMDFhclRobmNOenhYU3h2d0kxR0FXTERvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFaEFTc1F2WERtWWZVb2lrMFhzWmZXaUFVVnNma2xiWmZHc3YyN0VZbjFRNWF6bWU1a3pZOQprcEIyVFRjNXJsSTNtMnp0QnJGSUdHY1FKOHd1QTJqWGlnPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+  server.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUI5akNDQVp5Z0F3SUJBZ0lVZUtEVEM5VmIvK1dnODZldE1RMnh1S0tBYkVZd0NnWUlLb1pJemowRUF3SXcKUnpFTE1Ba0dBMVVFQmhNQ1JFVXhEekFOQmdOVkJBZ1RCazExYm1samFERVFNQTRHQTFVRUJ4TUhRbUYyWVhKcApZVEVWTUJNR0ExVUVBeE1NYldWMFlXd3RjRzlrTG1sdk1CNFhEVEU1TVRFeU56RXpNVFV3TUZvWERUSTBNVEV5Ck5URXpNVFV3TUZvd1J6RUxNQWtHQTFVRUJoTUNSRVV4RHpBTkJnTlZCQWdUQmsxMWJtbGphREVRTUE0R0ExVUUKQnhNSFFtRjJZWEpwWVRFVk1CTUdBMVVFQXhNTWJXVjBZV3d0Y0c5a0xtbHZNRmt3RXdZSEtvWkl6ajBDQVFZSQpLb1pJemowREFRY0RRZ0FFaEFTc1F2WERtWWZVb2lrMFhzWmZXaUFVVnNma2xiWmZHc3YyN0VZbjFRNWF6bWU1Cmt6WTlrcEIyVFRjNXJsSTNtMnp0QnJGSUdHY1FKOHd1QTJqWGlxTm1NR1F3RGdZRFZSMFBBUUgvQkFRREFnRUcKTUJJR0ExVWRFd0VCL3dRSU1BWUJBZjhDQVFJd0hRWURWUjBPQkJZRUZNRW0vSFB0S3FraStnN21PUUdaWEt1cgo5YzAxTUI4R0ExVWRJd1FZTUJhQUZNRW0vSFB0S3FraStnN21PUUdaWEt1cjljMDFNQW9HQ0NxR1NNNDlCQU1DCkEwZ0FNRVVDSUVlWmNEYXdodDNqMTIxVGJxZDZud2pUMmdOTGFpYmk1YTVQT0tEdmcrN1dBaUVBMkRvc1hHN1cKQ081L3RFWHVKand6aVM0ckpUWk92T3MySytJbDdud3Z3T0E9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masterdata-api
+  namespace: masterdata
+spec:
+  selector:
+    matchLabels:
+      app: masterdata-api
+  template:
+    metadata:
+      labels:
+        app: masterdata-api
+        networking.gardener.cloud/from-prometheus: allowed
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: /metrics
+        prometheus.io/port: '2112'
+    spec:
+      containers:
+      - name: masterdata-api
+        image: registry.fi-ts.io/cloud-native/masterdata-api
+        imagePullPolicy: Always
+        env:
+        - name: MASTERDATA_API_SERVERCERT
+          value: /certs/server.pem
+        - name: MASTERDATA_API_SERVERKEY
+          value: /certs/server-key.pem
+        - name: MASTERDATA_API_DBHOST
+          value: masterdata-db
+        - name: MASTERDATA_API_PORT
+          value: "8443"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        ports:
+        - containerPort: 8443
+        readinessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8443", "-tls", "-tls-ca-cert=/certs/server.pem", "-tls-server-name=metal-stack.io"]
+          initialDelaySeconds: 5
+        livenessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:8443", "-tls", "-tls-ca-cert=/certs/server.pem", "-tls-server-name=metal-stack.io"]
+          initialDelaySeconds: 10
+        volumeMounts:
+        - name: certs
+          mountPath: /certs
+        - name: initdb-project-volume
+          mountPath: /initdb.d/project.yaml
+          subPath: project.yaml
+        - name: initdb-tenant-volume
+          mountPath: /initdb.d/tenant.yaml
+          subPath: tenant.yaml
+      volumes:
+      - name: certs
+        secret:
+          secretName: masterdata-api-tls
+      - name: initdb-project-volume
+        configMap:
+          name: default-project
+      - name: initdb-tenant-volume
+        configMap:
+          name: default-tenant
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masterdata-api
+  namespace: masterdata
+  labels:
+    app: masterdata-api
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8443
+    targetPort: 8443
+  selector:
+    app: masterdata-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masterdata-db
+  namespace: masterdata
+spec:
+  selector:
+    matchLabels:
+      app: masterdata-db
+  template:
+    metadata:
+      labels:
+        app: masterdata-db
+    spec:
+      containers:
+      - name: masterdata-db
+        image: postgres:12-alpine
+        env:
+        - name: POSTGRES_PASSWORD
+          value: password
+        - name: POSTGRES_USER
+          value: masterdata
+        - name: POSTGRES_DB
+          value: masterdata
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: masterdata-db
+  namespace: masterdata
+  labels:
+    app: masterdata-db
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+  selector:
+    app: masterdata-db

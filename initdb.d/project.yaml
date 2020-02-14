@@ -1,0 +1,19 @@
+---
+meta:
+  id: db511e4d-59b6-475c-b1c2-fd577404cdc9
+  kind: Project
+  apiversion: v1
+  version: 0
+name: project123
+description: Demo Project
+tenant_id: customer-1
+quotas:
+  cluster:
+    quota:
+      value: 3
+  machine:
+    quota:
+      value: 3
+  ip:
+    quota:
+      value: 3
