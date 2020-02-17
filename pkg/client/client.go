@@ -1,7 +1,10 @@
 package client
 
 import (
+	"time"
+
 	"github.com/metal-stack/masterdata-api/pkg/auth"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -25,9 +28,8 @@ type GRPCClient struct {
 
 // NewClient creates a new client for the services for the given address, with the certificate and hmac.
 func NewClient(address string, certFile string, hmacKey string, logger *zap.Logger) (Client, error) {
-
 	if hmacKey == "" {
-		logger.Sugar().Fatal("no hmac-key specified")
+		return nil, errors.New("no hmac-key specified")
 	}
 
 	client := GRPCClient{
@@ -38,14 +40,15 @@ func NewClient(address string, certFile string, hmacKey string, logger *zap.Logg
 	// Set up the credentials for the connection.
 	perRPCHMACAuthenticator, err := auth.NewHMACAuther(logger, hmacKey, auth.EditUser)
 	if err != nil {
-		logger.Sugar().Fatalf("failed to create hmac-authenticator: %v", err)
+		return nil, errors.Wrap(err, "failed to create hmac-authenticator")
 	}
 	// TODO serverNameOverride should only be there for tests...?
 	creds, err := credentials.NewClientTLSFromFile(certFile, "metal-stack.io")
 	if err != nil {
-		logger.Sugar().Fatalf("failed to load credentials: %v", err)
+		return nil, errors.Wrap(err, "failed to load credentials")
 	}
 	opts := []grpc.DialOption{
+		grpc.WithTimeout(3 * time.Second),
 		// In addition to the following grpc.DialOption, callers may also use
 		// the grpc.CallOption grpc.PerRPCCredentials with the RPC invocation
 		// itself.
@@ -61,12 +64,27 @@ func NewClient(address string, certFile string, hmacKey string, logger *zap.Logg
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
-		logger.Sugar().Errorf("did not connect: %v", err)
 		return nil, err
 	}
 	client.conn = conn
 
 	return client, nil
+}
+
+// NewClientWithRetry tries creating a new client for the services for the given address, with the certificate and hmac until successfully initialized.
+func NewClientWithRetry(address string, certFile string, hmacKey string, logger *zap.Logger, stop <-chan struct{}) (Client, error) {
+	for {
+		select {
+		case <-stop:
+			return nil, errors.New("received stop signal, stop client init")
+		default:
+			client, err := NewClient(address, certFile, hmacKey, logger)
+			if err == nil {
+				return client, nil
+			}
+			logger.Sugar().Errorw("failed initializing masterdata-api client, retrying...", "error", err)
+		}
+	}
 }
 
 // Close the underlying connection

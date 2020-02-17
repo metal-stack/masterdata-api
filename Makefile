@@ -21,7 +21,7 @@ clean:
 protoc:
 	# docker pull metalstack/builder
 	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder protoc -I api/ api/v1/*.proto --go_out=plugins=grpc:api
-	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder  protoc -I api/ api/grpc/health/v1/*.proto --go_out=plugins=grpc:api
+	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder protoc -I api/ api/grpc/health/v1/*.proto --go_out=plugins=grpc:api
 
 .PHONY: test
 test:
