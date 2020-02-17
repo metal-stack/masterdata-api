@@ -1,9 +1,9 @@
 package client
 
 import (
+	"context"
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 	"github.com/pkg/errors"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
