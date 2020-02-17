@@ -192,8 +192,8 @@ func run() {
 	go func() {
 		logger.Info("starting pprof endpoint of :2113")
 		// inspect via
-		// go tool pprof -http :8080 localhost:2113/pprof/heap
-		// go tool pprof -http :8080 localhost:2113/pprof/goroutine
+		// go tool pprof -http :8080 localhost:2113/debug/pprof/heap
+		// go tool pprof -http :8080 localhost:2113/debug/pprof/goroutine
 		err := http.ListenAndServe(":2113", nil)
 		if err != nil {
 			sLogger.Errorw("failed to start pprof endpoint", "error", err)

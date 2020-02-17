@@ -71,18 +71,27 @@ go get -u github.com/golang/protobuf/protoc-gen-go
 make postgres-up
 ```
 
+Start client with extensive logging
 ```bash
 make clean protoc client
-bin/client
+GRPC_GO_LOG_VERBOSITY_LEVEL=99 GRPC_GO_LOG_SEVERITY_LEVEL=info bin/client
 ```
 
+Start server
 ```bash
 make clean protoc server
-bin server
+bin/server
 ```
 
 ## Metrics
 
 ```bash
 http://localhost:2112/metrics
+```
+
+## pprof
+
+```
+go tool pprof -http :8080 localhost:2113/debug/pprof/heap
+go tool pprof -http :8080 localhost:2113/debug/pprof/goroutine
 ```
