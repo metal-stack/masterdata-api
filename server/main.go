@@ -2,7 +2,9 @@ package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
@@ -67,8 +69,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.Flags().IntP("port", "", 50051, "the port to serve on")
 
-	rootCmd.Flags().StringP("servercert", "", "certs/server.pem", "server certificate path")
-	rootCmd.Flags().StringP("serverkey", "", "certs/server-key.pem", "server key path")
+	rootCmd.Flags().StringP("ca", "", "certs/ca.pem", "ca path")
+	rootCmd.Flags().StringP("cert", "", "certs/server.pem", "server certificate path")
+	rootCmd.Flags().StringP("certkey", "", "certs/server-key.pem", "server key path")
 
 	rootCmd.Flags().StringP("dbhost", "", "localhost", "postgres database server hostname/ip")
 	rootCmd.Flags().StringP("dbport", "", "5432", "postgres database server port")
@@ -94,10 +97,6 @@ func run() {
 		}
 	}()
 
-	hmacKey := viper.GetString("hmackey")
-	if hmacKey == "" {
-		hmacKey = auth.HmacDefaultKey
-	}
 	port := viper.GetInt("port")
 	addr := fmt.Sprintf(":%d", port)
 	lis, err := net.Listen("tcp", addr)
@@ -107,21 +106,50 @@ func run() {
 
 	sLogger.Infow("starting masterdata-api", "version", v.V.String(), "address", addr)
 
-	serverCert := viper.GetString("servercert")
-	serverKey := viper.GetString("serverkey")
-	cert, err := tls.LoadX509KeyPair(serverCert, serverKey)
-	if err != nil {
-		sLogger.Fatalf("failed to load key pair: %s", err)
+	hmacKey := viper.GetString("hmackey")
+	if hmacKey == "" {
+		hmacKey = auth.HmacDefaultKey
 	}
-
 	auther, err := auth.NewHMACAuther(logger, hmacKey, auth.EditUser)
 	if err != nil {
 		sLogger.Fatalf("failed to create auther: %s", err)
 	}
 
+	caFile := viper.GetString("ca")
+	// Get system certificate pool
+	certPool, err := x509.SystemCertPool()
+	if err != nil {
+		sLogger.Fatalf("could not read system certificate pool: %s", err)
+	}
+
+	if caFile != "" {
+		sLogger.Infof("using ca: %s", caFile)
+		ca, err := ioutil.ReadFile(caFile)
+		if err != nil {
+			sLogger.Fatalf("could not read ca certificate: %s", err)
+		}
+		// Append the certificates from the CA
+		if ok := certPool.AppendCertsFromPEM(ca); !ok {
+			sLogger.Fatalf("failed to append ca certs: %s", caFile)
+		}
+	}
+
+	serverCert := viper.GetString("cert")
+	serverKey := viper.GetString("certkey")
+	cert, err := tls.LoadX509KeyPair(serverCert, serverKey)
+	if err != nil {
+		sLogger.Fatalf("failed to load key pair: %s", err)
+	}
+
+	creds := credentials.NewTLS(&tls.Config{
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		Certificates: []tls.Certificate{cert},
+		ClientCAs:    certPool,
+	})
+
 	opts := []grpc.ServerOption{
 		// Enable TLS for all incoming connections.
-		grpc.Creds(credentials.NewServerTLSFromCert(&cert)),
+		grpc.Creds(creds),
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_ctxtags.StreamServerInterceptor(),
 			grpc_prometheus.StreamServerInterceptor,
@@ -192,8 +220,8 @@ func run() {
 	go func() {
 		logger.Info("starting pprof endpoint of :2113")
 		// inspect via
-		// go tool pprof -http :8080 localhost:2113/pprof/heap
-		// go tool pprof -http :8080 localhost:2113/pprof/goroutine
+		// go tool pprof -http :8080 localhost:2113/debug/pprof/heap
+		// go tool pprof -http :8080 localhost:2113/debug/pprof/goroutine
 		err := http.ListenAndServe(":2113", nil)
 		if err != nil {
 			sLogger.Errorw("failed to start pprof endpoint", "error", err)

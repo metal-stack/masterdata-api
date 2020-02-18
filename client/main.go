@@ -25,7 +25,7 @@ func main() {
 		hmacKey = auth.HmacDefaultKey
 	}
 
-	c, err := client.NewClient("localhost:50051", "certs/server.pem", hmacKey, logger)
+	c, err := client.NewClient(context.TODO(), "localhost", 50051, "certs/client.pem", "certs/client-key.pem", "certs/ca.pem", hmacKey, logger)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

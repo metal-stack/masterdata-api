@@ -21,7 +21,7 @@ clean:
 protoc:
 	# docker pull metalstack/builder
 	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder protoc -I api/ api/v1/*.proto --go_out=plugins=grpc:api
-	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder  protoc -I api/ api/grpc/health/v1/*.proto --go_out=plugins=grpc:api
+	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder protoc -I api/ api/grpc/health/v1/*.proto --go_out=plugins=grpc:api
 
 .PHONY: test
 test:
@@ -65,4 +65,7 @@ postgres-rm:
 
 .PHONY: certs
 certs:
-	cd certs && cfssl gencert -initca ca-csr.json | cfssljson -bare server -
+	cd certs && cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
+	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client-server server.json | cfssljson -bare server -
+	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client client.json | cfssljson -bare client -
+	

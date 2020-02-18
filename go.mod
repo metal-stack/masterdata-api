@@ -24,6 +24,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.0.9
 	github.com/vektra/mockery v0.0.0-20181123154057-e78b021dcbb5 // indirect
 	go.uber.org/zap v1.13.0
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/sys v0.0.0-20200212091648-12a6c2dcc1e4 // indirect
 	google.golang.org/genproto v0.0.0-20200212174721-66ed5ce911ce // indirect
 	google.golang.org/grpc v1.27.1
