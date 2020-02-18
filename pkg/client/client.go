@@ -2,6 +2,8 @@ package client
 
 import (
 	"github.com/metal-stack/masterdata-api/pkg/auth"
+	"github.com/pkg/errors"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -24,10 +26,9 @@ type GRPCClient struct {
 }
 
 // NewClient creates a new client for the services for the given address, with the certificate and hmac.
-func NewClient(address string, certFile string, hmacKey string, logger *zap.Logger) (Client, error) {
-
+func NewClient(ctx context.Context, address string, certFile string, hmacKey string, logger *zap.Logger) (Client, error) {
 	if hmacKey == "" {
-		logger.Sugar().Fatal("no hmac-key specified")
+		return nil, errors.New("no hmac-key specified")
 	}
 
 	client := GRPCClient{
@@ -38,12 +39,12 @@ func NewClient(address string, certFile string, hmacKey string, logger *zap.Logg
 	// Set up the credentials for the connection.
 	perRPCHMACAuthenticator, err := auth.NewHMACAuther(logger, hmacKey, auth.EditUser)
 	if err != nil {
-		logger.Sugar().Fatalf("failed to create hmac-authenticator: %v", err)
+		return nil, errors.Wrap(err, "failed to create hmac-authenticator")
 	}
 	// TODO serverNameOverride should only be there for tests...?
 	creds, err := credentials.NewClientTLSFromFile(certFile, "metal-stack.io")
 	if err != nil {
-		logger.Sugar().Fatalf("failed to load credentials: %v", err)
+		return nil, errors.Wrap(err, "failed to load credentials")
 	}
 	opts := []grpc.DialOption{
 		// In addition to the following grpc.DialOption, callers may also use
@@ -59,9 +60,8 @@ func NewClient(address string, certFile string, hmacKey string, logger *zap.Logg
 		grpc.WithBlock(),
 	}
 	// Set up a connection to the server.
-	conn, err := grpc.Dial(address, opts...)
+	conn, err := grpc.DialContext(ctx, address, opts...)
 	if err != nil {
-		logger.Sugar().Errorf("did not connect: %v", err)
 		return nil, err
 	}
 	client.conn = conn
