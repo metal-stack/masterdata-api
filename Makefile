@@ -65,4 +65,7 @@ postgres-rm:
 
 .PHONY: certs
 certs:
-	cd certs && cfssl gencert -initca ca-csr.json | cfssljson -bare server -
+	cd certs && cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
+	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client-server server.json | cfssljson -bare server -
+	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client client.json | cfssljson -bare client -
+	

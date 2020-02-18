@@ -1,9 +1,5 @@
 {
-    "CN": "metal-stack.io",
-    "hosts": [
-        "masterdata-api.metal-stack.io",
-        "masterdata-api.metal-stack.dev"
-    ],
+    "CN": "ca",
     "key": {
         "algo": "ecdsa",
         "size": 256

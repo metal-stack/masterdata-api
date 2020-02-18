@@ -4,7 +4,7 @@
             "expiry": "168h"
         },
         "profiles": {
-            "www": {
+            "server": {
                 "expiry": "8760h",
                 "usages": [
                     "signing",
@@ -17,6 +17,15 @@
                 "usages": [
                     "signing",
                     "key encipherment",
+                    "client auth"
+                ]
+            },
+            "client-server": {
+                "expiry": "8760h",
+                "usages": [
+                    "signing",
+                    "key encipherment",
+                    "server auth",
                     "client auth"
                 ]
             }

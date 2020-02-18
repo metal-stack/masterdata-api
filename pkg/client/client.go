@@ -1,11 +1,15 @@
 package client
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"io/ioutil"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"go.uber.org/zap"
@@ -26,7 +30,36 @@ type GRPCClient struct {
 }
 
 // NewClient creates a new client for the services for the given address, with the certificate and hmac.
-func NewClient(ctx context.Context, address string, certFile string, hmacKey string, logger *zap.Logger) (Client, error) {
+func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, logger *zap.Logger) (Client, error) {
+
+	address := fmt.Sprintf("%s:%d", hostname, port)
+
+	certPool, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load system credentials: %v", err)
+	}
+
+	ca, err := ioutil.ReadFile(caFile)
+	if err != nil {
+		return nil, fmt.Errorf("could not read ca certificate: %s", err)
+	}
+
+	ok := certPool.AppendCertsFromPEM(ca)
+	if !ok {
+		return nil, fmt.Errorf("failed to append ca certs: %s", caFile)
+	}
+
+	clientCertificate, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, fmt.Errorf("could not load client key pair: %s", err)
+	}
+
+	creds := credentials.NewTLS(&tls.Config{
+		ServerName:   hostname,
+		Certificates: []tls.Certificate{clientCertificate},
+		RootCAs:      certPool,
+	})
+
 	if hmacKey == "" {
 		return nil, errors.New("no hmac-key specified")
 	}
@@ -41,12 +74,9 @@ func NewClient(ctx context.Context, address string, certFile string, hmacKey str
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create hmac-authenticator")
 	}
-	// TODO serverNameOverride should only be there for tests...?
-	creds, err := credentials.NewClientTLSFromFile(certFile, "metal-stack.io")
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to load credentials")
-	}
+
 	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(creds),
 		// In addition to the following grpc.DialOption, callers may also use
 		// the grpc.CallOption grpc.PerRPCCredentials with the RPC invocation
 		// itself.
