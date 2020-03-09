@@ -20,8 +20,10 @@ clean:
 .PHONY: protoc
 protoc:
 	# docker pull metalstack/builder
-	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder protoc -I api/ api/v1/*.proto --go_out=plugins=grpc:api
-	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder protoc -I api/ api/grpc/health/v1/*.proto --go_out=plugins=grpc:api
+# 	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder protoc -I api api/v1/*.proto --go_out=plugins=grpc:api --go_opt=paths=source_relative  api/v1/*.proto
+# 	docker run -it --rm -v ${PWD}/api:/work/api metalstack/builder protoc -I api api/grpc/health/v1/*.proto --go_out=plugins=grpc:api --go_opt=paths=source_relative api/grpc/health/v1/*.proto
+	protoc -I api -I api/v1/*.proto --go_out api --go_opt=paths=source_relative api/v1/*.proto
+	protoc -I api -I api/grpc/health/v1/*.proto --go_out api --go_opt=paths=source_relative api/grpc/health/v1/*.proto
 
 .PHONY: test
 test:

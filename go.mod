@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/squirrel v1.2.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/gogo/status v1.1.0
-	github.com/golang/protobuf v1.3.4
+	github.com/golang/protobuf v1.4.0-rc.2
 	github.com/google/uuid v1.1.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -28,6 +28,7 @@ require (
 	golang.org/x/sys v0.0.0-20200212091648-12a6c2dcc1e4 // indirect
 	google.golang.org/genproto v0.0.0-20200212174721-66ed5ce911ce // indirect
 	google.golang.org/grpc v1.27.1
+	google.golang.org/protobuf v1.20.0
 )
 
 // required because by default viper depends on etcd v3.3.10 which has a corrupt sum
