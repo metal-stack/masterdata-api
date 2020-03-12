@@ -36,7 +36,7 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
-		return nil, fmt.Errorf("failed to load system credentials", zap.Error(err))
+		return nil, fmt.Errorf("failed to load system credentials: %w", err)
 	}
 
 	if caFile != "" {

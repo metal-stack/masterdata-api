@@ -193,7 +193,7 @@ func run() {
 
 	err = storage.Initdb(healthServer, "initdb.d")
 	if err != nil {
-		sLogger.Errorw("unable to apply initdb content", "error", err)
+		logger.Error("unable to apply initdb content", zap.Error(err))
 	}
 
 	projectService := service.NewProjectService(storage, logger)
@@ -212,7 +212,7 @@ func run() {
 		logger.Info("starting metrics endpoint of :2112")
 		err := http.ListenAndServe(":2112", metricsServer)
 		if err != nil {
-			sLogger.Errorw("failed to start metrics endpoint", "error", err)
+			logger.Error("failed to start metrics endpoint", zap.Error(err))
 		}
 		os.Exit(1)
 	}()
@@ -224,7 +224,7 @@ func run() {
 		// go tool pprof -http :8080 localhost:2113/debug/pprof/goroutine
 		err := http.ListenAndServe(":2113", nil)
 		if err != nil {
-			sLogger.Errorw("failed to start pprof endpoint", "error", err)
+			logger.Error("failed to start pprof endpoint", zap.Error(err))
 		}
 		os.Exit(1)
 	}()
