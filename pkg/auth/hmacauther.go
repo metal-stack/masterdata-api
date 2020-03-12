@@ -70,7 +70,7 @@ func (a *HMACAuther) Auth(ctx context.Context) (context.Context, error) {
 
 	user, err := a.hmacAuth.UserFromRequestData(rqd)
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid auth token: %w", err)
+		return nil, status.Errorf(codes.Unauthenticated, "invalid auth token: %v", err)
 	}
 
 	newCtx := context.WithValue(ctx, contextKeyUser, user)
