@@ -83,7 +83,7 @@ func init() {
 
 	err := viper.BindPFlags(rootCmd.Flags())
 	if err != nil {
-		logger.Sugar().Errorw("unable to construct root command:%v", err)
+		logger.Error("unable to construct root command", zap.Error(err))
 	}
 }
 
