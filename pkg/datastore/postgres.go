@@ -7,10 +7,10 @@ import (
 	"github.com/lib/pq"
 	"reflect"
 
-	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	// import for sqlx to use postgres driver
@@ -57,7 +57,7 @@ type Datastore struct {
 func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, sslmode string, ves ...VersionedJSONEntity) (*Datastore, error) {
 	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to database:%v", err)
+		return nil, fmt.Errorf("unable to connect to database: %w", err)
 	}
 	types := make(map[string]VersionedJSONEntity)
 	for _, ve := range ves {

@@ -101,7 +101,7 @@ func run() {
 	addr := fmt.Sprintf(":%d", port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		sLogger.Fatalf("failed to listen: %v", err)
+		logger.Fatal("failed to listen", zap.Error(err))
 	}
 
 	sLogger.Infow("starting masterdata-api", "version", v.V.String(), "address", addr)
@@ -112,25 +112,25 @@ func run() {
 	}
 	auther, err := auth.NewHMACAuther(logger, hmacKey, auth.EditUser)
 	if err != nil {
-		sLogger.Fatalf("failed to create auther: %s", err)
+		logger.Fatal("failed to create auther", zap.Error(err))
 	}
 
 	caFile := viper.GetString("ca")
 	// Get system certificate pool
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
-		sLogger.Fatalf("could not read system certificate pool: %s", err)
+		logger.Fatal("could not read system certificate pool", zap.Error(err))
 	}
 
 	if caFile != "" {
-		sLogger.Infof("using ca: %s", caFile)
+		sLogger.Info("using ca", "ca", caFile)
 		ca, err := ioutil.ReadFile(caFile)
 		if err != nil {
-			sLogger.Fatalf("could not read ca certificate: %s", err)
+			logger.Fatal("could not read ca certificate", zap.Error(err))
 		}
 		// Append the certificates from the CA
 		if ok := certPool.AppendCertsFromPEM(ca); !ok {
-			sLogger.Fatalf("failed to append ca certs: %s", caFile)
+			logger.Fatal("failed to append ca certs", zap.Error(err))
 		}
 	}
 
@@ -138,7 +138,7 @@ func run() {
 	serverKey := viper.GetString("certkey")
 	cert, err := tls.LoadX509KeyPair(serverCert, serverKey)
 	if err != nil {
-		sLogger.Fatalf("failed to load key pair: %s", err)
+		logger.Fatal("failed to load key pair", zap.Error(err))
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -186,7 +186,7 @@ func run() {
 
 	storage, err := datastore.NewPostgresStorage(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode, ves...)
 	if err != nil {
-		sLogger.Fatalf("failed to create postgres connection: %v", err)
+		logger.Fatal("failed to create postgres connection", zap.Error(err))
 	}
 
 	healthServer := health.NewHealthServer()
@@ -232,6 +232,6 @@ func run() {
 	reflection.Register(grpcServer)
 
 	if err := grpcServer.Serve(lis); err != nil {
-		sLogger.Fatalf("failed to serve: %v", err)
+		logger.Fatal("failed to serve", zap.Error(err))
 	}
 }
