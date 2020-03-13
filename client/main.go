@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const grpcRequestTimeoutSecs = 5 * time.Second
+const grpcRequestTimeout = 5 * time.Second
 
 func main() {
 
@@ -41,7 +41,7 @@ func main() {
 
 func projectExample(c client.Client, log *zap.Logger) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeoutSecs)
+	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeout)
 	defer cancel()
 
 	// create
@@ -53,6 +53,14 @@ func projectExample(c client.Client, log *zap.Logger) {
 			Cluster: &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
 			Machine: &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
 			Ip:      &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
+		},
+		Meta: &v1.Meta{
+			Annotations: map[string]string{
+				"metal-stack.io/contract": "1234",
+			},
+			Labels: []string{
+				"color=green",
+			},
 		},
 	}
 	pcr := &v1.ProjectCreateRequest{
@@ -128,7 +136,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 			},
 		},
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeoutSecs*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeout)
 	defer cancel()
 
 	tcr := &v1.TenantCreateRequest{
@@ -178,10 +186,10 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	log.Sugar().Infof("got tenant with id %v", tgres)
 
 	log.Sugar().Infof("get tenant with non-existant id")
-	tgr_notfound := &v1.TenantGetRequest{
+	tgrNotFound := &v1.TenantGetRequest{
 		Id: "1982739817298219873",
 	}
-	_, err = c.Tenant().Get(ctx, tgr_notfound)
+	_, err = c.Tenant().Get(ctx, tgrNotFound)
 	if !v1.IsNotFound(err) {
 		log.Sugar().Fatal("unexpected response %v with error on tenant that cannot be found!", err)
 	}

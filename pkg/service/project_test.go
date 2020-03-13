@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	wrappers "github.com/golang/protobuf/ptypes/wrappers"
+	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -23,6 +23,14 @@ func TestCreateProject(t *testing.T) {
 		Name:        "FirstP",
 		Description: "First Project",
 		TenantId:    "t1",
+		Meta: &v1.Meta{
+			Annotations: map[string]string{
+				"metal-stack.io/contract": "1234",
+			},
+			Labels: []string{
+				"color=green",
+			},
+		},
 	}
 	tcr := &v1.ProjectCreateRequest{
 		Project: p1,
