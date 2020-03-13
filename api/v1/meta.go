@@ -22,3 +22,11 @@ func (m *Meta) SetCreatedTime(time *timestamp.Timestamp) {
 func (m *Meta) SetUpdatedTime(time *timestamp.Timestamp) {
 	m.UpdatedTime = time
 }
+
+func (m *Meta) SetAnnotations(annotations map[string]string) {
+	m.Annotations = annotations
+}
+
+func (m *Meta) SetLabels(labels []string) {
+	m.Labels = labels
+}

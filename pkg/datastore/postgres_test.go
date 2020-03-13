@@ -3,11 +3,12 @@ package datastore
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"os"
 	"runtime/debug"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
@@ -501,4 +502,78 @@ func TestDelete(t *testing.T) {
 	assert.Error(t, err)
 	assert.EqualError(t, err, "entity of type:tenant with id:t5 not found")
 
+}
+
+func TestAnnotationsAndLabels(t *testing.T) {
+	assert.NotNil(t, ds, "Datastore must not be nil")
+	ctx := context.Background()
+	tcr := &v1.Tenant{
+		Meta: &v1.Meta{
+			Id: "tenant-3",
+			Annotations: map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+			},
+			Labels: []string{
+				"color=red",
+			},
+		},
+		Name:        "A Tenant",
+		Description: "A very important Tenant",
+	}
+
+	err := ds.Create(ctx, tcr)
+	assert.NoError(t, err)
+	assert.NotNil(t, tcr)
+	assert.Equal(t, int64(0), tcr.Meta.Version)
+	assert.Equal(t, "A Tenant", tcr.GetName())
+	assert.NotNil(t, tcr.GetMeta().GetAnnotations())
+	assert.NotNil(t, tcr.GetMeta().GetLabels())
+	assert.Equal(t, map[string]string{"key1": "value1", "key2": "value2"}, tcr.GetMeta().GetAnnotations())
+	assert.Equal(t, []string{"color=red"}, tcr.GetMeta().GetLabels())
+
+	// get from db
+	tget := &v1.Tenant{}
+	err = ds.Get(ctx, tcr.Meta.Id, tget)
+	require.NoError(t, err)
+	require.Equal(t, tcr.Meta.Id, tget.Meta.Id)
+	assert.Equal(t, int64(0), tget.Meta.Version)
+
+	// update instance
+	tcr.Name = "updated name"
+	err = ds.Update(ctx, tcr)
+	assert.NoError(t, err)
+	assert.NotNil(t, tcr)
+	// incremented version after update
+	assert.Equal(t, int64(1), tcr.Meta.Version)
+
+	// re-read from db
+	var tgr v1.Tenant
+	err = ds.Get(ctx, tcr.Meta.GetId(), &tgr)
+	assert.NoError(t, err)
+	// version is incremented
+	assert.Equal(t, int64(1), tgr.Meta.Version)
+	// updated data is reflected
+	assert.Equal(t, "updated name", tgr.GetName())
+
+	// try to update older version --> optimistic lock error
+	tget.Name = "updated older entity"
+	err = ds.Update(ctx, tget)
+	require.Equal(t, err,
+		NewOptimisticLockError(
+			fmt.Sprintf("optimistic lock error updating tenant with id %s, existing version 1 mismatches entity version 0", tget.GetMeta().Id),
+		),
+	)
+
+	// update annotations and labels
+	as := tcr.GetMeta().GetAnnotations()
+	as["key1"] = "value3"
+	ls := []string{"color=red", "size=xlarge"}
+	tcr.GetMeta().SetAnnotations(as)
+	tcr.GetMeta().SetLabels(ls)
+	err = ds.Update(ctx, tcr)
+	assert.NoError(t, err)
+	assert.NotNil(t, tcr)
+	assert.Equal(t, map[string]string{"key1": "value3", "key2": "value2"}, tcr.GetMeta().GetAnnotations())
+	assert.Equal(t, []string{"color=red", "size=xlarge"}, tcr.GetMeta().GetLabels())
 }

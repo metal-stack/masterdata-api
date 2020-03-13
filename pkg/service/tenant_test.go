@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 
-	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	wrappers "github.com/golang/protobuf/ptypes/wrappers"
+	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 
 	"testing"
@@ -33,6 +33,14 @@ func TestCreateTenant(t *testing.T) {
 	t1 := &v1.Tenant{
 		Name:        "First",
 		Description: "First Tenant",
+		Meta: &v1.Meta{
+			Annotations: map[string]string{
+				"metal-stack.io/contract": "2345",
+			},
+			Labels: []string{
+				"color=blue",
+			},
+		},
 	}
 	tcr := &v1.TenantCreateRequest{
 		Tenant: t1,
