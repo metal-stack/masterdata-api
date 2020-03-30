@@ -63,7 +63,7 @@ func (s *ProjectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 	return project.NewProjectResponse(), err
 }
 func (s *ProjectService) Update(ctx context.Context, req *v1.ProjectUpdateRequest) (*v1.ProjectResponse, error) {
-	project := req.NewProject()
+	project := req.Project
 	err := s.Storage.Update(ctx, project)
 	return project.NewProjectResponse(), err
 }

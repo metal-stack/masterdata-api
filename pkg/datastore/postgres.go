@@ -7,10 +7,10 @@ import (
 	"github.com/lib/pq"
 	"reflect"
 
-	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	// import for sqlx to use postgres driver
