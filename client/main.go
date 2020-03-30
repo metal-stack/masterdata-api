@@ -37,6 +37,8 @@ func main() {
 	}()
 	projectExample(c, logger)
 	tenantExample(c, logger)
+
+	logger.Info("Success")
 }
 
 func projectExample(c client.Client, log *zap.Logger) {
@@ -73,10 +75,33 @@ func projectExample(c client.Client, log *zap.Logger) {
 	log.Sugar().Infow("created project", "project", res)
 
 	// get
-	_, err = c.Project().Get(ctx, &v1.ProjectGetRequest{Id: res.Project.Meta.Id})
+	prj, err := c.Project().Get(ctx, &v1.ProjectGetRequest{Id: res.Project.Meta.Id})
 	if err != nil {
 		log.Sugar().Fatalf("created project notfound, id=%s", res.Project.Meta.Id)
 	}
+
+	// update
+	prj.Project.Meta.Annotations["mykey"] = "myvalue"
+	prures, err := c.Project().Update(ctx, &v1.ProjectUpdateRequest{
+		Project: prj.Project,
+	})
+	if err != nil {
+		log.Sugar().Fatalf("update project failed, id=%s", res.Project.Meta.Id)
+	}
+
+	// explicit re-get
+	prj2, err := c.Project().Get(ctx, &v1.ProjectGetRequest{Id: res.Project.Meta.Id})
+	if err != nil {
+		log.Sugar().Fatalf("created project notfound, id=%s", res.Project.Meta.Id)
+	}
+	if prj2.GetProject().Meta.Annotations["mykey"] != "myvalue" {
+		log.Sugar().Fatalf("update project failed, id=%s", res.Project.Meta.Id)
+	}
+
+	if prures.Project.Meta.Version <= prj.Project.Meta.Version {
+		log.Sugar().Fatalf("update project failed, version not incremented", res.Project.Meta.Id)
+	}
+
 	_, err = c.Project().Get(ctx, &v1.ProjectGetRequest{Id: "123123"})
 	if !v1.IsNotFound(err) {
 		log.Sugar().Fatalf("expected notfound")

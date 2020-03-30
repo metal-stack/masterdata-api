@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	wrappers "github.com/golang/protobuf/ptypes/wrappers"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 

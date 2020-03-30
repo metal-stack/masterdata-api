@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	wrappers "github.com/golang/protobuf/ptypes/wrappers"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -92,9 +92,11 @@ func TestUpdateProject(t *testing.T) {
 		Description: "Second Project",
 	}
 	tur := &v1.ProjectUpdateRequest{
-		Id:          "p2",
-		Name:        &wrappers.StringValue{Value: "SecondP"},
-		Description: &wrappers.StringValue{Value: "Second Project"},
+		Project: &v1.Project{
+			Meta:        &v1.Meta{Id: "p2"},
+			Name:        "SecondP",
+			Description: "Second Project",
+		},
 	}
 
 	storageMock.On("Update", ctx, t1).Return(nil)
@@ -102,7 +104,7 @@ func TestUpdateProject(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProject())
-	assert.Equal(t, tur.GetName().GetValue(), resp.GetProject().GetName())
+	assert.Equal(t, tur.GetProject().GetName(), resp.GetProject().GetName())
 }
 
 func TestDeleteProject(t *testing.T) {

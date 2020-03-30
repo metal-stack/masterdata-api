@@ -8,15 +8,6 @@ func (m *Project) NewProjectResponse() *ProjectResponse {
 	}
 }
 
-func (m *ProjectUpdateRequest) NewProject() *Project {
-	return &Project{
-		Meta:        &Meta{Id: m.Id},
-		Name:        m.GetName().GetValue(),
-		Description: m.GetDescription().GetValue(),
-		Quotas:      m.Quotas,
-	}
-}
-
 func (m *ProjectDeleteRequest) NewProject() *Project {
 	return &Project{
 		Meta: &Meta{Id: m.Id},
