@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const grpcRequestTimeoutSecs = 5 * time.Second
+const grpcRequestTimeout = 5 * time.Second
 
 func main() {
 
@@ -37,11 +37,13 @@ func main() {
 	}()
 	projectExample(c, logger)
 	tenantExample(c, logger)
+
+	logger.Info("Success")
 }
 
 func projectExample(c client.Client, log *zap.Logger) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeoutSecs)
+	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeout)
 	defer cancel()
 
 	// create
@@ -54,6 +56,14 @@ func projectExample(c client.Client, log *zap.Logger) {
 			Machine: &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
 			Ip:      &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
 		},
+		Meta: &v1.Meta{
+			Annotations: map[string]string{
+				"metal-stack.io/contract": "1234",
+			},
+			Labels: []string{
+				"color=green",
+			},
+		},
 	}
 	pcr := &v1.ProjectCreateRequest{
 		Project: project,
@@ -62,13 +72,37 @@ func projectExample(c client.Client, log *zap.Logger) {
 	if err != nil {
 		log.Fatal("could not create project", zap.Error(err))
 	}
-	log.Sugar().Infow("created project", "project", res)
+	log.Info("created project", zap.Stringer("project", res))
 
 	// get
-	_, err = c.Project().Get(ctx, &v1.ProjectGetRequest{Id: res.Project.Meta.Id})
+	projectId := res.Project.Meta.Id
+	prj, err := c.Project().Get(ctx, &v1.ProjectGetRequest{Id: projectId})
 	if err != nil {
-		log.Sugar().Fatal("created project notfound", "id", res.Project.Meta.Id)
+		log.Fatal("created project notfound", zap.String("id", projectId))
 	}
+
+	// update
+	prj.Project.Meta.Annotations["mykey"] = "myvalue"
+	prures, err := c.Project().Update(ctx, &v1.ProjectUpdateRequest{
+		Project: prj.Project,
+	})
+	if err != nil {
+		log.Fatal("update project failed", zap.String("id", projectId))
+	}
+
+	// explicit re-get
+	prj2, err := c.Project().Get(ctx, &v1.ProjectGetRequest{Id: projectId})
+	if err != nil {
+		log.Fatal("created project notfound", zap.String("id", projectId))
+	}
+	if prj2.GetProject().Meta.Annotations["mykey"] != "myvalue" {
+		log.Fatal("update project failed", zap.String("id", projectId))
+	}
+
+	if prures.Project.Meta.Version <= prj.Project.Meta.Version {
+		log.Fatal("update project failed, version not incremented", zap.String("id", projectId))
+	}
+
 	_, err = c.Project().Get(ctx, &v1.ProjectGetRequest{Id: "123123"})
 	if !v1.IsNotFound(err) {
 		log.Fatal("expected notfound")
@@ -80,7 +114,7 @@ func projectExample(c client.Client, log *zap.Logger) {
 		log.Fatal("could get create find projects endpoint", zap.Error(err))
 	}
 	for _, p := range pfr.Projects {
-		log.Sugar().Infow("found project", "project", p)
+		log.Info("found project", zap.Stringer("project", p))
 	}
 
 	// delete projects
@@ -92,7 +126,7 @@ func projectExample(c client.Client, log *zap.Logger) {
 		if err != nil {
 			log.Fatal("could delete project", zap.Error(err))
 		}
-		log.Sugar().Infow("deleted ", "project", p)
+		log.Info("deleted ", zap.Stringer("project", p))
 	}
 }
 
@@ -108,7 +142,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		},
 		IamConfig: &v1.IAMConfig{
 			IssuerConfig: &v1.IssuerConfig{
-				Url:      "https://dex.fi-ts.io/dex",
+				Url:      "https://dex.test.metal-stack.io/dex",
 				ClientId: "123213213",
 			},
 			IdmConfig: &v1.IDMConfig{
@@ -128,7 +162,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 			},
 		},
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeoutSecs*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeout)
 	defer cancel()
 
 	tcr := &v1.TenantCreateRequest{
@@ -139,7 +173,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	if err != nil {
 		log.Fatal("could not create tenant", zap.Error(err))
 	}
-	log.Sugar().Info("created tenant", "tenant", t)
+	log.Info("created tenant", zap.Stringer("tenant", t))
 
 	// try to create the same tenant with the returned id another time...
 	tcr.Tenant.Meta = t.Tenant.Meta
@@ -147,15 +181,15 @@ func tenantExample(c client.Client, log *zap.Logger) {
 
 	if err != nil {
 		if v1.IsConflict(err) {
-			log.Sugar().Info("got expected grpc code, indicating duplicate key")
+			log.Info("got expected grpc code, indicating duplicate key")
 		} else {
 			log.Fatal("could not create tenant, unexpected error", zap.Error(err))
 		}
 	} else {
-		log.Sugar().Fatal("THIS MUST NOT HAPPEN: successfully created tenant with duplicate ID", "ID", t)
+		log.Fatal("THIS MUST NOT HAPPEN: successfully created tenant with duplicate ID", zap.Stringer("ID", t))
 	}
 
-	log.Sugar().Info("find all tenants")
+	log.Info("find all tenants")
 	tfrq := &v1.TenantFindRequest{
 		// Id:                   t.Id,
 	}
@@ -164,10 +198,10 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		log.Fatal("could not find tenants", zap.Error(err))
 	}
 	for i := range tfrs.Tenants {
-		log.Sugar().Info("found tenant", "tenant", tfrs.Tenants[i])
+		log.Info("found tenant", zap.Stringer("tenant", tfrs.Tenants[i]))
 	}
 
-	log.Sugar().Info("get tenant with id")
+	log.Info("get tenant with id")
 	tgr := &v1.TenantGetRequest{
 		Id: t.Tenant.Meta.Id,
 	}
@@ -175,13 +209,13 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	if err != nil {
 		log.Fatal("could not get tenant", zap.Error(err))
 	}
-	log.Sugar().Info("got tenant", "id", tgres)
+	log.Info("got tenant", zap.Stringer("id", tgres))
 
-	log.Sugar().Info("get tenant with non-existant id")
-	tgr_notfound := &v1.TenantGetRequest{
+	log.Info("get tenant with non-existant id")
+	tgrNotFound := &v1.TenantGetRequest{
 		Id: "1982739817298219873",
 	}
-	_, err = c.Tenant().Get(ctx, tgr_notfound)
+	_, err = c.Tenant().Get(ctx, tgrNotFound)
 	if !v1.IsNotFound(err) {
 		log.Fatal("unexpected response with error on tenant that cannot be found!", zap.Error(err))
 	}
@@ -199,7 +233,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	if err != nil {
 		log.Fatal("could not update tenant", zap.Error(err))
 	}
-	log.Sugar().Info("updated tenant", "tenant", tures)
+	log.Info("updated tenant", zap.Stringer("tenant", tures))
 
 	tenant2 := tgres2.Tenant
 	tenant2.Name = "update older tenant"
@@ -208,7 +242,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		log.Fatal("could not update tenant, expected OptimistickLockError, got error", zap.Error(err))
 	}
 
-	log.Sugar().Info("find tenant with id")
+	log.Info("find tenant with id")
 	tfrqi := &v1.TenantFindRequest{
 		Id: &wrappers.StringValue{Value: t.Tenant.Meta.Id},
 	}
@@ -217,10 +251,10 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		log.Fatal("could not find tenants", zap.Error(err))
 	}
 	for i := range tfrsi.Tenants {
-		log.Sugar().Info("found tenant", "tenant", tfrsi.Tenants[i])
+		log.Info("found tenant", zap.Stringer("tenant", tfrsi.Tenants[i]))
 	}
 
-	log.Sugar().Info("delete tenant with id")
+	log.Info("delete tenant with id")
 	tdr := &v1.TenantDeleteRequest{
 		Id: t.Tenant.Meta.Id,
 	}
@@ -229,12 +263,12 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		log.Fatal("could not delete tenant", zap.Error(err))
 	}
 
-	log.Sugar().Info("try to delete already deleted tenant")
+	log.Info("try to delete already deleted tenant")
 	tdr2 := &v1.TenantDeleteRequest{
 		Id: t.Tenant.Meta.Id,
 	}
 	_, err = c.Tenant().Delete(ctx, tdr2)
 	if !v1.IsNotFound(err) {
-		log.Sugar().Info("got expected grpc code, indicating not found")
+		log.Info("got expected grpc code, indicating not found")
 	}
 }

@@ -55,7 +55,7 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		logger.Sugar().Errorw("failed executing root command", "error", err)
+		logger.Error("failed executing root command", zap.Error(err))
 	}
 }
 
@@ -89,7 +89,6 @@ func init() {
 
 func run() {
 	logger, _ = zap.NewProduction()
-	sLogger := logger.Sugar()
 	defer func() {
 		err := logger.Sync() // flushes buffer, if any
 		if err != nil {
@@ -104,7 +103,7 @@ func run() {
 		logger.Fatal("failed to listen", zap.Error(err))
 	}
 
-	sLogger.Infow("starting masterdata-api", "version", v.V.String(), "address", addr)
+	logger.Info("starting masterdata-api", zap.Stringer("version", v.V), zap.String("address", addr))
 
 	hmacKey := viper.GetString("hmackey")
 	if hmacKey == "" {
@@ -123,7 +122,7 @@ func run() {
 	}
 
 	if caFile != "" {
-		sLogger.Info("using ca", "ca", caFile)
+		logger.Info("using ca", zap.String("ca", caFile))
 		ca, err := ioutil.ReadFile(caFile)
 		if err != nil {
 			logger.Fatal("could not read ca certificate", zap.Error(err))

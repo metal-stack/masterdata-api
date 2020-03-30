@@ -29,10 +29,7 @@ message ProjectCreateRequest {
 }
 
 message ProjectUpdateRequest {
-    string id = 1;
-    google.protobuf.StringValue name = 2;
-    google.protobuf.StringValue description = 3;
-    QuotaSet quotas = 4;
+    Project project = 1;
 }
 
 message ProjectDeleteRequest {
