@@ -29,7 +29,7 @@ message ProjectCreateRequest {
 }
 
 message ProjectUpdateRequest {
-    Project Project = 1;
+    Project project = 1;
 }
 
 message ProjectDeleteRequest {

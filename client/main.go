@@ -37,6 +37,8 @@ func main() {
 	}()
 	projectExample(c, logger)
 	tenantExample(c, logger)
+
+	logger.Info("Success")
 }
 
 func projectExample(c client.Client, log *zap.Logger) {
