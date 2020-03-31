@@ -82,12 +82,11 @@ func TestMain(m *testing.M) {
 		ds, err = NewPostgresStorage(log, ip, port.Port(), "postgres", "password", "postgres", "disable", &v1.Project{}, &v1.Tenant{})
 		if err != nil {
 			time.Sleep(100 * time.Millisecond)
-			// log.Sugar().Errorw("cannot connect to postgres", "err", err)
 			continue
 		}
 		err = ds.db.Ping()
 		if err != nil {
-			log.Sugar().Errorw("Could not connect to postgres server", "err", err)
+			log.Error("Could not connect to postgres server", zap.Error(err))
 		}
 		if err == nil {
 			break

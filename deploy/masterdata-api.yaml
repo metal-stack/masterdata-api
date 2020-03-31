@@ -20,7 +20,7 @@ data:
     name: TNNT
     iam_config:
       issuer_config:
-        url: "https://dex.metal-stack.io/dex"
+        url: "https://dex.test.metal-stack.io/dex"
         client_id: "metal-stack"
       idm_config:
         idm_type: "UX"

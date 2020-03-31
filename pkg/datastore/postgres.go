@@ -57,15 +57,15 @@ type Datastore struct {
 func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, sslmode string, ves ...VersionedJSONEntity) (*Datastore, error) {
 	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
 	if err != nil {
-		return nil, fmt.Errorf("unable to connect to database:%v", err)
+		return nil, fmt.Errorf("unable to connect to database: %w", err)
 	}
 	types := make(map[string]VersionedJSONEntity)
 	for _, ve := range ves {
 		jsonField := ve.JSONField()
-		logger.Sugar().Infow("creating schema", "entity", jsonField)
+		logger.Info("creating schema", zap.String("entity", jsonField))
 		_, err = db.Exec(ve.Schema())
 		if err != nil {
-			logger.Sugar().Fatalw("unable to create schema", "entity", jsonField, "err", err)
+			logger.Fatal("unable to create schema", zap.String("entity", jsonField), zap.Error(err))
 			return nil, err
 		}
 		types[jsonField] = ve
@@ -109,7 +109,7 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 		"RETURNING " + jsonField,
 	)
 	sql, vals, _ := q.ToSql()
-	ds.log.Sugar().Infow("create", "entity", tableName, "sql", sql, "values", vals)
+	ds.log.Info("create", zap.String("entity", tableName), zap.String("sql", sql), zap.Any("values", vals))
 
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -185,7 +185,7 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 			"RETURNING " + jsonField,
 		)
 	sql, vals, _ := q.ToSql()
-	ds.log.Sugar().Infow("update", "entity", tableName, "sql", sql, "values", vals)
+	ds.log.Info("update", zap.String("entity", tableName), zap.String("sql", sql), zap.Any("values", vals))
 
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -216,7 +216,7 @@ func (ds *Datastore) Get(ctx context.Context, id string, ve VersionedJSONEntity)
 	})
 
 	sql, _, _ := q.ToSql()
-	ds.log.Sugar().Infow("get", "entity", jsonField, "sql", sql, "id", id)
+	ds.log.Info("get", zap.String("entity", jsonField), zap.String("sql", sql), zap.String("id", id))
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
 		return err
@@ -246,7 +246,7 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 		Where(squirrel.Eq{"id": ve.GetMeta().GetId()})
 
 	sql, _, _ := q.ToSql()
-	ds.log.Sugar().Debugw("delete", "entity", jsonField, "sql", sql)
+	ds.log.Debug("delete", zap.String("entity", jsonField), zap.String("sql", sql))
 	result, err := q.ExecContext(ctx)
 	if err != nil {
 		return err
@@ -295,7 +295,7 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, re
 	q = q.OrderBy("id")
 
 	sql, vals, _ := q.ToSql()
-	ds.log.Sugar().Debugw("find", "sql", sql, "values", vals)
+	ds.log.Debug("find", zap.String("sql", sql), zap.Any("values", vals))
 
 	rows, err := q.QueryContext(ctx)
 	if err != nil {

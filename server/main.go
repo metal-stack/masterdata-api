@@ -55,7 +55,7 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		logger.Sugar().Errorw("failed executing root command", "error", err)
+		logger.Error("failed executing root command", zap.Error(err))
 	}
 }
 
@@ -83,13 +83,12 @@ func init() {
 
 	err := viper.BindPFlags(rootCmd.Flags())
 	if err != nil {
-		logger.Sugar().Errorw("unable to construct root command:%v", err)
+		logger.Error("unable to construct root command", zap.Error(err))
 	}
 }
 
 func run() {
 	logger, _ = zap.NewProduction()
-	sLogger := logger.Sugar()
 	defer func() {
 		err := logger.Sync() // flushes buffer, if any
 		if err != nil {
@@ -101,10 +100,10 @@ func run() {
 	addr := fmt.Sprintf(":%d", port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		sLogger.Fatalf("failed to listen: %v", err)
+		logger.Fatal("failed to listen", zap.Error(err))
 	}
 
-	sLogger.Infow("starting masterdata-api", "version", v.V.String(), "address", addr)
+	logger.Info("starting masterdata-api", zap.Stringer("version", v.V), zap.String("address", addr))
 
 	hmacKey := viper.GetString("hmackey")
 	if hmacKey == "" {
@@ -112,25 +111,25 @@ func run() {
 	}
 	auther, err := auth.NewHMACAuther(logger, hmacKey, auth.EditUser)
 	if err != nil {
-		sLogger.Fatalf("failed to create auther: %s", err)
+		logger.Fatal("failed to create auther", zap.Error(err))
 	}
 
 	caFile := viper.GetString("ca")
 	// Get system certificate pool
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
-		sLogger.Fatalf("could not read system certificate pool: %s", err)
+		logger.Fatal("could not read system certificate pool", zap.Error(err))
 	}
 
 	if caFile != "" {
-		sLogger.Infof("using ca: %s", caFile)
+		logger.Info("using ca", zap.String("ca", caFile))
 		ca, err := ioutil.ReadFile(caFile)
 		if err != nil {
-			sLogger.Fatalf("could not read ca certificate: %s", err)
+			logger.Fatal("could not read ca certificate", zap.Error(err))
 		}
 		// Append the certificates from the CA
 		if ok := certPool.AppendCertsFromPEM(ca); !ok {
-			sLogger.Fatalf("failed to append ca certs: %s", caFile)
+			logger.Fatal("failed to append ca certs", zap.Error(err))
 		}
 	}
 
@@ -138,7 +137,7 @@ func run() {
 	serverKey := viper.GetString("certkey")
 	cert, err := tls.LoadX509KeyPair(serverCert, serverKey)
 	if err != nil {
-		sLogger.Fatalf("failed to load key pair: %s", err)
+		logger.Fatal("failed to load key pair", zap.Error(err))
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -186,14 +185,14 @@ func run() {
 
 	storage, err := datastore.NewPostgresStorage(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode, ves...)
 	if err != nil {
-		sLogger.Fatalf("failed to create postgres connection: %v", err)
+		logger.Fatal("failed to create postgres connection", zap.Error(err))
 	}
 
 	healthServer := health.NewHealthServer()
 
 	err = storage.Initdb(healthServer, "initdb.d")
 	if err != nil {
-		sLogger.Errorw("unable to apply initdb content", "error", err)
+		logger.Error("unable to apply initdb content", zap.Error(err))
 	}
 
 	projectService := service.NewProjectService(storage, logger)
@@ -212,7 +211,7 @@ func run() {
 		logger.Info("starting metrics endpoint of :2112")
 		err := http.ListenAndServe(":2112", metricsServer)
 		if err != nil {
-			sLogger.Errorw("failed to start metrics endpoint", "error", err)
+			logger.Error("failed to start metrics endpoint", zap.Error(err))
 		}
 		os.Exit(1)
 	}()
@@ -224,7 +223,7 @@ func run() {
 		// go tool pprof -http :8080 localhost:2113/debug/pprof/goroutine
 		err := http.ListenAndServe(":2113", nil)
 		if err != nil {
-			sLogger.Errorw("failed to start pprof endpoint", "error", err)
+			logger.Error("failed to start pprof endpoint", zap.Error(err))
 		}
 		os.Exit(1)
 	}()
@@ -232,6 +231,6 @@ func run() {
 	reflection.Register(grpcServer)
 
 	if err := grpcServer.Serve(lis); err != nil {
-		sLogger.Fatalf("failed to serve: %v", err)
+		logger.Fatal("failed to serve", zap.Error(err))
 	}
 }

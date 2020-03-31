@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	gyaml "github.com/ghodss/yaml"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"path"
 	"path/filepath"
@@ -23,7 +24,7 @@ func (d *Datastore) Initdb(healthServer *health.Server, dir string) error {
 		return err
 	}
 	for _, f := range files {
-		d.log.Sugar().Infow("read initdb", "file", f)
+		d.log.Info("read initdb", zap.Any("file", f))
 		err = d.processConfig(f)
 		if err != nil {
 			return err
@@ -84,7 +85,7 @@ func (d *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 		return err
 	}
 	meta := mm.Meta
-	d.log.Sugar().Infow("initdb", "meta", meta)
+	d.log.Info("initdb", zap.Any("meta", meta))
 
 	kind := meta.GetKind()
 	apiversion := meta.GetApiversion()
@@ -99,10 +100,10 @@ func (d *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	elementType := reflect.TypeOf(typeElem)
 	expectedAPI := strings.ReplaceAll(strings.Split(elementType.String(), ".")[0], "*", "")
 	if expectedAPI != apiversion {
-		d.log.Sugar().Errorw("initdb apiversion does not match", "given", apiversion, "expected", expectedAPI)
+		d.log.Error("initdb apiversion does not match", zap.String("given", apiversion), zap.String("expected", expectedAPI))
 		return nil
 	}
-	d.log.Sugar().Infow("initdb", "type", elementType, "apiversion", apiversion)
+	d.log.Info("initdb", zap.Stringer("type", elementType), zap.String("apiversion", apiversion))
 
 	// no we have the type, create new from type and marshall in that new struct
 	newEntity, ok := reflect.New(elementType.Elem()).Interface().(VersionedJSONEntity)
@@ -127,7 +128,7 @@ func (d *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 		case NotFoundError:
 			existingEntity = nil
 		default:
-			d.log.Sugar().Errorw("initdb", "error", err)
+			d.log.Error("initdb", zap.Error(err))
 			return err
 		}
 	}
@@ -136,9 +137,9 @@ func (d *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	if existingEntity != nil {
 		oldVersion := existingEntity.GetMeta().GetVersion()
 		newVersion := newEntity.GetMeta().GetVersion()
-		d.log.Sugar().Infow("initdb found existing, update", "kind", newKind, "id", newID, "old version", oldVersion, "new version", newVersion)
+		d.log.Info("initdb found existing, update", zap.String("kind", newKind), zap.String("id", newID), zap.Any("old version", oldVersion), zap.Any("new version", newVersion))
 		if oldVersion >= newVersion {
-			d.log.Sugar().Infow("initdb existing version is equal or higher, skip update", "kind", newKind, "id", newID)
+			d.log.Info("initdb existing version is equal or higher, skip update", zap.String("kind", newKind), zap.String("id", newID))
 			return nil
 		}
 
@@ -148,7 +149,7 @@ func (d *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 			return err
 		}
 	} else {
-		d.log.Sugar().Infow("initdb create", "kind", newKind, "id", newID)
+		d.log.Info("initdb create", zap.String("kind", newKind), zap.String("id", newID))
 		err = d.Create(context.Background(), newEntity)
 		if err != nil {
 			return err

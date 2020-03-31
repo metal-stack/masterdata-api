@@ -36,13 +36,13 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
-		return nil, fmt.Errorf("failed to load system credentials: %v", err)
+		return nil, fmt.Errorf("failed to load system credentials: %w", err)
 	}
 
 	if caFile != "" {
 		ca, err := ioutil.ReadFile(caFile)
 		if err != nil {
-			return nil, fmt.Errorf("could not read ca certificate: %s", err)
+			return nil, fmt.Errorf("could not read ca certificate: %w", err)
 		}
 
 		ok := certPool.AppendCertsFromPEM(ca)
@@ -53,7 +53,7 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 
 	clientCertificate, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
-		return nil, fmt.Errorf("could not load client key pair: %s", err)
+		return nil, fmt.Errorf("could not load client key pair: %w", err)
 	}
 
 	creds := credentials.NewTLS(&tls.Config{

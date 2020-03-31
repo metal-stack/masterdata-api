@@ -14,6 +14,7 @@ import (
 	"flag"
 	"fmt"
 	errs "github.com/pkg/errors"
+	"go.uber.org/zap"
 	"go/format"
 	"io/ioutil"
 	"log"
@@ -58,7 +59,7 @@ func main() {
 
 	err := g.generate(*packageName, *typeName)
 	if err != nil {
-		log.Fatalf("error generating content: %s", err)
+		log.Fatal("error generating content", zap.Error(err))
 	}
 
 	// Format the output.
@@ -72,7 +73,7 @@ func main() {
 	}
 	err = ioutil.WriteFile(outputName, src, 0644)
 	if err != nil {
-		log.Fatalf("error writing output: %s", err)
+		log.Fatal("error writing output", zap.Error(err))
 	}
 }
 
