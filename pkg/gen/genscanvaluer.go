@@ -103,7 +103,6 @@ func (g *Generator) generate(packageName, typeName string) error {
 		"packageName":   packageName,
 		"typeName":      typeName,
 		"typeNameLower": strings.ToLower(typeName),
-		"kind":          strings.Title(strings.ToLower(typeName)),
 		"tableName":     strings.ToLower(typeName) + "s",
 	}
 
@@ -171,7 +170,7 @@ func (m {{ .typeName }}) TableName() string {
 }
 
 func (m {{ .typeName }}) Kind() string {
-	return "{{ .kind }}"
+	return "{{ .typeName }}"
 }
 
 func (m {{ .typeName }}) APIVersion() string {
