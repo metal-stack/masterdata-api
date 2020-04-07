@@ -19,7 +19,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const desired_apiversion = "v1"
+// TODO this could be done with genscanvaluer.go as well
+const desiredAPIVersion = "v1"
 
 // Storage is a interface to store objects.
 type Storage interface {
@@ -109,10 +110,9 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 	apiVersion := meta.GetApiversion()
 	if apiVersion == "" {
-		// TODO this could be done with genscanvaluer.go as well
-		meta.Apiversion = desired_apiversion
-	} else if apiVersion != desired_apiversion {
-		return fmt.Errorf("create of type:%s failed, apiversion must be set to:%s", jsonField, desired_apiversion)
+		meta.Apiversion = desiredAPIVersion
+	} else if apiVersion != desiredAPIVersion {
+		return fmt.Errorf("create of type:%s failed, apiversion must be set to:%s", jsonField, desiredAPIVersion)
 	}
 
 	meta.SetVersion(0)
@@ -173,10 +173,9 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 	apiVersion := meta.GetApiversion()
 	if apiVersion == "" {
-		// TODO this could be done with genscanvaluer.go as well
-		meta.Apiversion = desired_apiversion
-	} else if apiVersion != desired_apiversion {
-		return fmt.Errorf("update of type:%s failed, apiversion must be set to:%s", jsonField, desired_apiversion)
+		meta.Apiversion = desiredAPIVersion
+	} else if apiVersion != desiredAPIVersion {
+		return fmt.Errorf("update of type:%s failed, apiversion must be set to:%s", jsonField, desiredAPIVersion)
 	}
 
 	elemt := reflect.TypeOf(ve).Elem()
