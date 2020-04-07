@@ -24,11 +24,12 @@ var (
 // to test unregistered type checks
 type invalidVersionedEntity struct{}
 
-func (v *invalidVersionedEntity) JSONField() string { return "invalid" }
-func (v *invalidVersionedEntity) TableName() string { return "" }
-func (v *invalidVersionedEntity) Schema() string    { return "" }
-func (v *invalidVersionedEntity) Kind() string      { return "Invalid" }
-func (v *invalidVersionedEntity) GetMeta() *v1.Meta { return nil }
+func (v *invalidVersionedEntity) JSONField() string  { return "invalid" }
+func (v *invalidVersionedEntity) TableName() string  { return "" }
+func (v *invalidVersionedEntity) Schema() string     { return "" }
+func (v *invalidVersionedEntity) Kind() string       { return "Invalid" }
+func (v *invalidVersionedEntity) APIVersion() string { return "v1" }
+func (v *invalidVersionedEntity) GetMeta() *v1.Meta  { return nil }
 
 func TestMain(m *testing.M) {
 	code := 0

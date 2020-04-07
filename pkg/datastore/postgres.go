@@ -19,9 +19,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// TODO this could be done with genscanvaluer.go as well
-const desiredAPIVersion = "v1"
-
 // Storage is a interface to store objects.
 type Storage interface {
 	// generic
@@ -43,6 +40,7 @@ type JSONEntity interface {
 type VersionedEntity interface {
 	GetMeta() *v1.Meta
 	Kind() string
+	APIVersion() string
 }
 
 // VersionedJSONEntity defines a database entity which is stored in jsonb format and with version information
@@ -110,9 +108,9 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 	apiVersion := meta.GetApiversion()
 	if apiVersion == "" {
-		meta.Apiversion = desiredAPIVersion
-	} else if apiVersion != desiredAPIVersion {
-		return fmt.Errorf("create of type:%s failed, apiversion must be set to:%s", jsonField, desiredAPIVersion)
+		meta.Apiversion = ve.APIVersion()
+	} else if apiVersion != ve.APIVersion() {
+		return fmt.Errorf("create of type:%s failed, apiversion must be set to:%s", jsonField, ve.APIVersion())
 	}
 
 	meta.SetVersion(0)
@@ -173,9 +171,9 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 	apiVersion := meta.GetApiversion()
 	if apiVersion == "" {
-		meta.Apiversion = desiredAPIVersion
-	} else if apiVersion != desiredAPIVersion {
-		return fmt.Errorf("update of type:%s failed, apiversion must be set to:%s", jsonField, desiredAPIVersion)
+		meta.Apiversion = ve.APIVersion()
+	} else if apiVersion != ve.APIVersion() {
+		return fmt.Errorf("update of type:%s failed, apiversion must be set to:%s", jsonField, ve.APIVersion())
 	}
 
 	elemt := reflect.TypeOf(ve).Elem()

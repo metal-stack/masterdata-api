@@ -174,6 +174,10 @@ func (m {{ .typeName }}) Kind() string {
 	return "{{ .kind }}"
 }
 
+func (m {{ .typeName }}) APIVersion() string {
+	return "{{ .packageName }}"
+}
+
 // Value make the {{ .typeName }} struct implement the driver.Valuer interface. This method
 // simply returns the JSON-encoded representation of the struct.
 func (m {{ .typeName }}) Value() (driver.Value, error) {
