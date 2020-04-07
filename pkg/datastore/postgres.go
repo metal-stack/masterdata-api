@@ -3,9 +3,10 @@ package datastore
 import (
 	"context"
 	"fmt"
+	"reflect"
+
 	"github.com/golang/protobuf/ptypes"
 	"github.com/lib/pq"
-	"reflect"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
@@ -13,9 +14,12 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
 	// import for sqlx to use postgres driver
 	_ "github.com/lib/pq"
 )
+
+const desired_apiversion = "v1"
 
 // Storage is a interface to store objects.
 type Storage interface {
@@ -37,6 +41,7 @@ type JSONEntity interface {
 // VersionedEntity defines a database entity which is stored with version information
 type VersionedEntity interface {
 	GetMeta() *v1.Meta
+	Kind() string
 }
 
 // VersionedJSONEntity defines a database entity which is stored in jsonb format and with version information
@@ -96,6 +101,19 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 		id = uuid.Must(uuid.NewRandom()).String()
 		meta.SetId(id)
 	}
+	kind := meta.GetKind()
+	if kind == "" {
+		meta.Kind = ve.Kind()
+	} else if kind != ve.Kind() {
+		return fmt.Errorf("create of type:%s failed, kind is set to:%s but must be:%s", jsonField, kind, ve.Kind())
+	}
+	apiVersion := meta.GetApiversion()
+	if apiVersion == "" {
+		// TODO this could be done with genscanvaluer.go as well
+		meta.Apiversion = desired_apiversion
+	} else if apiVersion != desired_apiversion {
+		return fmt.Errorf("create of type:%s failed, apiversion must be set to:%s", jsonField, desired_apiversion)
+	}
 
 	meta.SetVersion(0)
 	meta.SetCreatedTime(ptypes.TimestampNow())
@@ -146,6 +164,19 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 	id := meta.GetId()
 	if id == "" {
 		return fmt.Errorf("entity of type:%s has no id, cannot update: %v", jsonField, ve)
+	}
+	kind := meta.GetKind()
+	if kind == "" {
+		meta.Kind = ve.Kind()
+	} else if kind != ve.Kind() {
+		return fmt.Errorf("update of type:%s failed, kind is set to:%s but must be:%s", jsonField, kind, ve.Kind())
+	}
+	apiVersion := meta.GetApiversion()
+	if apiVersion == "" {
+		// TODO this could be done with genscanvaluer.go as well
+		meta.Apiversion = desired_apiversion
+	} else if apiVersion != desired_apiversion {
+		return fmt.Errorf("update of type:%s failed, apiversion must be set to:%s", jsonField, desired_apiversion)
 	}
 
 	elemt := reflect.TypeOf(ve).Elem()

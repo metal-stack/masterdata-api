@@ -405,7 +405,9 @@ func init() {
 	proto.RegisterType((*ProjectListResponse)(nil), "v1.ProjectListResponse")
 }
 
-func init() { proto.RegisterFile("v1/project.proto", fileDescriptor_37dd3eae429dd876) }
+func init() {
+	proto.RegisterFile("v1/project.proto", fileDescriptor_37dd3eae429dd876)
+}
 
 var fileDescriptor_37dd3eae429dd876 = []byte{
 	// 452 bytes of a gzipped FileDescriptorProto

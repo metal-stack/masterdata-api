@@ -27,6 +27,10 @@ func (m Project) TableName() string {
 	return "projects"
 }
 
+func (m Project) Kind() string {
+	return "Project"
+}
+
 // Value make the Project struct implement the driver.Valuer interface. This method
 // simply returns the JSON-encoded representation of the struct.
 func (m Project) Value() (driver.Value, error) {

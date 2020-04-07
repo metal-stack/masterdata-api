@@ -27,6 +27,10 @@ func (m Tenant) TableName() string {
 	return "tenants"
 }
 
+func (m Tenant) Kind() string {
+	return "Tenant"
+}
+
 // Value make the Tenant struct implement the driver.Valuer interface. This method
 // simply returns the JSON-encoded representation of the struct.
 func (m Tenant) Value() (driver.Value, error) {
