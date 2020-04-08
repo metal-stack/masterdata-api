@@ -24,10 +24,12 @@ var (
 // to test unregistered type checks
 type invalidVersionedEntity struct{}
 
-func (v *invalidVersionedEntity) JSONField() string { return "invalid" }
-func (v *invalidVersionedEntity) TableName() string { return "" }
-func (v *invalidVersionedEntity) Schema() string    { return "" }
-func (v *invalidVersionedEntity) GetMeta() *v1.Meta { return nil }
+func (v *invalidVersionedEntity) JSONField() string  { return "invalid" }
+func (v *invalidVersionedEntity) TableName() string  { return "" }
+func (v *invalidVersionedEntity) Schema() string     { return "" }
+func (v *invalidVersionedEntity) Kind() string       { return "Invalid" }
+func (v *invalidVersionedEntity) APIVersion() string { return "v1" }
+func (v *invalidVersionedEntity) GetMeta() *v1.Meta  { return nil }
 
 func TestMain(m *testing.M) {
 	code := 0
@@ -279,6 +281,40 @@ func TestCreate(t *testing.T) {
 	assert.Contains(t, tcr3.GetMeta().GetId(), "-")
 	assert.Len(t, tcr3.GetMeta().GetId(), 36)
 
+	// create with empty kind and apiversion
+	tcr4 := &v1.Tenant{
+		Meta:        &v1.Meta{},
+		Name:        "dtenant",
+		Description: "D Tenant",
+	}
+	err = ds.Create(ctx, tcr4)
+	assert.NoError(t, err)
+	assert.NotNil(t, tcr3.GetMeta().GetApiversion())
+	assert.NotEmpty(t, tcr3.GetMeta().GetApiversion())
+	assert.Equal(t, tcr3.GetMeta().GetApiversion(), "v1")
+	assert.NotNil(t, tcr3.GetMeta().GetKind())
+	assert.NotEmpty(t, tcr3.GetMeta().GetKind())
+	assert.Equal(t, tcr3.GetMeta().GetKind(), "Tenant")
+
+	// create with wrong kind
+	tcr5 := &v1.Tenant{
+		Meta:        &v1.Meta{Kind: "Project"},
+		Name:        "etenant",
+		Description: "E Tenant",
+	}
+	err = ds.Create(ctx, tcr5)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "create of type:tenant failed, kind is set to:Project but must be:Tenant")
+
+	// create with wrong apiversion
+	tcr6 := &v1.Tenant{
+		Meta:        &v1.Meta{Apiversion: "v2"},
+		Name:        "ftenant",
+		Description: "F Tenant",
+	}
+	err = ds.Create(ctx, tcr6)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "create of type:tenant failed, apiversion must be set to:v1")
 }
 
 func TestUpdate(t *testing.T) {
@@ -333,6 +369,18 @@ func TestUpdate(t *testing.T) {
 	assert.Equal(t, "ctenant", tcr1.GetName())
 	assert.Equal(t, "C Tenant 3", tcr1.GetDescription())
 
+	// try update with wrong kind
+	tcr1.Meta.Kind = "WrongKind"
+	err = ds.Update(ctx, tcr1)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "update of type:tenant failed, kind is set to:WrongKind but must be:Tenant")
+
+	// try update with wrong kind
+	tcr1.Meta.Kind = "Tenant"
+	tcr1.Meta.Apiversion = "v2"
+	err = ds.Update(ctx, tcr1)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "update of type:tenant failed, apiversion must be set to:v1")
 }
 
 func TestGet(t *testing.T) {

@@ -13,8 +13,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	errs "github.com/pkg/errors"
-	"go.uber.org/zap"
 	"go/format"
 	"io/ioutil"
 	"log"
@@ -22,6 +20,9 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	errs "github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 const defaultFilenameSuffix = "_scnrvalr.go"
@@ -166,6 +167,14 @@ func (m {{ .typeName }}) JSONField() string {
 
 func (m {{ .typeName }}) TableName() string {
 	return "{{ .typeNameLower }}s"
+}
+
+func (m {{ .typeName }}) Kind() string {
+	return "{{ .typeName }}"
+}
+
+func (m {{ .typeName }}) APIVersion() string {
+	return "{{ .packageName }}"
 }
 
 // Value make the {{ .typeName }} struct implement the driver.Valuer interface. This method
