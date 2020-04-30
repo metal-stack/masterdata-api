@@ -16,6 +16,14 @@ func (m Tenant) Schema() string {
 		tenant JSONB NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS tenant_idx ON tenants USING GIN(tenant);
+
+	CREATE TABLE IF NOT EXISTS tenants_history (
+		id         text NOT NULL,
+        op		   char NOT NULL,
+		created_At timestamptz NOT NULL,
+		tenant JSONB NOT NULL
+	);
+	CREATE INDEX IF NOT EXISTS id_idx ON tenants_history USING btree(id);
 `
 }
 

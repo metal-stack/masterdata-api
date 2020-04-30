@@ -16,6 +16,14 @@ func (m Project) Schema() string {
 		project JSONB NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS project_idx ON projects USING GIN(project);
+
+	CREATE TABLE IF NOT EXISTS projects_history (
+		id         text NOT NULL,
+        op		   char NOT NULL,
+		created_At timestamptz NOT NULL,
+		project JSONB NOT NULL
+	);
+	CREATE INDEX IF NOT EXISTS id_idx ON projects_history USING btree(id);
 `
 }
 

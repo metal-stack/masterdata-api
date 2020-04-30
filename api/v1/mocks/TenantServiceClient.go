@@ -137,6 +137,36 @@ func (_m *TenantServiceClient) Get(ctx context.Context, in *v1.TenantGetRequest,
 	return r0, r1
 }
 
+// GetHistory provides a mock function with given fields: ctx, in, opts
+func (_m *TenantServiceClient) GetHistory(ctx context.Context, in *v1.TenantGetHistoryRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *v1.TenantResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.TenantGetHistoryRequest, ...grpc.CallOption) *v1.TenantResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.TenantResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.TenantGetHistoryRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Update provides a mock function with given fields: ctx, in, opts
 func (_m *TenantServiceClient) Update(ctx context.Context, in *v1.TenantUpdateRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
 	_va := make([]interface{}, len(opts))

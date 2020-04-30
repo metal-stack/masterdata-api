@@ -3,6 +3,9 @@ package datastore
 import (
 	"context"
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/testcontainers/testcontainers-go"
 	"os"
 	"runtime/debug"
 	"testing"
@@ -12,7 +15,6 @@ import (
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
-	"github.com/testcontainers/testcontainers-go"
 	"go.uber.org/zap"
 )
 
@@ -81,6 +83,7 @@ func TestMain(m *testing.M) {
 	}
 
 	for {
+		var err error
 		ds, err = NewPostgresStorage(log, ip, port.Port(), "postgres", "password", "postgres", "disable", &v1.Project{}, &v1.Tenant{})
 		if err != nil {
 			time.Sleep(100 * time.Millisecond)
@@ -174,7 +177,7 @@ func TestCRUD(t *testing.T) {
 	// delete not existing
 	err = ds.Delete(ctx, tcr)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "not found: delete of tenant with id tenant-1 affected 0 rows")
+	assert.EqualError(t, err, "entity of type:tenant with id:tenant-1 not found")
 
 }
 
@@ -224,6 +227,7 @@ func TestUpdateOptimisticLock(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
+	const t1 = "t1"
 	assert.NotNil(t, ds, "Datastore must not be nil")
 	ctx := context.Background()
 	// unregistered type
@@ -245,14 +249,14 @@ func TestCreate(t *testing.T) {
 
 	// valid entity
 	tcr1 = &v1.Tenant{
-		Meta:        &v1.Meta{Id: "t1"},
+		Meta:        &v1.Meta{Id: t1},
 		Name:        "atenant",
 		Description: "A Tenant",
 	}
 	err = ds.Create(ctx, tcr1)
 	assert.NoError(t, err)
 	// specified id is persisted
-	assert.Equal(t, "t1", tcr1.Meta.Id)
+	assert.Equal(t, t1, tcr1.Meta.Id)
 	// initial version is set
 	assert.Equal(t, int64(0), tcr1.Meta.Version)
 	assert.Equal(t, "atenant", tcr1.GetName())
@@ -260,7 +264,7 @@ func TestCreate(t *testing.T) {
 
 	// create with same id
 	tcr2 := &v1.Tenant{
-		Meta:        &v1.Meta{Id: "t1"},
+		Meta:        &v1.Meta{Id: t1},
 		Name:        "btenant",
 		Description: "B Tenant",
 	}
@@ -318,6 +322,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
+	const t3 = "t3"
 	assert.NotNil(t, ds, "Datastore must not be nil")
 	ctx := context.Background()
 	// unregistered type
@@ -348,7 +353,7 @@ func TestUpdate(t *testing.T) {
 
 	// tenant with id is not found
 	tcr1 = &v1.Tenant{
-		Meta:        &v1.Meta{Id: "t3"},
+		Meta:        &v1.Meta{Id: t3},
 		Name:        "ctenant",
 		Description: "C Tenant",
 	}
@@ -358,16 +363,24 @@ func TestUpdate(t *testing.T) {
 	// create tenant
 	err = ds.Create(ctx, tcr1)
 	assert.NoError(t, err)
-	assert.Equal(t, "t3", tcr1.GetMeta().GetId())
+	assert.Equal(t, t3, tcr1.GetMeta().GetId())
 	assert.Equal(t, "ctenant", tcr1.GetName())
 	assert.Equal(t, "C Tenant", tcr1.GetDescription())
+
+	tc := time.Now()
+	checkHistory(ctx, t, t3, tc, "ctenant", "C Tenant")
+
 	// now update existing
 	tcr1.Description = "C Tenant 3"
 	err = ds.Update(ctx, tcr1)
 	assert.NoError(t, err)
-	assert.Equal(t, "t3", tcr1.GetMeta().GetId())
+	assert.Equal(t, t3, tcr1.GetMeta().GetId())
 	assert.Equal(t, "ctenant", tcr1.GetName())
 	assert.Equal(t, "C Tenant 3", tcr1.GetDescription())
+
+	tu := time.Now()
+	checkHistory(ctx, t, t3, tc, "ctenant", "C Tenant")
+	checkHistory(ctx, t, t3, tu, "ctenant", "C Tenant 3")
 
 	// try update with wrong kind
 	tcr1.Meta.Kind = "WrongKind"
@@ -381,9 +394,20 @@ func TestUpdate(t *testing.T) {
 	err = ds.Update(ctx, tcr1)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "update of type:tenant failed, apiversion must be set to:v1")
+
+	checkHistory(ctx, t, t3, time.Now(), "ctenant", "C Tenant 3")
+}
+
+func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, name string, desc string) {
+	var tgrh v1.Tenant
+	err := ds.GetHistory(ctx, id, tm, &tgrh)
+	assert.NoError(t, err)
+	assert.Equal(t, name, tgrh.Name)
+	assert.Equal(t, desc, tgrh.GetDescription())
 }
 
 func TestGet(t *testing.T) {
+	const t4 = "t4"
 	assert.NotNil(t, ds, "Datastore must not be nil")
 	ctx := context.Background()
 	// unregistered type
@@ -401,27 +425,107 @@ func TestGet(t *testing.T) {
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
-		Meta:        &v1.Meta{Id: "t4"},
+		Meta:        &v1.Meta{Id: t4},
 		Name:        "dtenant",
 		Description: "D Tenant",
 	}
 	err = ds.Create(ctx, tcr1)
 	assert.NoError(t, err)
-	assert.Equal(t, "t4", tcr1.GetMeta().GetId())
+	assert.Equal(t, t4, tcr1.GetMeta().GetId())
 	assert.Equal(t, "dtenant", tcr1.GetName())
 	assert.Equal(t, "D Tenant", tcr1.GetDescription())
 
 	// now get it
 	var tgr2 v1.Tenant
-	err = ds.Get(ctx, "t4", &tgr2)
+	err = ds.Get(ctx, t4, &tgr2)
 	assert.NoError(t, err)
-	assert.Equal(t, "t4", tgr2.GetMeta().GetId())
+	assert.Equal(t, t4, tgr2.GetMeta().GetId())
 	assert.Equal(t, "dtenant", tgr2.GetName())
 	assert.Equal(t, "D Tenant", tgr2.GetDescription())
+}
 
+func TestGetHistory(t *testing.T) {
+	const t5 = "t5"
+	assert.NotNil(t, ds, "Datastore must not be nil")
+	ctx := context.Background()
+
+	ive := &invalidVersionedEntity{}
+	err := ds.GetHistory(ctx, "", time.Now(), ive)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "type:invalid is not registered")
+
+	// unknown id
+	var tgr1 v1.Tenant
+	err = ds.GetHistory(ctx, "unknown-id", time.Now(), &tgr1)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
+
+	// control time.Now()
+	createTS := time.Date(2020, 4, 30, 18, 0, 0, 0, time.UTC)
+	setNow(createTS)
+	defer resetNow()
+
+	var tgrH v1.Tenant
+	err = ds.GetHistory(ctx, t5, createTS, &tgrH)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "entity of type:tenant with id:t5 not found")
+
+	// create a tenant
+	tcr1 := &v1.Tenant{
+		Meta:        &v1.Meta{Id: t5},
+		Name:        "dtenant",
+		Description: "D Tenant",
+	}
+	err = ds.Create(ctx, tcr1)
+	assert.NoError(t, err)
+
+	checkHistory(ctx, t, t5, createTS, "dtenant", "D Tenant")
+
+	var tcrU v1.Tenant
+	err = ds.Get(ctx, t5, &tcrU)
+	assert.NoError(t, err)
+	assert.Equal(t, createTS, ts(tcrU.Meta.CreatedTime))
+
+	updateTS := time.Date(2020, 4, 30, 20, 0, 0, 0, time.UTC)
+	setNow(updateTS)
+	tcrU.Name = "dtenant updated"
+	err = ds.Update(ctx, &tcrU)
+	assert.NoError(t, err)
+	assert.Equal(t, updateTS, ts(tcrU.Meta.UpdatedTime))
+
+	checkHistory(ctx, t, t5, updateTS, "dtenant updated", "D Tenant")
+
+	update2TS := time.Date(2020, 4, 30, 21, 0, 0, 0, time.UTC)
+	setNow(update2TS)
+	tcrU.Name = "dtenant updated 2"
+	err = ds.Update(ctx, &tcrU)
+	assert.NoError(t, err)
+	assert.Equal(t, update2TS, ts(tcrU.Meta.UpdatedTime))
+
+	checkHistory(ctx, t, t5, update2TS, "dtenant updated 2", "D Tenant")
+
+	deletedTS := time.Date(2020, 4, 30, 22, 0, 0, 0, time.UTC)
+	setNow(deletedTS)
+	err = ds.Delete(ctx, tcr1)
+	assert.NoError(t, err)
+
+	checkHistory(ctx, t, t5, deletedTS, "dtenant updated 2", "D Tenant")
+
+	// Check complete history
+	// before create
+	err = ds.GetHistory(ctx, t5, time.Date(2019, 1, 1, 8, 0, 0, 0, time.UTC), &tgrH)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "entity of type:tenant with id:t5 not found")
+
+	checkHistory(ctx, t, t5, createTS, "dtenant", "D Tenant")
+	checkHistory(ctx, t, t5, updateTS, "dtenant updated", "D Tenant")
+	checkHistory(ctx, t, t5, update2TS, "dtenant updated 2", "D Tenant")
+	checkHistory(ctx, t, t5, deletedTS, "dtenant updated 2", "D Tenant")
+	checkHistory(ctx, t, t5, time.Date(2021, 1, 1, 8, 0, 0, 0, time.UTC), "dtenant updated 2", "D Tenant")
 }
 
 func TestFind(t *testing.T) {
+	const t6 = "t6"
 	assert.NotNil(t, ds, "Datastore must not be nil")
 	ctx := context.Background()
 	// result not a slice
@@ -444,20 +548,20 @@ func TestFind(t *testing.T) {
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
-		Meta:        &v1.Meta{Id: "t6"},
+		Meta:        &v1.Meta{Id: t6},
 		Name:        "ftenant",
 		Description: "F Tenant",
 	}
 	err = ds.Create(ctx, tcr1)
 	assert.NoError(t, err)
-	assert.Equal(t, "t6", tcr1.GetMeta().GetId())
+	assert.Equal(t, t6, tcr1.GetMeta().GetId())
 	assert.Equal(t, "ftenant", tcr1.GetName())
 	assert.Equal(t, "F Tenant", tcr1.GetDescription())
 
 	// now search it
 	var tfr []v1.Tenant
 	filter := make(map[string]interface{})
-	filter["id"] = "t6"
+	filter["id"] = t6
 	err = ds.Find(ctx, filter, &tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, tfr)
@@ -508,6 +612,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	const t9 = "t9"
 	assert.NotNil(t, ds, "Datastore must not be nil")
 	ctx := context.Background()
 	// unregistered type
@@ -523,32 +628,36 @@ func TestDelete(t *testing.T) {
 	}
 	err = ds.Delete(ctx, tdr1)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "not found: delete of tenant with id unknown-id affected 0 rows")
+	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
-		Meta:        &v1.Meta{Id: "t5"},
+		Meta:        &v1.Meta{Id: t9},
 		Name:        "etenant",
 		Description: "E Tenant",
 	}
 	err = ds.Create(ctx, tcr1)
 	assert.NoError(t, err)
-	assert.Equal(t, "t5", tcr1.GetMeta().GetId())
+	assert.Equal(t, t9, tcr1.GetMeta().GetId())
 	assert.Equal(t, "etenant", tcr1.GetName())
 	assert.Equal(t, "E Tenant", tcr1.GetDescription())
 
 	// now delete it
 	tdr2 := &v1.Tenant{
-		Meta: &v1.Meta{Id: "t5"},
+		Meta: &v1.Meta{Id: t9},
 	}
 	err = ds.Delete(ctx, tdr2)
 	assert.NoError(t, err)
 
 	var tgr v1.Tenant
-	err = ds.Get(ctx, "t5", &tgr)
+	err = ds.Get(ctx, t9, &tgr)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:t5 not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:t9 not found")
 
+	var tgrh v1.Tenant
+	err = ds.GetHistory(ctx, t9, time.Now(), &tgrh)
+	assert.NoError(t, err)
+	assert.Equal(t, "etenant", tgrh.Name)
 }
 
 func TestAnnotationsAndLabels(t *testing.T) {
@@ -623,4 +732,24 @@ func TestAnnotationsAndLabels(t *testing.T) {
 	assert.NotNil(t, tcr)
 	assert.Equal(t, map[string]string{"key1": "value3", "key2": "value2"}, tcr.GetMeta().GetAnnotations())
 	assert.Equal(t, []string{"color=red", "size=xlarge"}, tcr.GetMeta().GetLabels())
+}
+
+func ts(pbTs *timestamp.Timestamp) time.Time {
+	ts, err := ptypes.Timestamp(pbTs)
+	if err != nil {
+		panic(err)
+	}
+	return ts
+}
+
+// setNow sets Now
+func setNow(t time.Time) {
+	Now = func() time.Time {
+		return t
+	}
+}
+
+// resetNow resets the overriden Now to time.Now
+func resetNow() {
+	Now = time.Now
 }

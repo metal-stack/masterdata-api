@@ -143,6 +143,14 @@ const schemaTemplate = `
 		{{ .typeNameLower }} JSONB NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS {{ .typeNameLower }}_idx ON {{ .tableName }} USING GIN({{ .typeNameLower }});
+
+	CREATE TABLE IF NOT EXISTS {{ .tableName }}_history (
+		id         text NOT NULL,
+        op		   char NOT NULL,
+		created_At timestamptz NOT NULL,
+		{{ .typeNameLower }} JSONB NOT NULL
+	);
+	CREATE INDEX IF NOT EXISTS id_idx ON {{ .tableName }}_history USING btree(id);
 `
 
 const svTemplate = `

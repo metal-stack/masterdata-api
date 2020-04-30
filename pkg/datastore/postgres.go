@@ -3,10 +3,11 @@ package datastore
 import (
 	"context"
 	"fmt"
-	"reflect"
-
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/lib/pq"
+	"reflect"
+	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
@@ -19,6 +20,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// exchangable for testing
+var Now = time.Now
+
 // Storage is a interface to store objects.
 type Storage interface {
 	// generic
@@ -26,6 +30,7 @@ type Storage interface {
 	Update(ctx context.Context, ve VersionedJSONEntity) error
 	Delete(ctx context.Context, ve VersionedJSONEntity) error
 	Get(ctx context.Context, id string, ve VersionedJSONEntity) error
+	GetHistory(ctx context.Context, id string, at time.Time, ve VersionedJSONEntity) error
 	Find(ctx context.Context, filter map[string]interface{}, result interface{}) error
 }
 
@@ -56,6 +61,14 @@ type Datastore struct {
 	sb    squirrel.StatementBuilderType
 	types map[string]VersionedJSONEntity
 }
+
+type Op string
+
+const (
+	opCreate Op = "C"
+	opUpdate Op = "U"
+	opDelete Op = "D"
+)
 
 // NewPostgresStorage creates a new Storage which uses postgres.
 func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, sslmode string, ves ...VersionedJSONEntity) (*Datastore, error) {
@@ -114,7 +127,7 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 
 	meta.SetVersion(0)
-	meta.SetCreatedTime(ptypes.TimestampNow())
+	meta.SetCreatedTime(PbNow())
 
 	q := ds.sb.Insert(
 		tableName,
@@ -131,7 +144,9 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 	if err != nil {
 		return err
 	}
-	err = q.QueryRowContext(ctx).Scan(ve)
+	defer tx.Rollback()
+
+	err = q.RunWith(tx).QueryRowContext(ctx).Scan(ve)
 	if err != nil {
 		switch pqe := err.(type) {
 		case *pq.Error:
@@ -141,10 +156,11 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 		}
 		return err
 	}
-
-	err = tx.Commit()
-
-	return err
+	err = ds.insertHistory(ve, opCreate, tx)
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // Update the entity
@@ -196,7 +212,7 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 
 	ve.GetMeta().SetVersion(ve.GetMeta().GetVersion() + 1)
-	ve.GetMeta().SetUpdatedTime(ptypes.TimestampNow())
+	ve.GetMeta().SetUpdatedTime(PbNow())
 
 	// FIXME how to handle non updateable fields like created_time
 	// simple strategy copy unmodifiable fields from existing before update
@@ -219,10 +235,19 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 	if err != nil {
 		return err
 	}
-	err = q.QueryRowContext(ctx).Scan(ve)
+	defer tx.Rollback()
+
+	err = q.RunWith(tx).QueryRowContext(ctx).Scan(ve)
 	if err != nil {
 		return err
 	}
+
+	// insert dataset in history table
+	err = ds.insertHistory(ve, opUpdate, tx)
+	if err != nil {
+		return err
+	}
+
 	return tx.Commit()
 }
 
@@ -270,15 +295,38 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 	if !ok {
 		return fmt.Errorf("type:%s is not registered", jsonField)
 	}
-	q := ds.sb.Delete(tableName).
-		Where(squirrel.Eq{"id": ve.GetMeta().GetId()})
 
-	sql, _, _ := q.ToSql()
-	ds.log.Debug("delete", zap.String("entity", jsonField), zap.String("sql", sql))
-	result, err := q.ExecContext(ctx)
+	elemt := reflect.TypeOf(ve).Elem()
+	existingVE, ok := reflect.New(elemt).Interface().(VersionedJSONEntity)
+	if !ok {
+		return fmt.Errorf("entity is not a VersionedJSONEntity: %v", ve)
+	}
+	err := ds.Get(ctx, ve.GetMeta().Id, existingVE)
 	if err != nil {
 		return err
 	}
+
+	// delete dataset in table
+	q := ds.sb.Delete(tableName).
+		Where(squirrel.Eq{"id": ve.GetMeta().GetId()})
+	sql, _, err := q.ToSql()
+	if err != nil {
+		return err
+	}
+	ds.log.Debug("delete", zap.String("entity", jsonField), zap.String("sql", sql))
+
+	// in tx
+	tx, err := ds.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback() // The rollback will be ignored if the tx has been committed later in the function.
+
+	result, err := q.RunWith(tx).ExecContext(ctx)
+	if err != nil {
+		return err
+	}
+
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return err
@@ -290,7 +338,13 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 		return NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s affected %d rows", jsonField, ve.GetMeta().Id, rowsAffected))
 	}
 
-	return err
+	// insert dataset in history table
+	err = ds.insertHistory(existingVE, opDelete, tx)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // Find returns matching elements from the database
@@ -352,4 +406,73 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, re
 	}
 
 	return err
+}
+
+// Get the history entity for given id and the given point in time
+// returns NotFoundError if no entity can be found
+func (ds *Datastore) GetHistory(ctx context.Context, id string, at time.Time, ve VersionedJSONEntity) error {
+	jsonField := ve.JSONField()
+	tableName := historyTablename(ve.TableName())
+	_, ok := ds.types[jsonField]
+	if !ok {
+		return fmt.Errorf("type:%s is not registered", jsonField)
+	}
+	q := ds.sb.Select(jsonField).From(tableName).Where(squirrel.And{
+		squirrel.Eq{
+			"id": id,
+		},
+		squirrel.LtOrEq{
+			"created_At": at,
+		},
+	}).OrderByClause("created_At DESC").Limit(1)
+
+	sql, _, _ := q.ToSql()
+	ds.log.Info("get", zap.String("entity", jsonField), zap.String("sql", sql), zap.String("id", id), zap.String("created_At", at.Format(time.RFC3339)))
+	rows, err := q.QueryContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		cerr := rows.Close()
+		if err == nil && cerr != nil {
+			err = cerr
+		}
+	}()
+	if rows.Next() {
+		return rows.Scan(ve)
+	}
+	// we have no row
+	return NewNotFoundError(fmt.Sprintf("entity of type:%s with id:%s not found", jsonField, id))
+}
+
+func (ds *Datastore) insertHistory(ve VersionedJSONEntity, op Op, runner squirrel.BaseRunner) error {
+	jsonField := ve.JSONField()
+	tableName := ve.TableName()
+	qh := ds.sb.Insert(historyTablename(tableName)).
+		SetMap(map[string]interface{}{
+			"id":         ve.GetMeta().Id,
+			"op":         op,
+			"created_at": Now(),
+			jsonField:    ve,
+		})
+	_, err := qh.RunWith(runner).Exec()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// historyTablename returns the tablename of the table-twin with historic data.
+func historyTablename(table string) string {
+	return fmt.Sprintf("%s_history", table)
+}
+
+// PbNow return
+func PbNow() *timestamp.Timestamp {
+	now, err := ptypes.TimestampProto(Now())
+	if err != nil {
+		panic(err)
+	}
+	return now
 }
