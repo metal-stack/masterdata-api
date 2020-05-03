@@ -147,10 +147,10 @@ const schemaTemplate = `
 	CREATE TABLE IF NOT EXISTS {{ .tableName }}_history (
 		id         text NOT NULL,
         op		   char NOT NULL,
-		created_At timestamptz NOT NULL,
+		created_at timestamptz NOT NULL,
 		{{ .typeNameLower }} JSONB NOT NULL
 	);
-	CREATE INDEX IF NOT EXISTS id_idx ON {{ .tableName }}_history USING btree(id);
+	CREATE INDEX IF NOT EXISTS {{ .tableName }}_history_id_created_at_idx ON {{ .tableName }}_history USING btree(id, created_at);
 `
 
 const svTemplate = `

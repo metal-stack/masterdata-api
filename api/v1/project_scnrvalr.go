@@ -20,10 +20,10 @@ func (m Project) Schema() string {
 	CREATE TABLE IF NOT EXISTS projects_history (
 		id         text NOT NULL,
         op		   char NOT NULL,
-		created_At timestamptz NOT NULL,
+		created_at timestamptz NOT NULL,
 		project JSONB NOT NULL
 	);
-	CREATE INDEX IF NOT EXISTS id_idx ON projects_history USING btree(id);
+	CREATE INDEX IF NOT EXISTS projects_history_id_created_at_idx ON projects_history USING btree(id, created_at);
 `
 }
 

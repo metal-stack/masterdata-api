@@ -422,12 +422,12 @@ func (ds *Datastore) GetHistory(ctx context.Context, id string, at time.Time, ve
 			"id": id,
 		},
 		squirrel.LtOrEq{
-			"created_At": at,
+			"created_at": at,
 		},
-	}).OrderByClause("created_At DESC").Limit(1)
+	}).OrderByClause("created_at DESC").Limit(1)
 
 	sql, _, _ := q.ToSql()
-	ds.log.Info("get", zap.String("entity", jsonField), zap.String("sql", sql), zap.String("id", id), zap.String("created_At", at.Format(time.RFC3339)))
+	ds.log.Info("get", zap.String("entity", jsonField), zap.String("sql", sql), zap.String("id", id), zap.String("created_at", at.Format(time.RFC3339)))
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
 		return err
