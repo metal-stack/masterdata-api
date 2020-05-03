@@ -144,7 +144,12 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() {
+		err := tx.Rollback() // The rollback will be ignored if the tx has been committed later in the function.
+		if err != nil {
+			ds.log.Error("error rolling back", zap.Error(err))
+		}
+	}()
 
 	err = q.RunWith(tx).QueryRowContext(ctx).Scan(ve)
 	if err != nil {
@@ -235,7 +240,12 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() {
+		err := tx.Rollback() // The rollback will be ignored if the tx has been committed later in the function.
+		if err != nil {
+			ds.log.Error("error rolling back", zap.Error(err))
+		}
+	}()
 
 	err = q.RunWith(tx).QueryRowContext(ctx).Scan(ve)
 	if err != nil {
@@ -320,7 +330,12 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback() // The rollback will be ignored if the tx has been committed later in the function.
+	defer func() {
+		err := tx.Rollback() // The rollback will be ignored if the tx has been committed later in the function.
+		if err != nil {
+			ds.log.Error("error rolling back", zap.Error(err))
+		}
+	}()
 
 	result, err := q.RunWith(tx).ExecContext(ctx)
 	if err != nil {
