@@ -20,10 +20,10 @@ The services are exposed as grpc-services. The included client can be used
 in other services by simply importing it.
 
 The data is stored in a generic way using a postgres database
-with tables consisting of id /json-document fields.
+with tables consisting of id and json-document fields.
 
 Changes to the data are reflected in a history table-twin per entity. When data
-is updated or deleted, the previous data is written to the history table. 
+is created, updated or deleted, the change is also written to the history table.
 
 The main entities are generated from a `<type>.proto`-file
 plus some additional mapping-code in a `<type>.go` file.
