@@ -4,7 +4,6 @@ go 1.13
 
 require (
 	github.com/Masterminds/squirrel v1.2.0
-	github.com/docker/go-connections v0.4.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/gogo/status v1.1.0
 	github.com/golang/protobuf v1.3.5
@@ -23,7 +22,7 @@ require (
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/testify v1.5.1
 	github.com/testcontainers/testcontainers-go v0.3.1
-	github.com/vektra/mockery v0.0.0-20181123154057-e78b021dcbb5 // indirect
+	github.com/vektra/mockery v1.0.0 // indirect
 	go.uber.org/zap v1.14.0
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect

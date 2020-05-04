@@ -19,7 +19,7 @@ func (m Tenant) Schema() string {
 
 	CREATE TABLE IF NOT EXISTS tenants_history (
 		id         text NOT NULL,
-		op		   char NOT NULL,
+		op         char NOT NULL,
 		created_at timestamptz NOT NULL,
 		tenant JSONB NOT NULL
 	);

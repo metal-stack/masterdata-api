@@ -146,7 +146,7 @@ const schemaTemplate = `
 
 	CREATE TABLE IF NOT EXISTS {{ .tableName }}_history (
 		id         text NOT NULL,
-		op		   char NOT NULL,
+		op         char NOT NULL,
 		created_at timestamptz NOT NULL,
 		{{ .typeNameLower }} JSONB NOT NULL
 	);

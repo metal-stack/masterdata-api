@@ -458,7 +458,7 @@ func (ds *Datastore) GetHistory(ctx context.Context, id string, at time.Time, ve
 		return rows.Scan(ve)
 	}
 	// we have no row
-	return NewNotFoundError(fmt.Sprintf("entity of type:%s with id:%s not found", jsonField, id))
+	return NewNotFoundError(fmt.Sprintf("entity of type:%s with id:%s at:%s not found", jsonField, id, at.Format(time.RFC3339)))
 }
 
 func (ds *Datastore) insertHistory(ve VersionedJSONEntity, op Op, runner squirrel.BaseRunner) error {

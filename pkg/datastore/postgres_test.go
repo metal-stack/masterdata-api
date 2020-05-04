@@ -449,16 +449,18 @@ func TestGetHistory(t *testing.T) {
 	assert.NotNil(t, ds, "Datastore must not be nil")
 	ctx := context.Background()
 
+	tsNow := time.Date(2020, 4, 30, 18, 0, 0, 0, time.UTC)
+
 	ive := &invalidVersionedEntity{}
-	err := ds.GetHistory(ctx, "", time.Now(), ive)
+	err := ds.GetHistory(ctx, "", tsNow, ive)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "type:invalid is not registered")
 
 	// unknown id
 	var tgr1 v1.Tenant
-	err = ds.GetHistory(ctx, "unknown-id", time.Now(), &tgr1)
+	err = ds.GetHistory(ctx, "unknown-id", tsNow, &tgr1)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id at:2020-04-30T18:00:00Z not found")
 
 	// control time.Now()
 	createTS := time.Date(2020, 4, 30, 18, 0, 0, 0, time.UTC)
@@ -468,7 +470,7 @@ func TestGetHistory(t *testing.T) {
 	var tgrH v1.Tenant
 	err = ds.GetHistory(ctx, t5, createTS, &tgrH)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:t5 not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:t5 at:2020-04-30T18:00:00Z not found")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -484,14 +486,14 @@ func TestGetHistory(t *testing.T) {
 	var tcrU v1.Tenant
 	err = ds.Get(ctx, t5, &tcrU)
 	assert.NoError(t, err)
-	assert.Equal(t, createTS, ts(tcrU.Meta.CreatedTime))
+	assert.Equal(t, createTS, convertToTime(tcrU.Meta.CreatedTime))
 
 	updateTS := time.Date(2020, 4, 30, 20, 0, 0, 0, time.UTC)
 	setNow(updateTS)
 	tcrU.Name = "dtenant updated"
 	err = ds.Update(ctx, &tcrU)
 	assert.NoError(t, err)
-	assert.Equal(t, updateTS, ts(tcrU.Meta.UpdatedTime))
+	assert.Equal(t, updateTS, convertToTime(tcrU.Meta.UpdatedTime))
 
 	checkHistory(ctx, t, t5, updateTS, "dtenant updated", "D Tenant")
 
@@ -500,7 +502,7 @@ func TestGetHistory(t *testing.T) {
 	tcrU.Name = "dtenant updated 2"
 	err = ds.Update(ctx, &tcrU)
 	assert.NoError(t, err)
-	assert.Equal(t, update2TS, ts(tcrU.Meta.UpdatedTime))
+	assert.Equal(t, update2TS, convertToTime(tcrU.Meta.UpdatedTime))
 
 	checkHistory(ctx, t, t5, update2TS, "dtenant updated 2", "D Tenant")
 
@@ -515,7 +517,7 @@ func TestGetHistory(t *testing.T) {
 	// before create
 	err = ds.GetHistory(ctx, t5, time.Date(2019, 1, 1, 8, 0, 0, 0, time.UTC), &tgrH)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:t5 not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:t5 at:2019-01-01T08:00:00Z not found")
 
 	checkHistory(ctx, t, t5, createTS, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, updateTS, "dtenant updated", "D Tenant")
@@ -734,7 +736,7 @@ func TestAnnotationsAndLabels(t *testing.T) {
 	assert.Equal(t, []string{"color=red", "size=xlarge"}, tcr.GetMeta().GetLabels())
 }
 
-func ts(pbTs *timestamp.Timestamp) time.Time {
+func convertToTime(pbTs *timestamp.Timestamp) time.Time {
 	ts, err := ptypes.Timestamp(pbTs)
 	if err != nil {
 		panic(err)
