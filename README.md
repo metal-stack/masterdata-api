@@ -10,18 +10,6 @@ This Microservice provides the source of truth for master data.
     * limit max clusters
   * cluster
     * limit
-  * authn/authz & iam
-    * tenant-id
-    * issuer-url
-    * issuer-client-id
-    * idm
-      * type AD/UX - relevant for config of restrictions
-    * idm-webhook
-      * enabled true/false
-      * webhook config
-        * type AD/UX (duplicate, see above)
-        * subsystem
-        * ...
 * tenant project
   * settings
     * limit max clusters
@@ -32,7 +20,10 @@ The services are exposed as grpc-services. The included client can be used
 in other services by simply importing it.
 
 The data is stored in a generic way using a postgres database
-with tables consisting of id /json-document fields.
+with tables consisting of id and json-document fields.
+
+Changes to the data are reflected in a history table-twin per entity. When data
+is created, updated or deleted, the change is also written to the history table.
 
 The main entities are generated from a `<type>.proto`-file
 plus some additional mapping-code in a `<type>.go` file.

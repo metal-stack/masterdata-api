@@ -121,9 +121,7 @@ func init() {
 	proto.RegisterMapType((map[string]string)(nil), "v1.Meta.AnnotationsEntry")
 }
 
-func init() {
-	proto.RegisterFile("v1/meta.proto", fileDescriptor_3644ca97b32f0c15)
-}
+func init() { proto.RegisterFile("v1/meta.proto", fileDescriptor_3644ca97b32f0c15) }
 
 var fileDescriptor_3644ca97b32f0c15 = []byte{
 	// 278 bytes of a gzipped FileDescriptorProto

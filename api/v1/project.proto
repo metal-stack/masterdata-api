@@ -5,13 +5,14 @@ package v1;
 import "v1/meta.proto";
 import "v1/quota.proto";
 import "google/protobuf/wrappers.proto";
-
+import "google/protobuf/timestamp.proto";
 
 service ProjectService {
     rpc Create(ProjectCreateRequest) returns (ProjectResponse);
     rpc Update(ProjectUpdateRequest) returns (ProjectResponse);
     rpc Delete(ProjectDeleteRequest) returns (ProjectResponse);
     rpc Get(ProjectGetRequest) returns (ProjectResponse);
+    rpc GetHistory(ProjectGetHistoryRequest) returns (ProjectResponse);
     rpc Find(ProjectFindRequest) returns (ProjectListResponse);
 }
 
@@ -38,6 +39,11 @@ message ProjectDeleteRequest {
 
 message ProjectGetRequest {
     string id = 1;
+}
+
+message ProjectGetHistoryRequest {
+    string id = 1;
+    google.protobuf.Timestamp at = 2;
 }
 
 message ProjectFindRequest {

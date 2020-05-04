@@ -5,6 +5,7 @@ import (
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 type StorageStatusWrapper struct {
@@ -29,6 +30,10 @@ func (s StorageStatusWrapper) Delete(ctx context.Context, ve datastore.Versioned
 
 func (s StorageStatusWrapper) Get(ctx context.Context, id string, ve datastore.VersionedJSONEntity) error {
 	return wrapGetStatusError(s.storage.Get(ctx, id, ve))
+}
+
+func (s StorageStatusWrapper) GetHistory(ctx context.Context, id string, at time.Time, ve datastore.VersionedJSONEntity) error {
+	return wrapGetStatusError(s.storage.GetHistory(ctx, id, at, ve))
 }
 
 func (s StorageStatusWrapper) Find(ctx context.Context, filter map[string]interface{}, result interface{}) error {
