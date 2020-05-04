@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes"
 	"os"
 	"time"
 
@@ -74,6 +75,8 @@ func projectExample(c client.Client, log *zap.Logger) {
 	}
 	log.Info("created project", zap.Stringer("project", res))
 
+	ts := time.Now()
+
 	// get
 	projectId := res.Project.Meta.Id
 	prj, err := c.Project().Get(ctx, &v1.ProjectGetRequest{Id: projectId})
@@ -82,12 +85,25 @@ func projectExample(c client.Client, log *zap.Logger) {
 	}
 
 	// update
+	prj.Project.Description = "Updated Demo Project"
 	prj.Project.Meta.Annotations["mykey"] = "myvalue"
 	prures, err := c.Project().Update(ctx, &v1.ProjectUpdateRequest{
 		Project: prj.Project,
 	})
 	if err != nil {
 		log.Fatal("update project failed", zap.String("id", projectId))
+	}
+
+	pbHp, _ := ptypes.TimestampProto(ts)
+	phr, err := c.Project().GetHistory(ctx, &v1.ProjectGetHistoryRequest{
+		Id: prj.Project.Meta.Id,
+		At: pbHp,
+	})
+	if err != nil {
+		log.Fatal("get project history failed", zap.String("id", projectId))
+	}
+	if phr.Project.Description != "Demo Project" {
+		log.Fatal("get project: unexpected description", zap.String("id", projectId), zap.String("desc", phr.Project.Description))
 	}
 
 	// explicit re-get
@@ -271,4 +287,17 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	if !v1.IsNotFound(err) {
 		log.Info("got expected grpc code, indicating not found")
 	}
+
+	pbHt, _ := ptypes.TimestampProto(time.Now())
+	thr, err := c.Tenant().GetHistory(ctx, &v1.TenantGetHistoryRequest{
+		Id: tdr.Id,
+		At: pbHt,
+	})
+	if err != nil {
+		log.Fatal("tenant history not found", zap.Error(err))
+	}
+	if thr.Tenant.Name != "some other name" {
+		log.Fatal("get tenant: unexpected name", zap.String("id", tdr.Id), zap.String("name", thr.Tenant.Name))
+	}
+	log.Info("found history tenant", zap.Stringer("tenant", thr.Tenant))
 }

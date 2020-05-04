@@ -415,9 +415,7 @@ func init() {
 	proto.RegisterType((*ConnectorConfig)(nil), "v1.ConnectorConfig")
 }
 
-func init() {
-	proto.RegisterFile("v1/iam.proto", fileDescriptor_d513d8b3129389cd)
-}
+func init() { proto.RegisterFile("v1/iam.proto", fileDescriptor_d513d8b3129389cd) }
 
 var fileDescriptor_d513d8b3129389cd = []byte{
 	// 683 bytes of a gzipped FileDescriptorProto
