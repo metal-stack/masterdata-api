@@ -121,6 +121,9 @@ func TestCRUD(t *testing.T) {
 	assert.Equal(t, "A Tenant", tcr.GetName())
 	assert.Equal(t, "A very important Tenant", tcr.GetDescription())
 
+	err = ds.Create(ctx, tcr)
+	assert.EqualError(t, err, "an entity of type:tenant with the id:tenant-1 already exists")
+
 	// get existing
 	var tgr v1.Tenant
 	err = ds.Get(ctx, tcr.Meta.GetId(), &tgr)
@@ -398,6 +401,14 @@ func TestUpdate(t *testing.T) {
 	checkHistory(ctx, t, t3, time.Now(), "ctenant", "C Tenant 3")
 }
 
+func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name string, desc string) {
+	var tgrhc v1.Tenant
+	err := ds.GetHistoryCreated(ctx, id, &tgrhc)
+	assert.NoError(t, err)
+	assert.Equal(t, name, tgrhc.Name)
+	assert.Equal(t, desc, tgrhc.GetDescription())
+}
+
 func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, name string, desc string) {
 	var tgrh v1.Tenant
 	err := ds.GetHistory(ctx, id, tm, &tgrh)
@@ -456,11 +467,19 @@ func TestGetHistory(t *testing.T) {
 	assert.Error(t, err)
 	assert.EqualError(t, err, "type:invalid is not registered")
 
+	err = ds.GetHistoryCreated(ctx, "", ive)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "type:invalid is not registered")
+
 	// unknown id
 	var tgr1 v1.Tenant
 	err = ds.GetHistory(ctx, "unknown-id", tsNow, &tgr1)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id at:2020-04-30T18:00:00Z not found")
+	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:unknown-id] map[created_at:2020-04-30 18:00:00 +0000 UTC]] not found")
+
+	err = ds.GetHistoryCreated(ctx, "unknown-id", &tgr1)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:unknown-id] map[op:C]] not found")
 
 	// control time.Now()
 	createTS := time.Date(2020, 4, 30, 18, 0, 0, 0, time.UTC)
@@ -470,7 +489,11 @@ func TestGetHistory(t *testing.T) {
 	var tgrH v1.Tenant
 	err = ds.GetHistory(ctx, t5, createTS, &tgrH)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:t5 at:2020-04-30T18:00:00Z not found")
+	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[created_at:2020-04-30 18:00:00 +0000 UTC]] not found")
+
+	err = ds.GetHistoryCreated(ctx, t5, &tgrH)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[op:C]] not found")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -481,6 +504,7 @@ func TestGetHistory(t *testing.T) {
 	err = ds.Create(ctx, tcr1)
 	assert.NoError(t, err)
 
+	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, createTS, "dtenant", "D Tenant")
 
 	var tcrU v1.Tenant
@@ -495,6 +519,7 @@ func TestGetHistory(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, updateTS, convertToTime(tcrU.Meta.UpdatedTime))
 
+	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, updateTS, "dtenant updated", "D Tenant")
 
 	update2TS := time.Date(2020, 4, 30, 21, 0, 0, 0, time.UTC)
@@ -504,6 +529,7 @@ func TestGetHistory(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, update2TS, convertToTime(tcrU.Meta.UpdatedTime))
 
+	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, update2TS, "dtenant updated 2", "D Tenant")
 
 	deletedTS := time.Date(2020, 4, 30, 22, 0, 0, 0, time.UTC)
@@ -511,14 +537,16 @@ func TestGetHistory(t *testing.T) {
 	err = ds.Delete(ctx, tcr1)
 	assert.NoError(t, err)
 
+	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, deletedTS, "dtenant updated 2", "D Tenant")
 
 	// Check complete history
 	// before create
 	err = ds.GetHistory(ctx, t5, time.Date(2019, 1, 1, 8, 0, 0, 0, time.UTC), &tgrH)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:t5 at:2019-01-01T08:00:00Z not found")
+	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[created_at:2019-01-01 08:00:00 +0000 UTC]] not found")
 
+	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, createTS, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, updateTS, "dtenant updated", "D Tenant")
 	checkHistory(ctx, t, t5, update2TS, "dtenant updated 2", "D Tenant")
