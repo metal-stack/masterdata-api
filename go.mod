@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/Masterminds/squirrel v1.3.0
 	github.com/ghodss/yaml v1.0.0
+	github.com/go-pg/migrations/v7 v7.1.10
 	github.com/gogo/status v1.1.0
 	github.com/golang/protobuf v1.4.0
 	github.com/google/uuid v1.1.1
@@ -13,6 +14,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/json-iterator/go v1.1.9
 	github.com/lib/pq v1.5.0
+	github.com/lopezator/migrator v0.3.0
 	github.com/metal-stack/metal-lib v0.3.5
 	github.com/metal-stack/security v0.3.0
 	github.com/metal-stack/v v1.0.2

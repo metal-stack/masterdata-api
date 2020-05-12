@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	gyaml "github.com/ghodss/yaml"
-	"github.com/golang/protobuf/ptypes"
 	healthv1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/health"
@@ -31,74 +30,8 @@ func (ds *Datastore) Initdb(healthServer *health.Server, dir string) error {
 		}
 	}
 
-	entities := []interface{}{&[]v1.Project{}, &[]v1.Tenant{}}
-	for _, e := range entities {
-		err = ds.consolidateHistory(e)
-		if err != nil {
-			ds.log.Error("error consolidate history", zap.Error(err))
-		}
-	}
-
 	healthServer.SetServingStatus("initdb", healthv1.HealthCheckResponse_SERVING)
 	return nil
-}
-
-// consolidateHistory ensures, that for each VersionedJSONEntity there is at least one "created"-row in the history table.
-// The type of entities to consolidate is specified by the given pointer to a slice of entities.
-func (ds *Datastore) consolidateHistory(entitySlicePrt interface{}) error {
-
-	entitySliceV := reflect.ValueOf(entitySlicePrt)
-	if entitySliceV.Kind() != reflect.Ptr || entitySliceV.Elem().Kind() != reflect.Slice {
-		return fmt.Errorf("entity argument must be a slice address")
-	}
-	entitySliceElem := entitySliceV.Elem()
-	entitySliceElementType := entitySliceElem.Type().Elem()
-
-	tx, err := ds.db.BeginTx(context.Background(), nil)
-	if err != nil {
-		return err
-	}
-	defer ds.rollback(tx)
-
-	filter := make(map[string]interface{})
-	err = ds.Find(context.Background(), filter, entitySlicePrt)
-	if err != nil {
-		return err
-	}
-
-	for i := 0; i < entitySliceElem.Len(); i++ {
-		vpi := entitySliceElem.Index(i).Addr().Interface()
-		enityVe, ok := vpi.(VersionedJSONEntity)
-		if !ok {
-			return fmt.Errorf("element type must implement VersionedJSONEntity-Interface, was %T", vpi)
-		}
-
-		historyVe, ok := reflect.New(entitySliceElementType).Interface().(VersionedJSONEntity)
-		if !ok {
-			return fmt.Errorf("element type must implement VersionedJSONEntity-Interface")
-		}
-
-		// check if we already have a "created" row for this entity in history
-		err = ds.GetHistoryCreated(context.Background(), enityVe.GetMeta().Id, historyVe)
-		if err == nil {
-			continue
-		}
-		if _, notFound := err.(NotFoundError); !notFound {
-			return err // some sort of technical error stops us
-		}
-
-		// consolidate history by inserting the "created" row in history at the correct date
-		entityCreatedPbTs := enityVe.GetMeta().CreatedTime
-		entityCreated, err := ptypes.Timestamp(entityCreatedPbTs)
-		if err != nil {
-			return err
-		}
-		err = ds.insertHistory(enityVe, opCreate, entityCreated, tx)
-		if err != nil {
-			return err
-		}
-	}
-	return tx.Commit()
 }
 
 // MetaMeta is a container for the meta property inside a entity.
