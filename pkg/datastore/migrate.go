@@ -53,9 +53,9 @@ func (ds *Datastore) MigrateDB(healthServer *health.Server) error {
 
 // consolidateHistory ensures, that for each VersionedJSONEntity there is at least one "created"-row in the history table.
 // The type of entities to consolidate is specified by the given pointer to a slice of entities.
-func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePrt interface{}) error {
+func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePtr interface{}) error {
 
-	entitySliceV := reflect.ValueOf(entitySlicePrt)
+	entitySliceV := reflect.ValueOf(entitySlicePtr)
 	if entitySliceV.Kind() != reflect.Ptr || entitySliceV.Elem().Kind() != reflect.Slice {
 		return fmt.Errorf("entity argument must be a slice address")
 	}
@@ -63,7 +63,7 @@ func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePrt interface{}) 
 	entitySliceElementType := entitySliceElem.Type().Elem()
 
 	filter := make(map[string]interface{})
-	err := ds.Find(context.Background(), filter, entitySlicePrt)
+	err := ds.Find(context.Background(), filter, entitySlicePtr)
 	if err != nil {
 		return err
 	}
