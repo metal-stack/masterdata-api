@@ -40,6 +40,12 @@ func (s *Server) Check(ctx context.Context, in *v1.HealthCheckRequest) (*v1.Heal
 			Status: v1.HealthCheckResponse_NOT_SERVING,
 		}, nil
 	}
+	_, ok = s.statusMap["migratedb"]
+	if !ok {
+		return &v1.HealthCheckResponse{
+			Status: v1.HealthCheckResponse_NOT_SERVING,
+		}, nil
+	}
 	if in.Service == "" {
 		// check the server overall health status.
 		return &v1.HealthCheckResponse{

@@ -13,9 +13,12 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/json-iterator/go v1.1.9
 	github.com/lib/pq v1.5.0
+	github.com/lopezator/migrator v0.3.0
 	github.com/metal-stack/metal-lib v0.3.5
 	github.com/metal-stack/security v0.3.0
 	github.com/metal-stack/v v1.0.2
+	github.com/onsi/ginkgo v1.10.1 // indirect
+	github.com/onsi/gomega v1.7.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.6.0
 	github.com/spf13/cobra v1.0.0
@@ -23,7 +26,9 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/testcontainers/testcontainers-go v0.5.1
 	go.uber.org/zap v1.15.0
+	golang.org/x/crypto v0.0.0-20200427165652-729f1e841bcc // indirect
 	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5
+	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/genproto v0.0.0-20200430143042-b979b6f78d84 // indirect
 	google.golang.org/grpc v1.29.1
 )
