@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/lib/pq"
 	"reflect"
 	"time"
+
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
@@ -150,11 +150,8 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 
 	err = q.RunWith(tx).QueryRowContext(ctx).Scan(ve)
 	if err != nil {
-		switch pqe := err.(type) {
-		case *pq.Error:
-			if pqe.Code == "23505" {
-				return NewDuplicateKeyError(fmt.Sprintf("an entity of type:%s with the id:%s already exists", jsonField, meta.Id))
-			}
+		if IsErrorCode(err, UniqueViolationError) {
+			return NewDuplicateKeyError(fmt.Sprintf("an entity of type:%s with the id:%s already exists", jsonField, meta.Id))
 		}
 		return err
 	}

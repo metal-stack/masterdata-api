@@ -1,5 +1,7 @@
 package datastore
 
+import "github.com/lib/pq"
+
 // OptimisticLockError indicates that the operation could not be executed because the dataset to update has changed in the meantime.
 // clients can decide to read the current dataset and retry the operation.
 type OptimisticLockError struct {
@@ -56,4 +58,18 @@ func (e NotFoundError) Error() string {
 // NewNotFoundError is called to create an NewNotFoundError error
 func NewNotFoundError(msg string) NotFoundError {
 	return NotFoundError{msg: msg}
+}
+
+const (
+	// UniqueViolationError is raised if the unique constraint is violated
+	UniqueViolationError = pq.ErrorCode("23505") // 'unique_violation'
+)
+
+// IsErrorCode a specific postgres specific error as defined by
+// https://www.postgresql.org/docs/12/errcodes-appendix.html
+func IsErrorCode(err error, errcode pq.ErrorCode) bool {
+	if pgerr, ok := err.(*pq.Error); ok {
+		return pgerr.Code == errcode
+	}
+	return false
 }
