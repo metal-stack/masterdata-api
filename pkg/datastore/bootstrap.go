@@ -3,17 +3,18 @@ package datastore
 import (
 	"context"
 	"fmt"
-	gyaml "github.com/ghodss/yaml"
-	healthv1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
-	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"github.com/metal-stack/masterdata-api/pkg/health"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"path"
 	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
+
+	gyaml "github.com/ghodss/yaml"
+	healthv1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
+	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/masterdata-api/pkg/health"
+	"go.uber.org/zap"
 )
 
 // Initdb reads all yaml files in given directory and apply their content as initial datasets.
@@ -84,11 +85,10 @@ func (ds *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	if err != nil {
 		return err
 	}
-	meta := mm.Meta
-	ds.log.Info("initdb", zap.Any("meta", meta))
+	ds.log.Info("initdb", zap.Any("meta", mm.Meta.GetKind()))
 
-	kind := meta.GetKind()
-	apiversion := meta.GetApiversion()
+	kind := mm.Meta.GetKind()
+	apiversion := mm.Meta.GetApiversion()
 
 	// get type for this kind from datastore entity types registry
 	typeElem, ok := ds.types[strings.ToLower(kind)]
@@ -122,7 +122,7 @@ func (ds *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	// now check that this type is already present for this id,
 	// therefore create nil interface to get into
 	existingEntity := reflect.New(elementType.Elem()).Interface().(VersionedJSONEntity)
-	err = ds.Get(ctx, meta.GetId(), existingEntity)
+	err = ds.Get(ctx, mm.Meta.GetId(), existingEntity)
 	if err != nil {
 		switch err.(type) {
 		case NotFoundError:

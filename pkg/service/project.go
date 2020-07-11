@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+
 	"github.com/golang/protobuf/ptypes"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
@@ -114,8 +115,8 @@ func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 	}
 	resp := new(v1.ProjectListResponse)
 	for i := range res {
-		p := res[i]
-		resp.Projects = append(resp.Projects, &p)
+		p := &res[i]
+		resp.Projects = append(resp.Projects, p)
 	}
 	return resp, nil
 }

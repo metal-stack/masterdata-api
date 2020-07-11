@@ -129,7 +129,7 @@ func TestCRUD(t *testing.T) {
 	var tgr v1.Tenant
 	err = ds.Get(ctx, tcr.Meta.GetId(), &tgr)
 	assert.NoError(t, err)
-	assert.NotNil(t, tgr)
+	assert.NotNil(t, &tgr)
 	assert.Equal(t, "tenant-1", tgr.Meta.Id)
 	assert.Equal(t, "A Tenant", tgr.GetName())
 	assert.Equal(t, "A very important Tenant", tgr.GetDescription())
@@ -139,7 +139,7 @@ func TestCRUD(t *testing.T) {
 	err = ds.Get(ctx, "unknown-id", &tgr2)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
-	assert.NotNil(t, tgr2)
+	assert.NotNil(t, &tgr2)
 
 	// update without meta and id
 	err = ds.Update(ctx, &tgr2)
@@ -561,7 +561,7 @@ func TestFind(t *testing.T) {
 	ctx := context.Background()
 	// result not a slice
 	var te v1.Tenant
-	err := ds.Find(ctx, nil, te)
+	err := ds.Find(ctx, nil, &te)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "result argument must be a slice address")
 
