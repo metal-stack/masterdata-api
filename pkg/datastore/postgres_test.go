@@ -3,13 +3,14 @@ package datastore
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/testcontainers/testcontainers-go"
 	"os"
 	"runtime/debug"
 	"testing"
 	"time"
+
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/testcontainers/testcontainers-go"
 
 	"github.com/stretchr/testify/require"
 
@@ -352,7 +353,7 @@ func TestUpdate(t *testing.T) {
 	}
 	err = ds.Update(ctx, tcr1)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant has no id, cannot update: meta:<> name:\"ctenant\" description:\"C Tenant\" ")
+	assert.EqualError(t, err, "entity of type:tenant has no id, cannot update: meta:{}  name:\"ctenant\"  description:\"C Tenant\"")
 
 	// tenant with id is not found
 	tcr1 = &v1.Tenant{
