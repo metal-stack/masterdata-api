@@ -3,27 +3,32 @@ package auth
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/metal-stack/security"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"time"
 )
 
-// HmacDefaultKey is a exported constant for convenience
-const HmacDefaultKey = "4Rahs0WnJ4rJE8ZiwiLec62z"
+type contextKey string
 
-// hmacMethod fictive non-rest-method used for HMAC-Token
-const hmacMethod = "GRPC"
+const (
+	// HmacDefaultKey is a exported constant for convenience
+	HmacDefaultKey = "4Rahs0WnJ4rJE8ZiwiLec62z"
 
-// hmacAuthtype reflects the application for that the hmac is used (tenant masterdata-management)
-const hmacAuthtype = "tmdm"
+	// hmacMethod fictive non-rest-method used for HMAC-Token
+	hmacMethod = "GRPC"
 
-// lifetime of the hmac token
-const hmacLifetime = 15 * time.Second
+	// hmacAuthtype reflects the application for that the hmac is used (tenant masterdata-management)
+	hmacAuthtype = "tmdm"
 
-const contextKeyUser = "user"
+	// lifetime of the hmac token
+	hmacLifetime = 15 * time.Second
+
+	contextKeyUser = contextKey("user")
+)
 
 // HMACAuther provides means for generation/encoding and decoding/validation for grpc.
 // This code is potentially re-usable for all grpc-based clients/services

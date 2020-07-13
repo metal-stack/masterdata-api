@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
@@ -83,9 +84,8 @@ func (s *TenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 	}
 	resp := new(v1.TenantListResponse)
 	for i := range res {
-		element := res[i]
-		t := element
-		resp.Tenants = append(resp.Tenants, &t)
+		t := &res[i]
+		resp.Tenants = append(resp.Tenants, t)
 	}
 	return resp, nil
 }
