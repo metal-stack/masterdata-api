@@ -8,10 +8,10 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	v1 "github.com/metal-stack/masterdata-api/api/rest/v1"
 	mdmv1 "github.com/metal-stack/masterdata-api/api/v1"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func ToMdmV1Tenant(p *v1.Tenant) *mdmv1.Tenant {
-
 	if p == nil {
 		return nil
 	}
@@ -26,7 +26,6 @@ func ToMdmV1Tenant(p *v1.Tenant) *mdmv1.Tenant {
 }
 
 func ToV1Tenant(p *mdmv1.Tenant) *v1.Tenant {
-
 	if p == nil {
 		return nil
 	}
@@ -41,7 +40,6 @@ func ToV1Tenant(p *mdmv1.Tenant) *v1.Tenant {
 }
 
 func ToMdmV1Project(p *v1.Project) *mdmv1.Project {
-
 	if p == nil {
 		return nil
 	}
@@ -56,7 +54,6 @@ func ToMdmV1Project(p *v1.Project) *mdmv1.Project {
 }
 
 func ToV1Project(p *mdmv1.Project) *v1.Project {
-
 	if p == nil {
 		return nil
 	}
@@ -71,7 +68,6 @@ func ToV1Project(p *mdmv1.Project) *v1.Project {
 }
 
 func ToMdmV1QuotaSet(qs *v1.QuotaSet) *mdmv1.QuotaSet {
-
 	if qs == nil {
 		return nil
 	}
@@ -84,7 +80,6 @@ func ToMdmV1QuotaSet(qs *v1.QuotaSet) *mdmv1.QuotaSet {
 }
 
 func ToMdmV1Quota(q *v1.Quota) *mdmv1.Quota {
-
 	if q == nil {
 		return nil
 	}
@@ -100,7 +95,6 @@ func ToMdmV1Quota(q *v1.Quota) *mdmv1.Quota {
 }
 
 func ToMdmV1Meta(m *v1.Meta) *mdmv1.Meta {
-
 	if m == nil {
 		return nil
 	}
@@ -117,8 +111,29 @@ func ToMdmV1Meta(m *v1.Meta) *mdmv1.Meta {
 	}
 }
 
-func ToV1Meta(m *mdmv1.Meta) *v1.Meta {
+func ToMdmV1ProjectFindRequest(r *v1.ProjectFindRequest) *mdmv1.ProjectFindRequest {
+	if r == nil {
+		return nil
+	}
 
+	mdmv1r := new(mdmv1.ProjectFindRequest)
+	if r.Id != nil {
+		mdmv1r.Id = &wrapperspb.StringValue{Value: *r.Id}
+	}
+	if r.Description != nil {
+		mdmv1r.Description = &wrapperspb.StringValue{Value: *r.Description}
+	}
+	if r.Name != nil {
+		mdmv1r.Name = &wrapperspb.StringValue{Value: *r.Name}
+	}
+	if r.TenantId != nil {
+		mdmv1r.Id = &wrapperspb.StringValue{Value: *r.TenantId}
+	}
+
+	return mdmv1r
+}
+
+func ToV1Meta(m *mdmv1.Meta) *v1.Meta {
 	if m == nil {
 		return nil
 	}
@@ -136,7 +151,6 @@ func ToV1Meta(m *mdmv1.Meta) *v1.Meta {
 }
 
 func ToV1QuotaSet(q *mdmv1.QuotaSet) *v1.QuotaSet {
-
 	if q == nil {
 		return nil
 	}
@@ -156,7 +170,6 @@ func ToV1Quota(q *mdmv1.Quota) *v1.Quota {
 		Quota: unwrapInt32(q.Quota),
 	}
 }
-
 func unwrapInt32(w *wrappers.Int32Value) *int32 {
 	if w == nil {
 		return nil

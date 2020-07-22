@@ -17,6 +17,13 @@ type (
 		Project
 	}
 
+	ProjectFindRequest struct {
+		Id          *string `json:"id,omitempty"`
+		Name        *string `json:"name,omitempty"`
+		Description *string `json:"description,omitempty"`
+		TenantId    *string `json:"tenant_id,omitempty"`
+	}
+
 	ProjectResponse struct {
 		Project
 	}
