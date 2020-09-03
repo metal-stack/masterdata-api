@@ -8,13 +8,13 @@ BUILDDATE := $(shell date -Iseconds)
 VERSION := $(or ${VERSION},devel)
 
 .PHONY: all
-all: protoc generate mocks test server client
+all: protoc generate test server client
 
 .PHONY: release
 release: generate test server client
 
 .PHONY: clean
-clean: 
+clean:
 	rm -f api/v1/*pb.go bin/*
 
 .PHONY: protoc
@@ -54,9 +54,10 @@ client:
 	strip bin/client
 
 .PHONY: mocks
-mocks: mockery
-	cd api/v1 && $(MOCKERY) --name ProjectServiceClient && $(MOCKERY) --name TenantServiceClient && cd -
-	cd pkg/datastore && $(MOCKERY) --name Storage && cd -
+mocks:
+	@if ! which mockery > /dev/null; then echo "mockery needs to be installed (https://github.com/vektra/mockery)"; exit 1; fi
+	cd api/v1 && mockery --name ProjectServiceClient && mockery --name TenantServiceClient && cd -
+	cd pkg/datastore && mockery --name Storage && cd -
 
 .PHONY: postgres-up
 postgres-up: postgres-rm
@@ -71,21 +72,3 @@ certs:
 	cd certs && cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
 	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client-server server.json | cfssljson -bare server -
 	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client client.json | cfssljson -bare client -
-
-# find or download mockery
-.PHONY: mockery
-mockery:
-ifeq (, $(shell which mockery))
-	@{ \
-	set -e ;\
-	MOCKERY_TMP_DIR=$$(mktemp -d) ;\
-	cd $$MOCKERY_TMP_DIR ;\
-	wget https://github.com/vektra/mockery/releases/download/v2.0.4/mockery_2.0.4_Linux_x86_64.tar.gz ;\
-	tar -xf mockery_2.0.4_Linux_x86_64.tar.gz ;\
-	mv mockery $(GOBIN)/mockery ;\
-	rm -rf $$MOCKERY_TMP_DIR ;\
-	}
-MOCKERY=$(GOBIN)/mockery
-else
-MOCKERY=$(shell which mockery)
-endif
