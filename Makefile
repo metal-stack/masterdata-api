@@ -8,7 +8,7 @@ BUILDDATE := $(shell date -Iseconds)
 VERSION := $(or ${VERSION},devel)
 
 .PHONY: all
-all: protoc generate test server client
+all: generate test server client
 
 .PHONY: release
 release: generate test server client
@@ -19,11 +19,6 @@ clean:
 
 .PHONY: protoc
 protoc:
-	protoc -I api --go_out plugins=grpc:api api/v1/*.proto
-	protoc -I api --go_out plugins=grpc:api api/grpc/health/v1/*.proto
-
-.PHONY: protoc-docker
-protoc-docker:
 	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/v1/*.proto
 	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/grpc/health/v1/*.proto
 
