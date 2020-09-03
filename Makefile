@@ -24,8 +24,8 @@ protoc:
 
 .PHONY: protoc-docker
 protoc-docker:
-	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work -w /work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/v1/*.proto
-	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work -w /work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/grpc/health/v1/*.proto
+	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/v1/*.proto
+	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/grpc/health/v1/*.proto
 
 .PHONY: test
 test:
