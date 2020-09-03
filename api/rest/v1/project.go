@@ -29,6 +29,6 @@ type (
 	}
 
 	ProjectListResponse struct {
-		Projects []*Project `json:"projects,omitempty"`
+		Projects []*ProjectResponse `json:"projects,omitempty"`
 	}
 )

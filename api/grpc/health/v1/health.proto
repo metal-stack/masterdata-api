@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package grpc.health.v1;
+package v1;
 
-option go_package = "github.com/metal-stack/masterdata-api/api/grpc/health/v1";
+option go_package = "v1";
 
 message HealthCheckRequest {
   string service = 1;
