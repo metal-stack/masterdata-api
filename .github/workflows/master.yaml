@@ -17,6 +17,9 @@ jobs:
         args: run
     - name: Docker Image
       run: |
-        docker login -u metalstackci -p ${{ secrets.DOCKER_HUB_TOKEN }}
+        docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
         docker build -t metalstack/masterdata-api .
         docker push metalstack/masterdata-api
+    - uses: release-drafter/release-drafter@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
