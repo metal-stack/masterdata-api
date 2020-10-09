@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package v1;
 
-option go_package = "github.com/metal-stack/masterdata-api/api/v1";
+option go_package = "./v1";
 
 import "google/protobuf/timestamp.proto";
 
