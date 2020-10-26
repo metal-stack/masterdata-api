@@ -1,15 +1,16 @@
 package client
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 	"github.com/pkg/errors"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"go.uber.org/zap"
@@ -78,7 +79,6 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 	}
 
 	opts := []grpc.DialOption{
-		grpc.WithTransportCredentials(creds),
 		// In addition to the following grpc.DialOption, callers may also use
 		// the grpc.CallOption grpc.PerRPCCredentials with the RPC invocation
 		// itself.
