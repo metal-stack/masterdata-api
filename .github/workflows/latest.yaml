@@ -1,9 +1,9 @@
-name: Build image from release
+name: Build latest image
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -24,7 +24,11 @@ jobs:
       with:
         version: v1.32.2
 
-    - name: Build the Docker images
+    - name: Build and push Docker image
       run: |
-        docker build -t ghcr.io/metal-stack/masterdata-api:${GITHUB_REF##*/} .
-        docker push ghcr.io/metal-stack/masterdata-api:${GITHUB_REF##*/}
+        docker build -t ghcr.io/metal-stack/masterdata-api .
+        docker push ghcr.io/metal-stack/masterdata-api
+
+    - uses: release-drafter/release-drafter@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
