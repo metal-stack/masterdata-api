@@ -1,6 +1,9 @@
 package datastore
 
-import "github.com/lib/pq"
+import (
+	"github.com/lib/pq"
+	"github.com/pkg/errors"
+)
 
 // OptimisticLockError indicates that the operation could not be executed because the dataset to update has changed in the meantime.
 // clients can decide to read the current dataset and retry the operation.
@@ -68,7 +71,8 @@ const (
 // IsErrorCode a specific postgres specific error as defined by
 // https://www.postgresql.org/docs/12/errcodes-appendix.html
 func IsErrorCode(err error, errcode pq.ErrorCode) bool {
-	if pgerr, ok := err.(*pq.Error); ok {
+	var pgerr *pq.Error
+	if errors.As(err, &pgerr) {
 		return pgerr.Code == errcode
 	}
 	return false

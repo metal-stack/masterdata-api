@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"path"
@@ -124,10 +125,9 @@ func (ds *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	existingEntity := reflect.New(elementType.Elem()).Interface().(VersionedJSONEntity)
 	err = ds.Get(ctx, mm.Meta.GetId(), existingEntity)
 	if err != nil {
-		switch err.(type) {
-		case NotFoundError:
+		if errors.As(err, &NotFoundError{}) {
 			existingEntity = nil
-		default:
+		} else {
 			ds.log.Error("initdb", zap.Error(err))
 			return err
 		}
