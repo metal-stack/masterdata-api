@@ -68,6 +68,7 @@ func Test_onlyOneOfPtrsSet(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			if got := onlyOneOfPtrsSet(tt.args.ptrs...); got != tt.want {
 				t.Errorf("onlyOneOfPtrsSet() = %v, want %v", got, tt.want)

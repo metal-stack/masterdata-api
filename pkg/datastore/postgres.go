@@ -276,10 +276,8 @@ func (ds *Datastore) Get(ctx context.Context, id string, ve VersionedJSONEntity)
 		return err
 	}
 	defer func() {
-		cerr := rows.Close()
-		if err == nil && cerr != nil {
-			err = cerr
-		}
+		_ = rows.Close()
+		_ = rows.Err()
 	}()
 	if rows.Next() {
 		return rows.Scan(ve)
@@ -385,10 +383,8 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, re
 		return err
 	}
 	defer func() {
-		cerr := rows.Close()
-		if err == nil && cerr != nil {
-			err = cerr
-		}
+		_ = rows.Close()
+		_ = rows.Err()
 	}()
 
 	for rows.Next() {
@@ -453,10 +449,8 @@ func (ds *Datastore) getHistoryWithPredicate(ctx context.Context, pred interface
 	}
 
 	defer func() {
-		cerr := rows.Close()
-		if err == nil && cerr != nil {
-			err = cerr
-		}
+		_ = rows.Close()
+		_ = rows.Err()
 	}()
 	if rows.Next() {
 		return rows.Scan(ve)
