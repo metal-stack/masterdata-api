@@ -22,6 +22,36 @@ func ToMdmV1Tenant(p *v1.Tenant) *mdmv1.Tenant {
 		Description:   p.Description,
 		Quotas:        ToMdmV1QuotaSet(p.Quotas),
 		DefaultQuotas: ToMdmV1QuotaSet(p.DefaultQuotas),
+		IamConfig:     ToMdmV1IamConfig(p.IAMConfig),
+	}
+}
+
+func ToMdmV1IamConfig(i *v1.IAMConfig) *mdmv1.IAMConfig {
+	if i == nil {
+		return nil
+	}
+	return &mdmv1.IAMConfig{
+		IssuerConfig: ToMdmV1IssuerConfig(i.IssuerConfig),
+		IdmConfig:    ToMdmV1IDMConfig(i.IDMConfig),
+	}
+}
+
+func ToMdmV1IssuerConfig(i *v1.IssuerConfig) *mdmv1.IssuerConfig {
+	if i == nil {
+		return nil
+	}
+	return &mdmv1.IssuerConfig{
+		Url:      i.URL,
+		ClientId: i.ClientID,
+	}
+}
+
+func ToMdmV1IDMConfig(i *v1.IDMConfig) *mdmv1.IDMConfig {
+	if i == nil {
+		return nil
+	}
+	return &mdmv1.IDMConfig{
+		IdmType: i.IDMType,
 	}
 }
 
@@ -36,6 +66,39 @@ func ToV1Tenant(p *mdmv1.Tenant) *v1.Tenant {
 		Description:   p.Description,
 		Quotas:        ToV1QuotaSet(p.Quotas),
 		DefaultQuotas: ToV1QuotaSet(p.DefaultQuotas),
+		IAMConfig:     ToV1IAMConfig(p.IamConfig),
+	}
+}
+
+func ToV1IAMConfig(i *mdmv1.IAMConfig) *v1.IAMConfig {
+	if i == nil {
+		return nil
+	}
+
+	return &v1.IAMConfig{
+		IssuerConfig: ToV1IssuerConfig(i.IssuerConfig),
+		IDMConfig:    ToV1IDMConfig(i.IdmConfig),
+	}
+}
+
+func ToV1IssuerConfig(i *mdmv1.IssuerConfig) *v1.IssuerConfig {
+	if i == nil {
+		return nil
+	}
+
+	return &v1.IssuerConfig{
+		URL:      i.Url,
+		ClientID: i.ClientId,
+	}
+}
+
+func ToV1IDMConfig(i *mdmv1.IDMConfig) *v1.IDMConfig {
+	if i == nil {
+		return nil
+	}
+
+	return &v1.IDMConfig{
+		IDMType: i.IdmType,
 	}
 }
 

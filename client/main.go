@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/metal-stack/masterdata-api/api/rest/mapper"
 	"os"
 	"time"
 
@@ -26,7 +27,8 @@ func main() {
 		hmacKey = auth.HmacDefaultKey
 	}
 
-	c, err := client.NewClient(context.TODO(), "localhost", 50051, "certs/client.pem", "certs/client-key.pem", "certs/ca.pem", hmacKey, logger)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	c, err := client.NewClient(ctx, "localhost", 50051, "certs/client.pem", "certs/client-key.pem", "certs/ca.pem", hmacKey, logger)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
@@ -227,6 +229,14 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	}
 	log.Info("got tenant", zap.Stringer("id", tgres))
 
+	v1t := mapper.ToV1Tenant(tgres.Tenant)
+	mdm1t := mapper.ToMdmV1Tenant(v1t)
+
+	_, err = c.Tenant().Update(ctx, &v1.TenantUpdateRequest{Tenant: mdm1t})
+	if err != nil {
+		log.Fatal("could not get tenant", zap.Error(err))
+	}
+
 	log.Info("get tenant with non-existant id")
 	tgrNotFound := &v1.TenantGetRequest{
 		Id: "1982739817298219873",
@@ -239,6 +249,10 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	// get tenant one more time to have some older version after update to provoke an optimistic lock error
 	tgres2, _ := c.Tenant().Get(ctx, tgr)
 
+	tgres, err = c.Tenant().Get(ctx, tgr)
+	if err != nil {
+		log.Fatal("could not get tenant", zap.Error(err))
+	}
 	tenant := tgres.Tenant
 	tenant.Name = "some other name"
 
@@ -255,7 +269,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	tenant2.Name = "update older tenant"
 	_, err = c.Tenant().Update(ctx, tur)
 	if !v1.IsOptimistickLockError(err) {
-		log.Fatal("could not update tenant, expected OptimistickLockError, got error", zap.Error(err))
+		log.Fatal("could not update tenant, expected OptimisticLockError, got error", zap.Error(err))
 	}
 
 	log.Info("find tenant with id")
