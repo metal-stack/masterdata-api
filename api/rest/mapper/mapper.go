@@ -11,18 +11,18 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func ToMdmV1Tenant(p *v1.Tenant) *mdmv1.Tenant {
-	if p == nil {
+func ToMdmV1Tenant(t *v1.Tenant) *mdmv1.Tenant {
+	if t == nil {
 		return nil
 	}
 
 	return &mdmv1.Tenant{
-		Meta:          ToMdmV1Meta(p.Meta),
-		Name:          p.Name,
-		Description:   p.Description,
-		Quotas:        ToMdmV1QuotaSet(p.Quotas),
-		DefaultQuotas: ToMdmV1QuotaSet(p.DefaultQuotas),
-		IamConfig:     ToMdmV1IamConfig(p.IAMConfig),
+		Meta:          ToMdmV1Meta(t.Meta),
+		Name:          t.Name,
+		Description:   t.Description,
+		Quotas:        ToMdmV1QuotaSet(t.Quotas),
+		DefaultQuotas: ToMdmV1QuotaSet(t.DefaultQuotas),
+		IamConfig:     ToMdmV1IamConfig(t.IAMConfig),
 	}
 }
 
@@ -139,6 +139,7 @@ func ToMdmV1QuotaSet(qs *v1.QuotaSet) *mdmv1.QuotaSet {
 		Cluster: ToMdmV1Quota(qs.Cluster),
 		Machine: ToMdmV1Quota(qs.Machine),
 		Ip:      ToMdmV1Quota(qs.Ip),
+		Project: ToMdmV1Quota(qs.Project),
 	}
 }
 
