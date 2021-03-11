@@ -3,6 +3,7 @@ package datastore
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/lopezator/migrator"
@@ -85,7 +86,8 @@ func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePtr interface{}) 
 		if err == nil {
 			continue
 		}
-		if _, notFound := err.(NotFoundError); !notFound {
+
+		if !errors.As(err, &NotFoundError{}) {
 			return err // some sort of technical error stops us
 		}
 

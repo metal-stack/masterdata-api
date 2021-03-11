@@ -494,7 +494,8 @@ func PbNow() (*timestamp.Timestamp, time.Time) {
 
 // rollback tries to rollback the given transaction and logs an eventual rollback error
 func (ds *Datastore) rollback(tx *sql.Tx) {
-	if err := tx.Rollback(); err != nil && err != sql.ErrTxDone {
+	err := tx.Rollback()
+	if err != nil && !errors.Is(err, sql.ErrTxDone) {
 		ds.log.Error("error rolling back", zap.Error(err))
 	}
 }
