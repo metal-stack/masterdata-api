@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,8 +43,7 @@ func (s StorageStatusWrapper) Find(ctx context.Context, filter map[string]interf
 
 // wrapCreateStatusError wraps some errors in a grpc status error
 func wrapCreateStatusError(err error) error {
-	switch err.(type) {
-	case datastore.DuplicateKeyError:
+	if errors.As(err, &datastore.DuplicateKeyError{}) {
 		err = status.Error(codes.AlreadyExists, err.Error())
 	}
 	return err
@@ -51,19 +51,18 @@ func wrapCreateStatusError(err error) error {
 
 // wrapDeleteStatusError wraps some errors in a grpc status error
 func wrapDeleteStatusError(err error) error {
-	switch err.(type) {
-	case datastore.NotFoundError:
+	if errors.As(err, &datastore.NotFoundError{}) {
 		err = status.Error(codes.NotFound, err.Error())
-	case datastore.DataCorruptionError:
+	} else if errors.As(err, &datastore.DataCorruptionError{}) {
 		err = status.Error(codes.Internal, err.Error())
 	}
+
 	return err
 }
 
 // wrapGetStatusError wraps some errors in a grpc status error
 func wrapGetStatusError(err error) error {
-	switch err.(type) {
-	case datastore.NotFoundError:
+	if errors.As(err, &datastore.NotFoundError{}) {
 		err = status.Error(codes.NotFound, err.Error())
 	}
 	return err
@@ -71,8 +70,7 @@ func wrapGetStatusError(err error) error {
 
 // wrapUpdateStatusError wraps some errors in a grpc status error
 func wrapUpdateStatusError(err error) error {
-	switch err.(type) {
-	case datastore.OptimisticLockError:
+	if errors.As(err, &datastore.OptimisticLockError{}) {
 		err = status.Error(codes.FailedPrecondition, err.Error())
 	}
 	return err
