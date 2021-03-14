@@ -27,11 +27,13 @@ func main() {
 		hmacKey = auth.HmacDefaultKey
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	c, err := client.NewClient(ctx, "localhost", 50051, "certs/client.pem", "certs/client-key.pem", "certs/ca.pem", hmacKey, logger)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
+
 	defer func() {
 		err = c.Close()
 		if err != nil {
