@@ -29,6 +29,10 @@ type (
 	}
 
 	TenantResponse struct {
-		Tenant *Tenant `json:"tenant,omitempty"`
+		Tenant
+	}
+
+	TenantListResponse struct {
+		Tenants []*TenantResponse `json:"tenants,omitempty"`
 	}
 )
