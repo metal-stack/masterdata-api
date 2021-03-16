@@ -7,6 +7,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/gogo/status v1.1.0
 	github.com/golang/protobuf v1.4.3
+	github.com/google/go-cmp v0.5.5
 	github.com/google/uuid v1.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -15,7 +16,7 @@ require (
 	github.com/lib/pq v1.10.0
 	github.com/lopezator/migrator v0.3.0
 	github.com/metal-stack/metal-lib v0.6.9
-	github.com/metal-stack/security v0.5.0
+	github.com/metal-stack/security v0.5.1
 	github.com/metal-stack/v v1.0.3
 	github.com/onsi/ginkgo v1.15.1 // indirect
 	github.com/pkg/errors v0.9.1
