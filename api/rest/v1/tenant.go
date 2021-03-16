@@ -17,7 +17,7 @@ type (
 
 	IssuerConfig struct {
 		URL      string `json:"url,omitempty"`
-		ClientID string `json:"clientID,omitempty"`
+		ClientID string `json:"client_id,omitempty"`
 	}
 
 	IDMConfig struct {
