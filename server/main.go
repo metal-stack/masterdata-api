@@ -151,7 +151,6 @@ func run() {
 		if err == nil && methodFullName == "/grpc.health.v1.Health/Check" {
 			return false
 		}
-		logger.Info(methodFullName)
 		return true
 	}
 
