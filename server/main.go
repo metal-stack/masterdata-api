@@ -147,13 +147,21 @@ func run() {
 		MinVersion:   tls.VersionTLS12,
 	})
 
+	grpcLogDeciderFunc := func(methodFullName string, err error) bool {
+		if err == nil && methodFullName == "/grpc.health.v1.Health/Check" {
+			return false
+		}
+		logger.Info(methodFullName)
+		return true
+	}
+
 	opts := []grpc.ServerOption{
 		// Enable TLS for all incoming connections.
 		grpc.Creds(creds),
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_ctxtags.StreamServerInterceptor(),
 			grpc_prometheus.StreamServerInterceptor,
-			grpc_zap.StreamServerInterceptor(logger),
+			grpc_zap.StreamServerInterceptor(logger, grpc_zap.WithDecider(grpcLogDeciderFunc)),
 			grpc_auth.StreamServerInterceptor(auther.Auth),
 			grpc_internalerror.StreamServerInterceptor(),
 			grpc_recovery.StreamServerInterceptor(),
@@ -161,7 +169,7 @@ func run() {
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
-			grpc_zap.UnaryServerInterceptor(logger),
+			grpc_zap.UnaryServerInterceptor(logger, grpc_zap.WithDecider(grpcLogDeciderFunc)),
 			grpc_auth.UnaryServerInterceptor(auther.Auth),
 			grpc_internalerror.UnaryServerInterceptor(),
 			grpc_recovery.UnaryServerInterceptor(),
