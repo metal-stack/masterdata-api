@@ -67,3 +67,10 @@ certs:
 	cd certs && cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
 	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client-server server.json | cfssljson -bare server -
 	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client client.json | cfssljson -bare client -
+
+.PHONY: mini-lab-push
+mini-lab-push:
+	docker build -t metalstack/masterdata-api:latest .
+	kind --name metal-control-plane load docker-image metalstack/masterdata-api:latest
+	kubectl --kubeconfig=$(MINI_LAB_KUBECONFIG) patch deployments.apps -n metal-control-plane masterdata-api --patch='{"spec":{"template":{"spec":{"containers":[{"name": "masterdata-api","imagePullPolicy":"IfNotPresent","image":"metalstack/masterdata-api:latest"}]}}}}'
+	kubectl --kubeconfig=$(MINI_LAB_KUBECONFIG) delete pod -n metal-control-plane -l app=masterdata-api
