@@ -191,7 +191,7 @@ func ToMdmV1ProjectFindRequest(r *v1.ProjectFindRequest) *mdmv1.ProjectFindReque
 		mdmv1r.Name = &wrapperspb.StringValue{Value: *r.Name}
 	}
 	if r.TenantId != nil {
-		mdmv1r.Id = &wrapperspb.StringValue{Value: *r.TenantId}
+		mdmv1r.TenantId = &wrapperspb.StringValue{Value: *r.TenantId}
 	}
 
 	return mdmv1r
