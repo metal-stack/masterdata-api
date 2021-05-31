@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 
-	"github.com/golang/protobuf/ptypes/wrappers"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"testing"
 
@@ -120,7 +120,7 @@ func TestFindTenantByID(t *testing.T) {
 	// filter by id
 	f1 := make(map[string]interface{})
 	tfr := &v1.TenantFindRequest{
-		Id: &wrappers.StringValue{Value: "t5"},
+		Id: &wrapperspb.StringValue{Value: "t5"},
 	}
 
 	f1["id"] = "t5"
@@ -138,7 +138,7 @@ func TestFindTenantByName(t *testing.T) {
 	// filter by name
 	var t6s []v1.Tenant
 	tfr := &v1.TenantFindRequest{
-		Name: &wrappers.StringValue{Value: "Fifth"},
+		Name: &wrapperspb.StringValue{Value: "Fifth"},
 	}
 
 	f2 := make(map[string]interface{})

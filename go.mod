@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/gogo/status v1.1.0
-	github.com/golang/protobuf v1.5.2
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0

@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/testcontainers/testcontainers-go"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/stretchr/testify/require"
 
@@ -765,7 +765,7 @@ func TestAnnotationsAndLabels(t *testing.T) {
 	assert.Equal(t, []string{"color=red", "size=xlarge"}, tcr.GetMeta().GetLabels())
 }
 
-func convertToTime(pbTs *timestamp.Timestamp) time.Time {
+func convertToTime(pbTs *timestamppb.Timestamp) time.Time {
 	return pbTs.AsTime()
 }
 

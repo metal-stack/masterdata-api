@@ -1,8 +1,8 @@
 package v1
 
 import (
-	"github.com/golang/protobuf/ptypes/timestamp"
 	jsoniter "github.com/json-iterator/go"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -15,11 +15,11 @@ func (m *Meta) SetVersion(version int64) {
 	m.Version = version
 }
 
-func (m *Meta) SetCreatedTime(time *timestamp.Timestamp) {
+func (m *Meta) SetCreatedTime(time *timestamppb.Timestamp) {
 	m.CreatedTime = time
 }
 
-func (m *Meta) SetUpdatedTime(time *timestamp.Timestamp) {
+func (m *Meta) SetUpdatedTime(time *timestamppb.Timestamp) {
 	m.UpdatedTime = time
 }
 

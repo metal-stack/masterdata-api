@@ -7,10 +7,10 @@ import (
 
 	"github.com/metal-stack/masterdata-api/api/rest/mapper"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 
-	"github.com/golang/protobuf/ptypes/wrappers"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/client"
 	"go.uber.org/zap"
@@ -58,9 +58,9 @@ func projectExample(c client.Client, log *zap.Logger) {
 		Description: "Demo Project",
 		TenantId:    "customer-1",
 		Quotas: &v1.QuotaSet{
-			Cluster: &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
-			Machine: &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
-			Ip:      &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
+			Cluster: &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
+			Machine: &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
+			Ip:      &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
 		},
 		Meta: &v1.Meta{
 			Annotations: map[string]string{
@@ -157,9 +157,9 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		Name:        "myTenant",
 		Description: "myDesc",
 		DefaultQuotas: &v1.QuotaSet{
-			Cluster: &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
-			Machine: &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
-			Ip:      &v1.Quota{Quota: &wrappers.Int32Value{Value: 3}},
+			Cluster: &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
+			Machine: &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
+			Ip:      &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
 		},
 		IamConfig: &v1.IAMConfig{
 			IssuerConfig: &v1.IssuerConfig{
@@ -176,7 +176,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 					IdmAccessCode:  "e",
 					IdmCustomerId:  "f",
 					IdmGroupOu:     "g",
-					IdmGroupnameTemplate: &wrappers.StringValue{
+					IdmGroupnameTemplate: &wrapperspb.StringValue{
 						Value: "asdasdads",
 					},
 				},
@@ -277,7 +277,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 
 	log.Info("find tenant with id")
 	tfrqi := &v1.TenantFindRequest{
-		Id: &wrappers.StringValue{Value: t.Tenant.Meta.Id},
+		Id: &wrapperspb.StringValue{Value: t.Tenant.Meta.Id},
 	}
 	tfrsi, err := c.Tenant().Find(ctx, tfrqi)
 	if err != nil {

@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/Masterminds/squirrel"
@@ -483,7 +482,7 @@ func historyTablename(table string) string {
 }
 
 // PbNow returns the current time as Protobuf and time
-func PbNow() (*timestamp.Timestamp, time.Time) {
+func PbNow() (*timestamppb.Timestamp, time.Time) {
 	now := Now()
 	nowPb := timestamppb.New(now)
 	return nowPb, now

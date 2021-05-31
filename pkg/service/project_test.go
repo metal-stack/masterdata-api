@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/wrappers"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"testing"
 
@@ -52,7 +52,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	t1 := &v1.Tenant{
 		Quotas: &v1.QuotaSet{
 			Project: &v1.Quota{
-				Quota: &wrappers.Int32Value{Value: 2},
+				Quota: &wrapperspb.Int32Value{Value: 2},
 			},
 		},
 	}
@@ -152,7 +152,7 @@ func TestFindProjectByID(t *testing.T) {
 	// filter by id
 	f1 := make(map[string]interface{})
 	tfr := &v1.ProjectFindRequest{
-		Id: &wrappers.StringValue{Value: "p5"},
+		Id: &wrapperspb.StringValue{Value: "p5"},
 	}
 
 	f1["id"] = "p5"
@@ -170,7 +170,7 @@ func TestFindProjectByName(t *testing.T) {
 	// filter by name
 	var t6s []v1.Project
 	tfr := &v1.ProjectFindRequest{
-		Name: &wrappers.StringValue{Value: "Sixth"},
+		Name: &wrapperspb.StringValue{Value: "Sixth"},
 	}
 
 	f2 := make(map[string]interface{})
@@ -189,7 +189,7 @@ func TestFindProjectByTenant(t *testing.T) {
 	// filter by name
 	var t6s []v1.Project
 	tfr := &v1.ProjectFindRequest{
-		TenantId: &wrappers.StringValue{Value: "p1"},
+		TenantId: &wrapperspb.StringValue{Value: "p1"},
 	}
 
 	f2 := make(map[string]interface{})
