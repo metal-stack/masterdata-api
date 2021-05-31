@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/testcontainers/testcontainers-go"
 
@@ -402,6 +401,7 @@ func TestUpdate(t *testing.T) {
 	checkHistory(ctx, t, t3, time.Now(), "ctenant", "C Tenant 3")
 }
 
+//nolint:unparam
 func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name string, desc string) {
 	var tgrhc v1.Tenant
 	err := ds.GetHistoryCreated(ctx, id, &tgrhc)
@@ -766,11 +766,7 @@ func TestAnnotationsAndLabels(t *testing.T) {
 }
 
 func convertToTime(pbTs *timestamp.Timestamp) time.Time {
-	ts, err := ptypes.Timestamp(pbTs)
-	if err != nil {
-		panic(err)
-	}
-	return ts
+	return pbTs.AsTime()
 }
 
 // setNow sets Now

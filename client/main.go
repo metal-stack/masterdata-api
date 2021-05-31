@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/metal-stack/masterdata-api/api/rest/mapper"
 	"os"
 	"time"
+
+	"github.com/metal-stack/masterdata-api/api/rest/mapper"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 
@@ -98,7 +99,7 @@ func projectExample(c client.Client, log *zap.Logger) {
 		log.Fatal("update project failed", zap.String("id", projectId))
 	}
 
-	pbHp, _ := ptypes.TimestampProto(ts)
+	pbHp := timestamppb.New(ts)
 	phr, err := c.Project().GetHistory(ctx, &v1.ProjectGetHistoryRequest{
 		Id: prj.Project.Meta.Id,
 		At: pbHp,
@@ -304,7 +305,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		log.Info("got expected grpc code, indicating not found")
 	}
 
-	pbHt, _ := ptypes.TimestampProto(time.Now())
+	pbHt := timestamppb.Now()
 	thr, err := c.Tenant().GetHistory(ctx, &v1.TenantGetHistoryRequest{
 		Id: tdr.Id,
 		At: pbHt,

@@ -3,11 +3,11 @@ package mapper
 import (
 	"time"
 
-	px "github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	v1 "github.com/metal-stack/masterdata-api/api/rest/v1"
 	mdmv1 "github.com/metal-stack/masterdata-api/api/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -243,34 +243,10 @@ func unwrapInt32(w *wrappers.Int32Value) *int32 {
 }
 
 func mustTimestampToTime(ts *timestamp.Timestamp) *time.Time {
-	t, err := timestampToTime(ts)
-	if err != nil {
-		t = nil
-	}
-	return t
-}
-
-func timestampToTime(ts *timestamp.Timestamp) (*time.Time, error) {
-	if ts == nil {
-		return nil, nil
-	}
-
-	t, err := px.Timestamp(ts)
-	return &t, err
+	t := ts.AsTime()
+	return &t
 }
 
 func mustTimeToTimestamp(t *time.Time) *timestamp.Timestamp {
-	ts, err := timeToTimestamp(t)
-	if err != nil {
-		ts = nil
-	}
-	return ts
-}
-
-func timeToTimestamp(t *time.Time) (*timestamp.Timestamp, error) {
-	if t == nil {
-		return nil, nil
-	}
-
-	return px.TimestampProto(*t)
+	return timestamppb.New(*t)
 }
