@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang/protobuf/ptypes"
-
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"go.uber.org/zap"
@@ -84,11 +82,8 @@ func (s *ProjectService) Get(ctx context.Context, req *v1.ProjectGetRequest) (*v
 }
 func (s *ProjectService) GetHistory(ctx context.Context, req *v1.ProjectGetHistoryRequest) (*v1.ProjectResponse, error) {
 	project := &v1.Project{}
-	at, err := ptypes.Timestamp(req.At)
-	if err != nil {
-		return nil, err
-	}
-	err = s.Storage.GetHistory(ctx, req.Id, at, project)
+	at := req.At.AsTime()
+	err := s.Storage.GetHistory(ctx, req.Id, at, project)
 	if err != nil {
 		return nil, err
 	}

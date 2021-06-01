@@ -1,11 +1,12 @@
 package mapper
 
 import (
-	"github.com/google/go-cmp/cmp"
-	v1 "github.com/metal-stack/masterdata-api/api/rest/v1"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
+	v1 "github.com/metal-stack/masterdata-api/api/rest/v1"
 )
 
 func TestTenantMapperRoundtrip(t *testing.T) {
@@ -98,6 +99,7 @@ func TestTenantMapperRoundtrip(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
 			gotMdMV1 := ToMdmV1Tenant(tt.inAndOut)

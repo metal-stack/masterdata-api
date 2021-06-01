@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
+	"reflect"
+
 	"github.com/lopezator/migrator"
 	healthv1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/health"
 	"go.uber.org/zap"
-	"reflect"
 )
 
 // MigrateDB applies necessary DB Migrations.
@@ -93,11 +93,8 @@ func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePtr interface{}) 
 
 		// consolidate history by inserting the "created" row in history at the correct date
 		entityCreatedPbTs := enityVe.GetMeta().CreatedTime
-		entityCreated, err := ptypes.Timestamp(entityCreatedPbTs)
-		if err != nil {
-			return err
-		}
-		err = ds.insertHistory(enityVe, opCreate, entityCreated, tx)
+		entityCreated := entityCreatedPbTs.AsTime()
+		err := ds.insertHistory(enityVe, opCreate, entityCreated, tx)
 		if err != nil {
 			return err
 		}

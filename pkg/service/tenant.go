@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"go.uber.org/zap"
@@ -55,12 +54,9 @@ func (s *TenantService) Get(ctx context.Context, req *v1.TenantGetRequest) (*v1.
 
 func (s *TenantService) GetHistory(ctx context.Context, req *v1.TenantGetHistoryRequest) (*v1.TenantResponse, error) {
 	tenant := &v1.Tenant{}
-	at, err := ptypes.Timestamp(req.At)
+	at := req.At.AsTime()
 	s.log.Info("getHistory", zap.String("id", req.Id), zap.Time("at", at))
-	if err != nil {
-		return nil, err
-	}
-	err = s.Storage.GetHistory(ctx, req.Id, at, tenant)
+	err := s.Storage.GetHistory(ctx, req.Id, at, tenant)
 	if err != nil {
 		return nil, err
 	}

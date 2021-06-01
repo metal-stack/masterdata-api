@@ -3,11 +3,9 @@ package mapper
 import (
 	"time"
 
-	px "github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	v1 "github.com/metal-stack/masterdata-api/api/rest/v1"
 	mdmv1 "github.com/metal-stack/masterdata-api/api/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -152,7 +150,7 @@ func ToMdmV1Quota(q *v1.Quota) *mdmv1.Quota {
 	}
 
 	return &mdmv1.Quota{
-		Quota: &wrappers.Int32Value{
+		Quota: &wrapperspb.Int32Value{
 			Value: *q.Quota,
 		},
 	}
@@ -234,7 +232,7 @@ func ToV1Quota(q *mdmv1.Quota) *v1.Quota {
 		Quota: unwrapInt32(q.Quota),
 	}
 }
-func unwrapInt32(w *wrappers.Int32Value) *int32 {
+func unwrapInt32(w *wrapperspb.Int32Value) *int32 {
 	if w == nil {
 		return nil
 	}
@@ -242,35 +240,11 @@ func unwrapInt32(w *wrappers.Int32Value) *int32 {
 	return &w.Value
 }
 
-func mustTimestampToTime(ts *timestamp.Timestamp) *time.Time {
-	t, err := timestampToTime(ts)
-	if err != nil {
-		t = nil
-	}
-	return t
+func mustTimestampToTime(ts *timestamppb.Timestamp) *time.Time {
+	t := ts.AsTime()
+	return &t
 }
 
-func timestampToTime(ts *timestamp.Timestamp) (*time.Time, error) {
-	if ts == nil {
-		return nil, nil
-	}
-
-	t, err := px.Timestamp(ts)
-	return &t, err
-}
-
-func mustTimeToTimestamp(t *time.Time) *timestamp.Timestamp {
-	ts, err := timeToTimestamp(t)
-	if err != nil {
-		ts = nil
-	}
-	return ts
-}
-
-func timeToTimestamp(t *time.Time) (*timestamp.Timestamp, error) {
-	if t == nil {
-		return nil, nil
-	}
-
-	return px.TimestampProto(*t)
+func mustTimeToTimestamp(t *time.Time) *timestamppb.Timestamp {
+	return timestamppb.New(*t)
 }

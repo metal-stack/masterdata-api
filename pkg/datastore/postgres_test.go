@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/testcontainers/testcontainers-go"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/stretchr/testify/require"
 
@@ -402,6 +401,7 @@ func TestUpdate(t *testing.T) {
 	checkHistory(ctx, t, t3, time.Now(), "ctenant", "C Tenant 3")
 }
 
+//nolint:unparam
 func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name string, desc string) {
 	var tgrhc v1.Tenant
 	err := ds.GetHistoryCreated(ctx, id, &tgrhc)
@@ -765,12 +765,8 @@ func TestAnnotationsAndLabels(t *testing.T) {
 	assert.Equal(t, []string{"color=red", "size=xlarge"}, tcr.GetMeta().GetLabels())
 }
 
-func convertToTime(pbTs *timestamp.Timestamp) time.Time {
-	ts, err := ptypes.Timestamp(pbTs)
-	if err != nil {
-		panic(err)
-	}
-	return ts
+func convertToTime(pbTs *timestamppb.Timestamp) time.Time {
+	return pbTs.AsTime()
 }
 
 // setNow sets Now
