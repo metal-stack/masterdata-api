@@ -23,7 +23,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
-	github.com/testcontainers/testcontainers-go v0.10.0
+	github.com/testcontainers/testcontainers-go v0.11.0
 	go.uber.org/zap v1.17.0
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect
 	google.golang.org/grpc v1.38.0

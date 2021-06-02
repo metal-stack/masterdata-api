@@ -241,10 +241,16 @@ func unwrapInt32(w *wrapperspb.Int32Value) *int32 {
 }
 
 func mustTimestampToTime(ts *timestamppb.Timestamp) *time.Time {
+	if ts == nil {
+		return nil
+	}
 	t := ts.AsTime()
 	return &t
 }
 
 func mustTimeToTimestamp(t *time.Time) *timestamppb.Timestamp {
+	if t == nil {
+		return nil
+	}
 	return timestamppb.New(*t)
 }
