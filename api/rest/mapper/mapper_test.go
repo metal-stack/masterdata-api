@@ -97,6 +97,30 @@ func TestTenantMapperRoundtrip(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "nil times",
+			inAndOut: &v1.Tenant{
+				Meta: &v1.Meta{
+					Id:          "1",
+					Kind:        "tenant",
+					Apiversion:  "1",
+					Version:     99,
+					CreatedTime: nil,
+					UpdatedTime: nil,
+				},
+				Name:        "tnt",
+				Description: "tnt is a test tenant",
+				IAMConfig: &v1.IAMConfig{
+					IssuerConfig: &v1.IssuerConfig{
+						URL:      "https://oidc.myissuer.com",
+						ClientID: "47abcdef12",
+					},
+					IDMConfig: &v1.IDMConfig{
+						IDMType: "ldap",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
