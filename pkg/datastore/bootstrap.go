@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -61,7 +61,7 @@ func splitYamlDocs(doc string) []string {
 
 // processConfig processes all yaml docs contained in the given file
 func (ds *Datastore) processConfig(file string) error {
-	yaml, err := ioutil.ReadFile(file)
+	yaml, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}

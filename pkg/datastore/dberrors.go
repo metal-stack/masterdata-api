@@ -1,8 +1,9 @@
 package datastore
 
 import (
+	"errors"
+
 	"github.com/lib/pq"
-	"github.com/pkg/errors"
 )
 
 // OptimisticLockError indicates that the operation could not be executed because the dataset to update has changed in the meantime.

@@ -4,11 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/metal-stack/masterdata-api/pkg/auth"
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -41,7 +41,7 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 	}
 
 	if caFile != "" {
-		ca, err := ioutil.ReadFile(caFile)
+		ca, err := os.ReadFile(caFile)
 		if err != nil {
 			return nil, fmt.Errorf("could not read ca certificate: %w", err)
 		}
@@ -76,7 +76,7 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 	// Set up the credentials for the connection.
 	perRPCHMACAuthenticator, err := auth.NewHMACAuther(logger, hmacKey, auth.EditUser)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create hmac-authenticator")
+		return nil, fmt.Errorf("failed to create hmac-authenticator: %w", err)
 	}
 
 	opts := []grpc.DialOption{

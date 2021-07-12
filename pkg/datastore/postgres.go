@@ -3,6 +3,7 @@ package datastore
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"time"
@@ -13,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	// import for sqlx to use postgres driver
@@ -198,7 +198,7 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 
 	err := ds.Get(ctx, id, existingVE)
 	if err != nil {
-		return errors.Errorf("update - no entity of type:%s with id:%s found", jsonField, id)
+		return fmt.Errorf("update - no entity of type:%s with id:%s found", jsonField, id)
 	}
 
 	if ve.GetMeta().GetVersion() < existingVE.GetMeta().GetVersion() {
