@@ -14,14 +14,12 @@ import (
 	"flag"
 	"fmt"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
-	errs "github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -72,7 +70,7 @@ func main() {
 		baseName := fmt.Sprintf("%s%s", *typeName, defaultFilenameSuffix)
 		outputName = filepath.Join(dir, strings.ToLower(baseName))
 	}
-	err = ioutil.WriteFile(outputName, src, 0644)
+	err = os.WriteFile(outputName, src, 0644)
 	if err != nil {
 		log.Fatal("error writing output", zap.Error(err))
 	}
@@ -92,11 +90,11 @@ func (g *Generator) generate(packageName, typeName string) error {
 
 	tmpl, err := template.New("sv").Parse(svTemplate)
 	if err != nil {
-		return errs.Wrapf(err, "error parsing template %s", svTemplate)
+		return fmt.Errorf("error parsing template %s error: %w", svTemplate, err)
 	}
 	stmpl, err := template.New("sv").Parse(schemaTemplate)
 	if err != nil {
-		return errs.Wrapf(err, "error parsing template %s", schemaTemplate)
+		return fmt.Errorf("error parsing template %s error: %w", schemaTemplate, err)
 	}
 
 	info := map[string]string{
@@ -109,7 +107,7 @@ func (g *Generator) generate(packageName, typeName string) error {
 	var renderedBytesSchema bytes.Buffer
 	err = stmpl.Execute(&renderedBytesSchema, info)
 	if err != nil {
-		return errs.Wrap(err, "error rendering template")
+		return fmt.Errorf("error rendering template: %w", err)
 	}
 
 	info["schema"] = fmt.Sprintf("`%s`", renderedBytesSchema.String())
@@ -117,7 +115,7 @@ func (g *Generator) generate(packageName, typeName string) error {
 	var renderedBytes bytes.Buffer
 	err = tmpl.Execute(&renderedBytes, info)
 	if err != nil {
-		return errs.Wrap(err, "error rendering template")
+		return fmt.Errorf("error rendering template: %w", err)
 	}
 
 	g.Printf("%s", renderedBytes.String())

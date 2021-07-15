@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	_ "net/http/pprof" //nolint:gosec
@@ -123,7 +122,7 @@ func run() {
 
 	if caFile != "" {
 		logger.Info("using ca", zap.String("ca", caFile))
-		ca, err := ioutil.ReadFile(caFile)
+		ca, err := os.ReadFile(caFile)
 		if err != nil {
 			logger.Fatal("could not read ca certificate", zap.Error(err))
 		}
