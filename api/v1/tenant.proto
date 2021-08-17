@@ -9,14 +9,42 @@ import "v1/quota.proto";
 import "v1/iam.proto";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
 
 service TenantService {
-    rpc Create(TenantCreateRequest) returns(TenantResponse);
-    rpc Update(TenantUpdateRequest) returns(TenantResponse);
-    rpc Delete(TenantDeleteRequest) returns(TenantResponse);
-    rpc Get(TenantGetRequest) returns(TenantResponse);
-    rpc GetHistory(TenantGetHistoryRequest) returns(TenantResponse);
-    rpc Find(TenantFindRequest) returns(TenantListResponse);
+    rpc Create(TenantCreateRequest) returns(TenantResponse) {
+        option (google.api.http) = {
+            put: "/v1/tenant/{tenant.meta.id}"
+            body: "*"
+        };
+    };
+    rpc Update(TenantUpdateRequest) returns(TenantResponse) {
+        option (google.api.http) = {
+            post: "/v1/tenant/{tenant.meta.id}"
+            body: "*"
+        };
+    };
+    rpc Delete(TenantDeleteRequest) returns(TenantResponse) {
+        option (google.api.http) = {
+            delete: "/v1/tenant/{id}"
+        };
+    };
+    rpc Get(TenantGetRequest) returns(TenantResponse) {
+        option (google.api.http) = {
+            get: "/v1/tenant/{id}"
+        };
+    };
+    rpc GetHistory(TenantGetHistoryRequest) returns(TenantResponse) {
+        option (google.api.http) = {
+            post: "/v1/tenant/{id}/history"
+        };
+    };
+    rpc Find(TenantFindRequest) returns(TenantListResponse) {
+        option (google.api.http) = {
+            post: "/v1/tenant"
+            body: "*"
+        };
+    };
 }
 
 message Tenant {

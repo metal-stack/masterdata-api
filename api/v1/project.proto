@@ -8,14 +8,42 @@ import "v1/meta.proto";
 import "v1/quota.proto";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
 
 service ProjectService {
-    rpc Create(ProjectCreateRequest) returns (ProjectResponse);
-    rpc Update(ProjectUpdateRequest) returns (ProjectResponse);
-    rpc Delete(ProjectDeleteRequest) returns (ProjectResponse);
-    rpc Get(ProjectGetRequest) returns (ProjectResponse);
-    rpc GetHistory(ProjectGetHistoryRequest) returns (ProjectResponse);
-    rpc Find(ProjectFindRequest) returns (ProjectListResponse);
+    rpc Create(ProjectCreateRequest) returns (ProjectResponse) {
+        option (google.api.http) = {
+            put: "/v1/project/{project.meta.id}"
+            body: "*"
+        };
+    };
+    rpc Update(ProjectUpdateRequest) returns (ProjectResponse) {
+        option (google.api.http) = {
+            post: "/v1/project/{project.meta.id}"
+            body: "*"
+        };
+    };
+    rpc Delete(ProjectDeleteRequest) returns (ProjectResponse) {
+        option (google.api.http) = {
+            delete: "/v1/project/{id}"
+        };
+    };
+    rpc Get(ProjectGetRequest) returns (ProjectResponse) {
+        option (google.api.http) = {
+            get: "/v1/project/{id}"
+        };
+    };
+    rpc GetHistory(ProjectGetHistoryRequest) returns (ProjectResponse) {
+        option (google.api.http) = {
+            post: "/v1/project/{id}/history"
+        };
+    };
+    rpc Find(ProjectFindRequest) returns (ProjectListResponse) {
+        option (google.api.http) = {
+            post: "/v1/project"
+            body: "*"
+        };
+    };
 }
 
 // Project is the database model

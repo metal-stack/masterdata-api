@@ -21,6 +21,16 @@ clean:
 protoc:
 	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/v1/*.proto
 	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/grpc/health/v1/*.proto
+	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api \
+		--grpc-gateway_out api \
+		--grpc-gateway_opt logtostderr=true \
+		--grpc-gateway_opt generate_unbound_methods=true \
+		api/v1/*.proto
+	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api \
+		--openapiv2_out spec \
+    	--openapiv2_opt logtostderr=true \
+    	--openapiv2_opt allow_merge=true \
+    	api/v1/*.proto
 
 .PHONY: test
 test:
@@ -40,8 +50,17 @@ server:
 								   -X 'github.com/metal-stack/v.Revision=$(GITVERSION)' \
 								   -X 'github.com/metal-stack/v.GitSHA1=$(SHA)' \
 								   -X 'github.com/metal-stack/v.BuildDate=$(BUILDDATE)'" \
-						 -o bin/server server/main.go
+						 -o bin/server cmd/server/main.go
 	strip bin/server
+
+.PHONY: gateway
+gateway:
+	go build -tags netgo -ldflags "-X 'github.com/metal-stack/v.Version=$(VERSION)' \
+								   -X 'github.com/metal-stack/v.Revision=$(GITVERSION)' \
+								   -X 'github.com/metal-stack/v.GitSHA1=$(SHA)' \
+								   -X 'github.com/metal-stack/v.BuildDate=$(BUILDDATE)'" \
+						 -o bin/gateway cmd/gateway/main.go
+	strip bin/gateway
 
 .PHONY: client
 client:

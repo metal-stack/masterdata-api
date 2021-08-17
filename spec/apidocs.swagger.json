@@ -1,0 +1,782 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "masterdata-api",
+    "version": "0.9.0",
+    "contact": {
+      "name": "metal-stack",
+      "url": "https://metal-stack.io"
+    },
+    "license": {
+      "name": "AGPL-3.0",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.de.html"
+    }
+  },
+  "tags": [
+    {
+      "name": "ProjectService"
+    },
+    {
+      "name": "TenantService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/project": {
+      "post": {
+        "operationId": "ProjectService_Find",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ProjectListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ProjectFindRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ProjectService"
+        ]
+      }
+    },
+    "/v1/project/{id}": {
+      "get": {
+        "operationId": "ProjectService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ProjectService"
+        ]
+      },
+      "delete": {
+        "operationId": "ProjectService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ProjectService"
+        ]
+      }
+    },
+    "/v1/project/{id}/history": {
+      "post": {
+        "operationId": "ProjectService_GetHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ProjectService"
+        ]
+      }
+    },
+    "/v1/project/{project.meta.id}": {
+      "post": {
+        "operationId": "ProjectService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "project.meta.id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ProjectUpdateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ProjectService"
+        ]
+      },
+      "put": {
+        "operationId": "ProjectService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ProjectResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "project.meta.id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ProjectCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ProjectService"
+        ]
+      }
+    },
+    "/v1/tenant": {
+      "post": {
+        "operationId": "TenantService_Find",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TenantListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1TenantFindRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
+      }
+    },
+    "/v1/tenant/{id}": {
+      "get": {
+        "operationId": "TenantService_Get",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TenantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
+      },
+      "delete": {
+        "operationId": "TenantService_Delete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TenantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
+      }
+    },
+    "/v1/tenant/{id}/history": {
+      "post": {
+        "operationId": "TenantService_GetHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TenantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
+      }
+    },
+    "/v1/tenant/{tenant.meta.id}": {
+      "post": {
+        "operationId": "TenantService_Update",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TenantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.meta.id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1TenantUpdateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
+      },
+      "put": {
+        "operationId": "TenantService_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1TenantResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant.meta.id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1TenantCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "TenantService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1ConnectorConfig": {
+      "type": "object",
+      "properties": {
+        "idmApiUrl": {
+          "type": "string",
+          "title": "the following are all mandatory"
+        },
+        "idmApiUser": {
+          "type": "string"
+        },
+        "idmApiPassword": {
+          "type": "string"
+        },
+        "idmSystemId": {
+          "type": "string"
+        },
+        "idmAccessCode": {
+          "type": "string"
+        },
+        "idmCustomerId": {
+          "type": "string"
+        },
+        "idmGroupOu": {
+          "type": "string"
+        },
+        "idmGroupnameTemplate": {
+          "type": "string",
+          "title": "optional"
+        },
+        "idmDomainName": {
+          "type": "string"
+        },
+        "idmTenantPrefix": {
+          "type": "string"
+        },
+        "idmSubmitter": {
+          "type": "string"
+        },
+        "idmJobInfo": {
+          "type": "string"
+        },
+        "idmReqSystem": {
+          "type": "string"
+        },
+        "idmReqUser": {
+          "type": "string"
+        },
+        "idmReqEmail": {
+          "type": "string"
+        }
+      },
+      "title": "optional config if idm webhook is used to automatically create/delete groups/roles in the tenant idm"
+    },
+    "v1IAMConfig": {
+      "type": "object",
+      "properties": {
+        "issuerConfig": {
+          "$ref": "#/definitions/v1IssuerConfig"
+        },
+        "idmConfig": {
+          "$ref": "#/definitions/v1IDMConfig"
+        },
+        "groupConfig": {
+          "$ref": "#/definitions/v1NamespaceGroupConfig"
+        }
+      }
+    },
+    "v1IDMConfig": {
+      "type": "object",
+      "properties": {
+        "idmType": {
+          "type": "string"
+        },
+        "connectorConfig": {
+          "$ref": "#/definitions/v1ConnectorConfig",
+          "title": "optional"
+        }
+      },
+      "title": "mandatory config"
+    },
+    "v1IssuerConfig": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "clientId": {
+          "type": "string"
+        }
+      }
+    },
+    "v1Meta": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "apiversion": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "format": "int64"
+        },
+        "createdTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1NamespaceGroupConfig": {
+      "type": "object",
+      "properties": {
+        "excludedNamespaces": {
+          "type": "string",
+          "title": "no action is taken or any namespace in this list"
+        },
+        "expectedGroupsList": {
+          "type": "string",
+          "title": "for each element a RoleBinding is created in any Namespace - ClusterRoles are bound with this name\nadmin,edit,view"
+        },
+        "namespaceMaxLength": {
+          "type": "integer",
+          "format": "int32",
+          "title": "Maximum length of namespace-part in clusterGroupname and therefore in the corresponding groupname in the directory.\n20 chars für AD, given the naming-conventions"
+        },
+        "clusterGroupnameTemplate": {
+          "type": "string",
+          "title": "The created RoleBindings will reference this group (from token).\noidc:{{ .Namespace }}-{{ .Group }}"
+        },
+        "rolebindingNameTemplate": {
+          "type": "string",
+          "title": "The RoleBindings will created with this name.\noidc-{{ .Namespace }}-{{ .Group }}"
+        }
+      },
+      "title": "Config for group-rolebinding-controller"
+    },
+    "v1Project": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/definitions/v1Meta"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "quotas": {
+          "$ref": "#/definitions/v1QuotaSet"
+        }
+      },
+      "title": "Project is the database model"
+    },
+    "v1ProjectCreateRequest": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "$ref": "#/definitions/v1Project"
+        }
+      }
+    },
+    "v1ProjectFindRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tenantId": {
+          "type": "string"
+        }
+      }
+    },
+    "v1ProjectListResponse": {
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Project"
+          }
+        }
+      }
+    },
+    "v1ProjectResponse": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "$ref": "#/definitions/v1Project"
+        }
+      }
+    },
+    "v1ProjectUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "$ref": "#/definitions/v1Project"
+        }
+      }
+    },
+    "v1Quota": {
+      "type": "object",
+      "properties": {
+        "quota": {
+          "type": "integer",
+          "format": "int32",
+          "title": "quota is the maximum amount for the current QuotaSet, can be nil"
+        }
+      },
+      "title": "Quota is the actual maximum amount"
+    },
+    "v1QuotaSet": {
+      "type": "object",
+      "properties": {
+        "cluster": {
+          "$ref": "#/definitions/v1Quota",
+          "title": "cluster the amount of clusters"
+        },
+        "machine": {
+          "$ref": "#/definitions/v1Quota",
+          "title": "machine the amount of machines"
+        },
+        "ip": {
+          "$ref": "#/definitions/v1Quota",
+          "title": "ip the amount of aquired ip´s"
+        },
+        "project": {
+          "$ref": "#/definitions/v1Quota",
+          "title": "project the amount of projects of a tenant"
+        }
+      },
+      "title": "QuotaSet defines the types of possible Quotas\nmight be specified by project or tenant\nwhatever quota is reached first counts\nit always defines the max amount of this type"
+    },
+    "v1Tenant": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "$ref": "#/definitions/v1Meta"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "defaultQuotas": {
+          "$ref": "#/definitions/v1QuotaSet"
+        },
+        "quotas": {
+          "$ref": "#/definitions/v1QuotaSet"
+        },
+        "iamConfig": {
+          "$ref": "#/definitions/v1IAMConfig"
+        }
+      }
+    },
+    "v1TenantCreateRequest": {
+      "type": "object",
+      "properties": {
+        "tenant": {
+          "$ref": "#/definitions/v1Tenant"
+        }
+      }
+    },
+    "v1TenantFindRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "v1TenantListResponse": {
+      "type": "object",
+      "properties": {
+        "tenants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Tenant"
+          }
+        }
+      }
+    },
+    "v1TenantResponse": {
+      "type": "object",
+      "properties": {
+        "tenant": {
+          "$ref": "#/definitions/v1Tenant"
+        }
+      }
+    },
+    "v1TenantUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "tenant": {
+          "$ref": "#/definitions/v1Tenant"
+        }
+      }
+    }
+  }
+}
