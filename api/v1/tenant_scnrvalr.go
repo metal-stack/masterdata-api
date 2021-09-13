@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-func (m Tenant) Schema() string {
+func (t *Tenant) Schema() string {
 	return `
 	CREATE TABLE IF NOT EXISTS tenants (
 		id   text PRIMARY KEY NOT NULL,
@@ -27,36 +27,36 @@ func (m Tenant) Schema() string {
 `
 }
 
-func (m Tenant) JSONField() string {
+func (t *Tenant) JSONField() string {
 	return "tenant"
 }
 
-func (m Tenant) TableName() string {
+func (t *Tenant) TableName() string {
 	return "tenants"
 }
 
-func (m Tenant) Kind() string {
+func (t *Tenant) Kind() string {
 	return "Tenant"
 }
 
-func (m Tenant) APIVersion() string {
+func (t *Tenant) APIVersion() string {
 	return "v1"
 }
 
 // Value make the Tenant struct implement the driver.Valuer interface. This method
 // simply returns the JSON-encoded representation of the struct.
-func (m Tenant) Value() (driver.Value, error) {
-	return json.Marshal(m)
+func (t *Tenant) Value() (driver.Value, error) {
+	return json.Marshal(t)
 }
 
 // Scan make the Tenant struct implement the sql.Scanner interface. This method
 // simply decodes a JSON-encoded value into the struct fields.
-func (m *Tenant) Scan(value interface{}) error {
+func (t *Tenant) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("type assertion to []byte failed")
 	}
 
-	err := json.Unmarshal(b, m)
+	err := json.Unmarshal(b, t)
 	return err
 }
