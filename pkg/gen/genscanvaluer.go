@@ -1,5 +1,6 @@
 // Generator should not be part of the package
-//+build ignore
+//go:build ignore
+// +build ignore
 
 /*
 	Generates methods necessary to fulfil the Scanner and Valuer Interface.
@@ -100,6 +101,7 @@ func (g *Generator) generate(packageName, typeName string) error {
 	info := map[string]string{
 		"packageName":   packageName,
 		"typeName":      typeName,
+		"typeVariable":  strings.ToLower(string(typeName[0])),
 		"typeNameLower": strings.ToLower(typeName),
 		"tableName":     strings.ToLower(typeName) + "s",
 	}
@@ -163,40 +165,40 @@ import (
 	"fmt"
 )
 
-func (m {{ .typeName }}) Schema() string {
+func ({{ .typeVariable }} *{{ .typeName }}) Schema() string {
 	return {{ .schema }}
 }
 
-func (m {{ .typeName }}) JSONField() string {
+func ({{ .typeVariable }} *{{ .typeName }}) JSONField() string {
 	return "{{ .typeNameLower }}"
 }
 
-func (m {{ .typeName }}) TableName() string {
+func ({{ .typeVariable }} *{{ .typeName }}) TableName() string {
 	return "{{ .typeNameLower }}s"
 }
 
-func (m {{ .typeName }}) Kind() string {
+func ({{ .typeVariable }} *{{ .typeName }}) Kind() string {
 	return "{{ .typeName }}"
 }
 
-func (m {{ .typeName }}) APIVersion() string {
+func ({{ .typeVariable }} *{{ .typeName }}) APIVersion() string {
 	return "{{ .packageName }}"
 }
 
 // Value make the {{ .typeName }} struct implement the driver.Valuer interface. This method
 // simply returns the JSON-encoded representation of the struct.
-func (m {{ .typeName }}) Value() (driver.Value, error) {
-	return json.Marshal(m)
+func ({{ .typeVariable }} *{{ .typeName }}) Value() (driver.Value, error) {
+	return json.Marshal({{ .typeVariable }})
 }
 
 // Scan make the {{ .typeName }} struct implement the sql.Scanner interface. This method
 // simply decodes a JSON-encoded value into the struct fields.
-func (m *{{ .typeName }}) Scan(value interface{}) error {
+func ({{ .typeVariable }} *{{ .typeName }}) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("type assertion to []byte failed")
 	}
 
-	err := json.Unmarshal(b, m)
+	err := json.Unmarshal(b, {{ .typeVariable }})
 	return err
 }`
