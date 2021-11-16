@@ -11,11 +11,11 @@ import (
 	"regexp"
 	"strings"
 
-	gyaml "github.com/ghodss/yaml"
 	healthv1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/health"
 	"go.uber.org/zap"
+	"sigs.k8s.io/yaml"
 )
 
 // Initdb reads all yaml files in given directory and apply their content as initial datasets.
@@ -61,13 +61,13 @@ func splitYamlDocs(doc string) []string {
 
 // processConfig processes all yaml docs contained in the given file
 func (ds *Datastore) processConfig(file string) error {
-	yaml, err := os.ReadFile(file)
+	yml, err := os.ReadFile(file)
 	if err != nil {
 		return err
 	}
 	ctx := context.Background()
 
-	yamldocs := splitYamlDocs(string(yaml))
+	yamldocs := splitYamlDocs(string(yml))
 	for i := range yamldocs {
 		ydoc := yamldocs[i]
 		err = ds.createOrUpdate(ctx, []byte(ydoc))
@@ -82,7 +82,7 @@ func (ds *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 
 	// all entities must contain a meta, parse that to get kind and apiversion
 	var mm MetaMeta
-	err := gyaml.Unmarshal(ydoc, &mm)
+	err := yaml.Unmarshal(ydoc, &mm)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func (ds *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 		panic(fmt.Sprintf("entity type %s must implement VersionedJSONEntity-Interface", elementType.String()))
 	}
 
-	err = gyaml.Unmarshal(ydoc, newEntity)
+	err = yaml.Unmarshal(ydoc, newEntity)
 	if err != nil {
 		return err
 	}

@@ -5,9 +5,9 @@ import (
 
 	"sync"
 
-	"github.com/gogo/status"
 	v1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // Server represents a Health Check server to check
