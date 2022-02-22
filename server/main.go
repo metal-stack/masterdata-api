@@ -31,6 +31,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -87,7 +88,11 @@ func init() {
 }
 
 func run() {
-	logger, _ = zap.NewProduction()
+
+	cfg := zap.NewProductionConfig()
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	logger, _ = cfg.Build()
 	defer func() {
 		err := logger.Sync() // flushes buffer, if any
 		if err != nil {
