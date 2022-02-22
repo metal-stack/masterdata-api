@@ -92,7 +92,10 @@ func run() {
 	cfg := zap.NewProductionConfig()
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	logger, _ = cfg.Build()
+	logger, err := cfg.Build()
+	if err != nil {
+		panic(err)
+	}
 	defer func() {
 		err := logger.Sync() // flushes buffer, if any
 		if err != nil {
