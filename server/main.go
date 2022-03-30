@@ -217,9 +217,11 @@ func run() {
 
 	projectService := service.NewProjectService(storage, logger)
 	tenantService := service.NewTenantService(storage, logger)
+	userService := service.NewUserService(storage, logger)
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
+	apiv1.RegisterUserServiceServer(grpcServer, userService)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
 
 	// After all your registrations, make sure all of the Prometheus metrics are initialized.

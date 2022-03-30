@@ -51,7 +51,7 @@ client:
 .PHONY: mocks
 mocks:
 	@if ! which mockery > /dev/null; then echo "mockery needs to be installed (https://github.com/vektra/mockery)"; exit 1; fi
-	cd api/v1 && mockery --name ProjectServiceClient && mockery --name TenantServiceClient && cd -
+	cd api/v1 && mockery --name ProjectServiceClient && mockery --name TenantServiceClient && mockery --name UserServiceClient && cd -
 	cd pkg/datastore && mockery --name Storage && cd -
 
 .PHONY: postgres-up
