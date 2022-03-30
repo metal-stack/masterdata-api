@@ -190,6 +190,7 @@ func run() {
 	ves := []datastore.VersionedJSONEntity{
 		&apiv1.Project{},
 		&apiv1.Tenant{},
+		&apiv1.Person{},
 	}
 	dbHost := viper.GetString("dbhost")
 	dbPort := viper.GetString("dbport")
@@ -217,11 +218,11 @@ func run() {
 
 	projectService := service.NewProjectService(storage, logger)
 	tenantService := service.NewTenantService(storage, logger)
-	userService := service.NewUserService(storage, logger)
+	personService := service.NewPersonService(storage, logger)
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
-	apiv1.RegisterUserServiceServer(grpcServer, userService)
+	apiv1.RegisterPersonServiceServer(grpcServer, personService)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
 
 	// After all your registrations, make sure all of the Prometheus metrics are initialized.

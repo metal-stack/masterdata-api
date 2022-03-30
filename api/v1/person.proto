@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package v1;
+
+option go_package = "./v1";
+
+import "v1/meta.proto";
+
+
+service PersonService {
+    rpc Create(PersonCreateRequest) returns (PersonResponse);
+    rpc Update(PersonUpdateRequest) returns (PersonResponse);
+    rpc Delete(PersonDeleteRequest) returns (PersonResponse);
+    rpc Get(PersonGetRequest) returns (PersonResponse);
+}
+
+// Person is the database model
+message Person {
+    Meta meta = 1;
+    string name = 2;
+    string description = 3;
+    string email = 4;
+    string avatar_url = 5;
+}
+
+message PersonCreateRequest {
+    Person person = 1;
+}
+
+message PersonUpdateRequest {
+    Person person = 1;
+}
+
+message PersonDeleteRequest {
+    string id = 1;
+}
+
+message PersonGetRequest {
+    string id = 1;
+}
+
+message PersonResponse {
+    Person person = 1;
+}
+

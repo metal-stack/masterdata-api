@@ -1,0 +1,8 @@
+---
+meta:
+  id: john.doe@github
+  kind: Person
+  apiversion: v1
+  version: 0
+name: John Doe
+email: john.doe@mail.com

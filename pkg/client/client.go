@@ -20,7 +20,7 @@ import (
 type Client interface {
 	Project() v1.ProjectServiceClient
 	Tenant() v1.TenantServiceClient
-	User() v1.UserServiceClient
+	Person() v1.PersonServiceClient
 	Close() error
 }
 
@@ -118,7 +118,7 @@ func (c GRPCClient) Tenant() v1.TenantServiceClient {
 	return v1.NewTenantServiceClient(c.conn)
 }
 
-// User is the root accessor for user related functions
-func (c GRPCClient) User() v1.UserServiceClient {
-	return v1.NewUserServiceClient(c.conn)
+// Person is the root accessor for user related functions
+func (c GRPCClient) Person() v1.PersonServiceClient {
+	return v1.NewPersonServiceClient(c.conn)
 }
