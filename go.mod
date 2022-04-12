@@ -10,19 +10,19 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/json-iterator/go v1.1.12
-	github.com/lib/pq v1.10.4
+	github.com/lib/pq v1.10.5
 	github.com/lopezator/migrator v0.3.0
 	github.com/metal-stack/metal-lib v0.9.0
 	github.com/metal-stack/security v0.6.3
 	github.com/metal-stack/v v1.0.3
 	github.com/prometheus/client_golang v1.12.1
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
-	github.com/stretchr/testify v1.7.0
-	github.com/testcontainers/testcontainers-go v0.12.0
+	github.com/stretchr/testify v1.7.1
+	github.com/testcontainers/testcontainers-go v0.13.0
 	go.uber.org/zap v1.21.0
-	google.golang.org/grpc v1.44.0
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/grpc v1.45.0
+	google.golang.org/protobuf v1.28.0
 	sigs.k8s.io/yaml v1.3.0
 )
 
@@ -32,10 +32,10 @@ require (
 	github.com/Microsoft/hcsshim v0.9.2 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
+	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/containerd/cgroups v1.0.3 // indirect
-	github.com/containerd/containerd v1.6.0 // indirect
+	github.com/containerd/containerd v1.6.2 // indirect
 	github.com/coreos/go-oidc/v3 v3.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d // indirect
@@ -74,7 +74,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/moby/sys/mount v0.2.0 // indirect
 	github.com/moby/sys/mountinfo v0.5.0 // indirect
-	github.com/moby/term v0.0.0-20210610120745-9d4ed1856297 // indirect
+	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
