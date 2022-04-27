@@ -195,6 +195,22 @@ func ToMdmV1ProjectFindRequest(r *v1.ProjectFindRequest) *mdmv1.ProjectFindReque
 	return mdmv1r
 }
 
+func ToMdmV1TenantFindRequest(r *v1.TenantFindRequest) *mdmv1.TenantFindRequest {
+	if r == nil {
+		return nil
+	}
+
+	mdmv1r := new(mdmv1.TenantFindRequest)
+	if r.Id != nil {
+		mdmv1r.Id = &wrapperspb.StringValue{Value: *r.Id}
+	}
+	if r.Name != nil {
+		mdmv1r.Name = &wrapperspb.StringValue{Value: *r.Name}
+	}
+
+	return mdmv1r
+}
+
 func ToV1Meta(m *mdmv1.Meta) *v1.Meta {
 	if m == nil {
 		return nil

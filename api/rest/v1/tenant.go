@@ -28,6 +28,11 @@ type (
 		Tenant *Tenant `json:"tenant,omitempty"`
 	}
 
+	TenantFindRequest struct {
+		Id   *string `json:"id,omitempty"`
+		Name *string `json:"name,omitempty"`
+	}
+
 	TenantResponse struct {
 		Tenant
 	}
