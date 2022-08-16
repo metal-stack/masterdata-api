@@ -1,4 +1,4 @@
-FROM alpine:3.15 as health-downloader
+FROM alpine:3.16 as health-downloader
 ENV GRPC_HEALTH_PROBE_VERSION=v0.4.10 \
     GRPC_HEALTH_PROBE_URL=https://github.com/grpc-ecosystem/grpc-health-probe/releases/download
 RUN apk -U add curl \
@@ -8,7 +8,7 @@ RUN apk -U add curl \
 
 FROM metalstack/builder:latest as builder
 
-FROM alpine:3.15
+FROM alpine:3.16
 RUN apk -U add ca-certificates
 COPY --from=builder /work/bin/server /masterdata-api
 COPY --from=health-downloader /bin/grpc_health_probe /bin/grpc_health_probe
