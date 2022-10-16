@@ -9,6 +9,7 @@ import (
 	_ "net/http/pprof" //nolint:gosec
 	"os"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc/reflection"
 
@@ -229,7 +230,12 @@ func run() {
 	metricsServer.Handle("/metrics", promhttp.Handler())
 	go func() {
 		logger.Info("starting metrics endpoint of :2112")
-		err := http.ListenAndServe(":2112", metricsServer)
+		server := http.Server{
+			Addr:              ":2112",
+			Handler:           metricsServer,
+			ReadHeaderTimeout: 1 * time.Minute,
+		}
+		err := server.ListenAndServe()
 		if err != nil {
 			logger.Error("failed to start metrics endpoint", zap.Error(err))
 		}
@@ -241,7 +247,11 @@ func run() {
 		// inspect via
 		// go tool pprof -http :8080 localhost:2113/debug/pprof/heap
 		// go tool pprof -http :8080 localhost:2113/debug/pprof/goroutine
-		err := http.ListenAndServe(":2113", nil)
+		server := http.Server{
+			Addr:              ":2113",
+			ReadHeaderTimeout: 1 * time.Minute,
+		}
+		err := server.ListenAndServe()
 		if err != nil {
 			logger.Error("failed to start pprof endpoint", zap.Error(err))
 		}
