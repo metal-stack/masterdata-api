@@ -20,7 +20,7 @@ import (
 
 // Initdb reads all yaml files in given directory and apply their content as initial datasets.
 func (ds *Datastore) Initdb(healthServer *health.Server, dir string) error {
-	files, err := ds.listFiles(dir)
+	files, err := filepath.Glob(path.Join(dir, "*.yaml"))
 	if err != nil {
 		return err
 	}
@@ -156,12 +156,4 @@ func (ds *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 		}
 	}
 	return nil
-}
-
-func (ds *Datastore) listFiles(dir string) ([]string, error) {
-	matches, err := filepath.Glob(path.Join(dir, "*.yaml"))
-	if err != nil {
-		return nil, err
-	}
-	return matches, nil
 }
