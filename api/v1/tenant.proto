@@ -52,6 +52,7 @@ message TenantGetHistoryRequest {
 message TenantFindRequest {
     google.protobuf.StringValue id = 1;
     google.protobuf.StringValue name = 2;
+    Paging paging = 3;
 }
 
 message TenantResponse {
@@ -60,4 +61,6 @@ message TenantResponse {
 
 message TenantListResponse {
     repeated Tenant tenants = 1;
+    // next_page is used for pagination, returns the next page to be fetched and must then be provided in the list request.
+    optional uint64 next_page = 2;
 }

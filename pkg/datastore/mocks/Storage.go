@@ -45,7 +45,7 @@ func (_m *Storage) Delete(ctx context.Context, ve datastore.VersionedJSONEntity)
 }
 
 // Find provides a mock function with given fields: ctx, filter, result
-func (_m *Storage) Find(ctx context.Context, filter map[string]interface{}, result interface{}) error {
+func (_m *Storage) Find(ctx context.Context, filter map[string]interface{}, paging *datastore.Paging, result interface{}) error {
 	ret := _m.Called(ctx, filter, result)
 
 	var r0 error

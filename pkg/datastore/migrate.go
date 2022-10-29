@@ -64,7 +64,7 @@ func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePtr interface{}) 
 	entitySliceElementType := entitySliceElem.Type().Elem()
 
 	filter := make(map[string]interface{})
-	err := ds.Find(context.Background(), filter, entitySlicePtr)
+	err := ds.Find(context.Background(), filter, nil, entitySlicePtr)
 	if err != nil {
 		return err
 	}

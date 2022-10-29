@@ -53,6 +53,7 @@ message ProjectFindRequest {
     google.protobuf.StringValue name = 2;
     google.protobuf.StringValue description = 3;
     google.protobuf.StringValue tenant_id = 4;
+    Paging paging = 5;
 }
 
 message ProjectResponse {
@@ -61,4 +62,6 @@ message ProjectResponse {
 
 message ProjectListResponse {
     repeated Project projects = 1;
+    // next_page_token is used for pagination, returns the next page to be fetched and must then be provided in the list request.
+    optional uint64 next_page = 2;
 }

@@ -16,3 +16,10 @@ message Meta {
     map<string, string> annotations = 7;
     repeated string labels = 8;
 }
+
+message Paging {
+    // page is used for pagination, if unset only the first page is returned, the list response contains then token for the next page.
+    optional uint64 page = 7;
+    // count is the number of results returned per page, if no given server side defaults apply
+    optional uint64 count = 8;
+}

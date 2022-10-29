@@ -31,7 +31,37 @@ type Storage interface {
 	Delete(ctx context.Context, ve VersionedJSONEntity) error
 	Get(ctx context.Context, id string, ve VersionedJSONEntity) error
 	GetHistory(ctx context.Context, id string, at time.Time, ve VersionedJSONEntity) error
-	Find(ctx context.Context, filter map[string]interface{}, result interface{}) error
+	Find(ctx context.Context, filter map[string]interface{}, paging *Paging, result interface{}) error
+}
+
+// Paging defines limit and offset for the find request
+type Paging struct {
+	Limit    uint64
+	Offset   uint64
+	NextPage uint64
+}
+
+const defaultPagingLimit = uint64(100)
+
+func ToPaging(paging *v1.Paging) *Paging {
+	if paging == nil {
+		return nil
+	}
+	limit := defaultPagingLimit
+	if paging.Count != nil {
+		limit = *paging.Count
+	}
+	offset := uint64(0)
+	nextpage := uint64(1)
+	if paging.Page != nil {
+		offset = *paging.Page * limit
+		nextpage = offset + 1
+	}
+	return &Paging{
+		Limit:    limit,
+		Offset:   offset,
+		NextPage: nextpage,
+	}
 }
 
 // JSONEntity is storable in json format
@@ -346,7 +376,7 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 }
 
 // Find returns matching elements from the database
-func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, result interface{}) error {
+func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, paging *Paging, result interface{}) error {
 	resultv := reflect.ValueOf(result)
 	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {
 		return fmt.Errorf("result argument must be a slice address")
@@ -373,6 +403,10 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, re
 		q = q.Where(filter)
 	}
 	q = q.OrderBy("id")
+
+	if paging != nil {
+		q.Limit(paging.Limit).Offset(paging.Offset)
+	}
 
 	sql, vals, _ := q.ToSql()
 	ds.log.Debug("find", zap.String("sql", sql), zap.Any("values", vals))

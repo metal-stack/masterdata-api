@@ -44,7 +44,7 @@ func (s *ProjectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 		filter := make(map[string]interface{})
 		filter["project ->> 'tenant_id'"] = project.GetTenantId()
 		var projects []v1.Project
-		err = s.Storage.Find(ctx, filter, &projects)
+		err = s.Storage.Find(ctx, filter, nil, &projects)
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +104,8 @@ func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 	if req.TenantId != nil {
 		filter["project ->> 'tenant_id'"] = req.TenantId.GetValue()
 	}
-	err := s.Storage.Find(ctx, filter, &res)
+	paging := datastore.ToPaging(req.Paging)
+	err := s.Storage.Find(ctx, filter, paging, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +113,9 @@ func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 	for i := range res {
 		p := &res[i]
 		resp.Projects = append(resp.Projects, p)
+	}
+	if paging != nil {
+		resp.NextPage = &paging.NextPage
 	}
 	return resp, nil
 }
