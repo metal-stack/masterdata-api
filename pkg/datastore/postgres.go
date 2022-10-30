@@ -410,6 +410,7 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 		_ = rows.Err()
 	}()
 
+	rowcount := uint64(0)
 	for rows.Next() {
 		elemp := reflect.New(elemt)
 		err = rows.Scan(elemp.Interface())
@@ -417,6 +418,7 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 			return nil, err
 		}
 		slicev = reflect.Append(slicev, elemp.Elem())
+		rowcount++
 	}
 	resultv.Elem().Set(slicev)
 
@@ -424,8 +426,10 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 	if err != nil {
 		return nil, err
 	}
-
-	return nextPage, err
+	if paging != nil && rowcount == *paging.Count {
+		return nextPage, err
+	}
+	return nil, err
 }
 
 // Get the history entity for given id and latest before or equal the given point in time
