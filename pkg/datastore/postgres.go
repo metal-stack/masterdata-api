@@ -55,7 +55,7 @@ func toPaging(paging *v1.Paging) *Paging {
 	nextpage := uint64(1)
 	if paging.Page != nil {
 		offset = *paging.Page * limit
-		nextpage = offset + 1
+		nextpage = *paging.Page + 1
 	}
 	return &Paging{
 		Limit:    limit,
