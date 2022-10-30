@@ -69,6 +69,7 @@ func initConfig() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.Flags().IntP("port", "", 50051, "the port to serve on")
+	rootCmd.Flags().BoolP("debug", "", false, "enable debugging")
 
 	rootCmd.Flags().StringP("ca", "", "certs/ca.pem", "ca path")
 	rootCmd.Flags().StringP("cert", "", "certs/server.pem", "server certificate path")
@@ -92,8 +93,9 @@ func run() {
 
 	cfg := zap.NewProductionConfig()
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	// FIXME make configurable
-	cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	if viper.IsSet("debug") {
+		cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	}
 
 	logger, err := cfg.Build()
 	if err != nil {

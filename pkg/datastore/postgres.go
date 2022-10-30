@@ -377,7 +377,6 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 
 // Find returns matching elements from the database
 func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, paging *Paging, result interface{}) error {
-	ds.log.Debug("find", zap.Any("filter", filter), zap.Any("paging", paging))
 	resultv := reflect.ValueOf(result)
 	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {
 		return fmt.Errorf("result argument must be a slice address")
@@ -406,7 +405,6 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 	q = q.OrderBy("id")
 
 	if paging != nil {
-		ds.log.Sugar().Debugw("find paging enabled", "paging", *paging)
 		q = q.Limit(paging.Limit).Offset(paging.Offset)
 	}
 
