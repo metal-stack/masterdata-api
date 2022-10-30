@@ -34,19 +34,13 @@ type Storage interface {
 	Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error)
 }
 
-// Paging defines limit and offset for the find request
-type Paging struct {
-	Limit    uint64
-	Offset   uint64
-	NextPage uint64
-}
-
 const defaultPagingLimit = uint64(100)
 
-func toPaging(paging *v1.Paging) *Paging {
+func addPaging(q squirrel.SelectBuilder, paging *v1.Paging) (squirrel.SelectBuilder, *uint64) {
 	if paging == nil {
-		return nil
+		return q, nil
 	}
+
 	limit := defaultPagingLimit
 	if paging.Count != nil {
 		limit = *paging.Count
@@ -57,11 +51,8 @@ func toPaging(paging *v1.Paging) *Paging {
 		offset = *paging.Page * limit
 		nextpage = *paging.Page + 1
 	}
-	return &Paging{
-		Limit:    limit,
-		Offset:   offset,
-		NextPage: nextpage,
-	}
+	q = q.Limit(limit).Offset(offset)
+	return q, &nextpage
 }
 
 // JSONEntity is storable in json format
@@ -404,12 +395,8 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 	}
 	q = q.OrderBy("id")
 
-	var nextPage *uint64
-	if paging != nil {
-		p := toPaging(paging)
-		nextPage = &p.NextPage
-		q = q.Limit(p.Limit).Offset(p.Offset)
-	}
+	// Add paging query if paging is defined
+	q, nextPage := addPaging(q, paging)
 
 	sql, vals, _ := q.ToSql()
 	ds.log.Debug("find", zap.String("sql", sql), zap.Any("values", vals))
