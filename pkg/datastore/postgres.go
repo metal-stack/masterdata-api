@@ -31,7 +31,7 @@ type Storage interface {
 	Delete(ctx context.Context, ve VersionedJSONEntity) error
 	Get(ctx context.Context, id string, ve VersionedJSONEntity) error
 	GetHistory(ctx context.Context, id string, at time.Time, ve VersionedJSONEntity) error
-	Find(ctx context.Context, filter map[string]interface{}, paging *Paging, result interface{}) error
+	Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error)
 }
 
 // Paging defines limit and offset for the find request
@@ -43,7 +43,7 @@ type Paging struct {
 
 const defaultPagingLimit = uint64(100)
 
-func ToPaging(paging *v1.Paging) *Paging {
+func toPaging(paging *v1.Paging) *Paging {
 	if paging == nil {
 		return nil
 	}
@@ -376,10 +376,10 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 }
 
 // Find returns matching elements from the database
-func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, paging *Paging, result interface{}) error {
+func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error) {
 	resultv := reflect.ValueOf(result)
 	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {
-		return fmt.Errorf("result argument must be a slice address")
+		return nil, fmt.Errorf("result argument must be a slice address")
 	}
 
 	slicev := resultv.Elem()
@@ -387,13 +387,13 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 
 	ve, ok := reflect.New(elemt).Interface().(VersionedJSONEntity)
 	if !ok {
-		return fmt.Errorf("result slice element type must implement VersionedJSONEntity-Interface")
+		return nil, fmt.Errorf("result slice element type must implement VersionedJSONEntity-Interface")
 	}
 	jsonField := ve.JSONField()
 	tableName := ve.TableName()
 	_, ok = ds.types[jsonField]
 	if !ok {
-		return fmt.Errorf("type:%s is not registered", jsonField)
+		return nil, fmt.Errorf("type:%s is not registered", jsonField)
 	}
 
 	q := ds.sb.Select(jsonField).
@@ -404,8 +404,11 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 	}
 	q = q.OrderBy("id")
 
+	var nextPage *uint64
 	if paging != nil {
-		q = q.Limit(paging.Limit).Offset(paging.Offset)
+		p := toPaging(paging)
+		nextPage = &p.NextPage
+		q = q.Limit(p.Limit).Offset(p.Offset)
 	}
 
 	sql, vals, _ := q.ToSql()
@@ -413,7 +416,7 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func() {
 		_ = rows.Close()
@@ -424,7 +427,7 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 		elemp := reflect.New(elemt)
 		err = rows.Scan(elemp.Interface())
 		if err != nil {
-			return err
+			return nil, err
 		}
 		slicev = reflect.Append(slicev, elemp.Elem())
 	}
@@ -432,10 +435,10 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 
 	err = rows.Err()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return err
+	return nextPage, err
 }
 
 // Get the history entity for given id and latest before or equal the given point in time

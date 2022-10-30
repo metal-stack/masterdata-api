@@ -5,7 +5,9 @@ import (
 	"errors"
 	"time"
 
+	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -38,7 +40,7 @@ func (s StorageStatusWrapper) GetHistory(ctx context.Context, id string, at time
 	return wrapGetStatusError(s.storage.GetHistory(ctx, id, at, ve))
 }
 
-func (s StorageStatusWrapper) Find(ctx context.Context, filter map[string]interface{}, paging *datastore.Paging, result interface{}) error {
+func (s StorageStatusWrapper) Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error) {
 	return s.storage.Find(ctx, filter, paging, result)
 }
 

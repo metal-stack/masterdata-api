@@ -74,8 +74,7 @@ func (s *TenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 	if req.Name != nil {
 		filter["tenant ->> 'name'"] = req.GetName().GetValue()
 	}
-	paging := datastore.ToPaging(req.Paging)
-	err := s.Storage.Find(ctx, filter, paging, &res)
+	nextPage, err := s.Storage.Find(ctx, filter, req.Paging, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +83,6 @@ func (s *TenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 		t := &res[i]
 		resp.Tenants = append(resp.Tenants, t)
 	}
-	if paging != nil {
-		resp.NextPage = &paging.NextPage
-	}
+	resp.NextPage = nextPage
 	return resp, nil
 }
