@@ -92,6 +92,8 @@ func run() {
 
 	cfg := zap.NewProductionConfig()
 	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	// FIXME make configurable
+	cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
 
 	logger, err := cfg.Build()
 	if err != nil {
