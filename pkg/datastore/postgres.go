@@ -426,7 +426,7 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 	if err != nil {
 		return nil, err
 	}
-	if paging != nil && rowcount == *paging.Count {
+	if paging != nil && paging.Count != nil && rowcount == *paging.Count {
 		return nextPage, err
 	}
 	return nil, err
