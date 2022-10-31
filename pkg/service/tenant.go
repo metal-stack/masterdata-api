@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
@@ -74,7 +75,12 @@ func (s *TenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 	if req.Name != nil {
 		filter["tenant ->> 'name'"] = req.GetName().GetValue()
 	}
-	err := s.Storage.Find(ctx, filter, &res)
+	for key, value := range req.Annotations {
+		// select * from tenants where tenant -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
+		f := fmt.Sprintf("tenant -> 'meta' -> 'annotations' ->> '%s'", key)
+		filter[f] = value
+	}
+	nextPage, err := s.Storage.Find(ctx, filter, req.Paging, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -83,5 +89,6 @@ func (s *TenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 		t := &res[i]
 		resp.Tenants = append(resp.Tenants, t)
 	}
+	resp.NextPage = nextPage
 	return resp, nil
 }

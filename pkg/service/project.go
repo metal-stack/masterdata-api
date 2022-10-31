@@ -44,7 +44,7 @@ func (s *ProjectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 		filter := make(map[string]interface{})
 		filter["project ->> 'tenant_id'"] = project.GetTenantId()
 		var projects []v1.Project
-		err = s.Storage.Find(ctx, filter, &projects)
+		_, err = s.Storage.Find(ctx, filter, nil, &projects)
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +104,12 @@ func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 	if req.TenantId != nil {
 		filter["project ->> 'tenant_id'"] = req.TenantId.GetValue()
 	}
-	err := s.Storage.Find(ctx, filter, &res)
+	for key, value := range req.Annotations {
+		// select * from project where project -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
+		f := fmt.Sprintf("project -> 'meta' -> 'annotations' ->> '%s'", key)
+		filter[f] = value
+	}
+	nextPage, err := s.Storage.Find(ctx, filter, req.Paging, &res)
 	if err != nil {
 		return nil, err
 	}
@@ -113,5 +118,6 @@ func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 		p := &res[i]
 		resp.Projects = append(resp.Projects, p)
 	}
+	resp.NextPage = nextPage
 	return resp, nil
 }

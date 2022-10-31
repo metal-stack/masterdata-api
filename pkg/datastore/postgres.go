@@ -31,7 +31,28 @@ type Storage interface {
 	Delete(ctx context.Context, ve VersionedJSONEntity) error
 	Get(ctx context.Context, id string, ve VersionedJSONEntity) error
 	GetHistory(ctx context.Context, id string, at time.Time, ve VersionedJSONEntity) error
-	Find(ctx context.Context, filter map[string]interface{}, result interface{}) error
+	Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error)
+}
+
+const defaultPagingLimit = uint64(100)
+
+func addPaging(q squirrel.SelectBuilder, paging *v1.Paging) (squirrel.SelectBuilder, *uint64) {
+	if paging == nil {
+		return q, nil
+	}
+
+	limit := defaultPagingLimit
+	if paging.Count != nil {
+		limit = *paging.Count
+	}
+	offset := uint64(0)
+	nextpage := uint64(1)
+	if paging.Page != nil {
+		offset = *paging.Page * limit
+		nextpage = *paging.Page + 1
+	}
+	q = q.Limit(limit).Offset(offset)
+	return q, &nextpage
 }
 
 // JSONEntity is storable in json format
@@ -346,10 +367,10 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 }
 
 // Find returns matching elements from the database
-func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, result interface{}) error {
+func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error) {
 	resultv := reflect.ValueOf(result)
 	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {
-		return fmt.Errorf("result argument must be a slice address")
+		return nil, fmt.Errorf("result argument must be a slice address")
 	}
 
 	slicev := resultv.Elem()
@@ -357,13 +378,13 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, re
 
 	ve, ok := reflect.New(elemt).Interface().(VersionedJSONEntity)
 	if !ok {
-		return fmt.Errorf("result slice element type must implement VersionedJSONEntity-Interface")
+		return nil, fmt.Errorf("result slice element type must implement VersionedJSONEntity-Interface")
 	}
 	jsonField := ve.JSONField()
 	tableName := ve.TableName()
 	_, ok = ds.types[jsonField]
 	if !ok {
-		return fmt.Errorf("type:%s is not registered", jsonField)
+		return nil, fmt.Errorf("type:%s is not registered", jsonField)
 	}
 
 	q := ds.sb.Select(jsonField).
@@ -374,34 +395,41 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, re
 	}
 	q = q.OrderBy("id")
 
+	// Add paging query if paging is defined
+	q, nextPage := addPaging(q, paging)
+
 	sql, vals, _ := q.ToSql()
 	ds.log.Debug("find", zap.String("sql", sql), zap.Any("values", vals))
 
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func() {
 		_ = rows.Close()
 		_ = rows.Err()
 	}()
 
+	rowcount := uint64(0)
 	for rows.Next() {
 		elemp := reflect.New(elemt)
 		err = rows.Scan(elemp.Interface())
 		if err != nil {
-			return err
+			return nil, err
 		}
 		slicev = reflect.Append(slicev, elemp.Elem())
+		rowcount++
 	}
 	resultv.Elem().Set(slicev)
 
 	err = rows.Err()
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	return err
+	if paging != nil && paging.Count != nil && rowcount == *paging.Count {
+		return nextPage, err
+	}
+	return nil, err
 }
 
 // Get the history entity for given id and latest before or equal the given point in time

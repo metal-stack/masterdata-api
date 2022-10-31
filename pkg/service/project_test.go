@@ -72,7 +72,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 		arg := args.Get(2).(*v1.Tenant)
 		arg.Quotas = t1.GetQuotas()
 	})
-	storageMock.On("Find", ctx, filter, &projects).Return(nil)
+	storageMock.On("Find", ctx, filter, mock.AnythingOfType("*v1.Paging"), &projects).Return(nil, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
 	resp, err := ts.Create(ctx, tcr)
 	assert.NoError(t, err)
@@ -156,7 +156,7 @@ func TestFindProjectByID(t *testing.T) {
 	}
 
 	f1["id"] = "p5"
-	storageMock.On("Find", ctx, f1, &t5s).Return(nil)
+	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging"), &t5s).Return(nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -175,7 +175,7 @@ func TestFindProjectByName(t *testing.T) {
 
 	f2 := make(map[string]interface{})
 	f2["project ->> 'name'"] = "Sixth"
-	storageMock.On("Find", ctx, f2, &t6s).Return(nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging"), &t6s).Return(nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -194,7 +194,7 @@ func TestFindProjectByTenant(t *testing.T) {
 
 	f2 := make(map[string]interface{})
 	f2["project ->> 'tenant_id'"] = "p1"
-	storageMock.On("Find", ctx, f2, &t6s).Return(nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging"), &t6s).Return(nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)

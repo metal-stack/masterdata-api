@@ -166,7 +166,7 @@ func TestCRUD(t *testing.T) {
 	filter := make(map[string]interface{})
 	// filter["tenant->>name"] = "Important Tenant"
 	filter["id"] = "tenant-1"
-	err = ds.Find(ctx, filter, &tenants)
+	_, err = ds.Find(ctx, filter, nil, &tenants)
 	assert.NoError(t, err)
 	assert.NotNil(t, tenants)
 	assert.Len(t, tenants, 1)
@@ -561,19 +561,19 @@ func TestFind(t *testing.T) {
 	ctx := context.Background()
 	// result not a slice
 	var te v1.Tenant
-	err := ds.Find(ctx, nil, &te)
+	_, err := ds.Find(ctx, nil, nil, &te)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "result argument must be a slice address")
 
 	// result is no versionedEntity
 	var res []string
-	err = ds.Find(ctx, nil, &res)
+	_, err = ds.Find(ctx, nil, nil, &res)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "result slice element type must implement VersionedJSONEntity-Interface")
 
 	// unregistered type
 	var ives = []invalidVersionedEntity{}
-	err = ds.Find(ctx, nil, &ives)
+	_, err = ds.Find(ctx, nil, nil, &ives)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "type:invalid is not registered")
 
@@ -593,7 +593,7 @@ func TestFind(t *testing.T) {
 	var tfr []v1.Tenant
 	filter := make(map[string]interface{})
 	filter["id"] = t6
-	err = ds.Find(ctx, filter, &tfr)
+	_, err = ds.Find(ctx, filter, nil, &tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, tfr)
 	assert.Len(t, tfr, 1)
@@ -610,14 +610,14 @@ func TestFind(t *testing.T) {
 	}
 	// find all
 	filter = make(map[string]interface{})
-	err = ds.Find(ctx, filter, &tfr)
+	_, err = ds.Find(ctx, filter, nil, &tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, tfr)
 
 	// find one
 	var t9 []v1.Tenant
 	filter["id"] = "ftenant-9"
-	err = ds.Find(ctx, filter, &t9)
+	_, err = ds.Find(ctx, filter, nil, &t9)
 	assert.NoError(t, err)
 	assert.NotNil(t, t9)
 	assert.Len(t, t9, 1)
@@ -626,7 +626,7 @@ func TestFind(t *testing.T) {
 	var t8 []v1.Tenant
 	filter = make(map[string]interface{})
 	filter["tenant ->> 'name'"] = "tenant-8"
-	err = ds.Find(ctx, filter, &t8)
+	_, err = ds.Find(ctx, filter, nil, &t8)
 	assert.NoError(t, err)
 	assert.NotNil(t, t8)
 	assert.Len(t, t8, 1)
@@ -635,7 +635,7 @@ func TestFind(t *testing.T) {
 	var t4 []v1.Tenant
 	filter = make(map[string]interface{})
 	filter["tenant ->> 'description'"] = "Tenant 4"
-	err = ds.Find(ctx, filter, &t4)
+	_, err = ds.Find(ctx, filter, nil, &t4)
 	assert.NoError(t, err)
 	assert.NotNil(t, t4)
 	assert.Len(t, t4, 1)

@@ -6,6 +6,7 @@ import (
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"testing"
@@ -124,7 +125,7 @@ func TestFindTenantByID(t *testing.T) {
 	}
 
 	f1["id"] = "t5"
-	storageMock.On("Find", ctx, f1, &t5s).Return(nil)
+	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging"), &t5s).Return(nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -143,7 +144,7 @@ func TestFindTenantByName(t *testing.T) {
 
 	f2 := make(map[string]interface{})
 	f2["tenant ->> 'name'"] = "Fifth"
-	storageMock.On("Find", ctx, f2, &t6s).Return(nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging"), &t6s).Return(nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
