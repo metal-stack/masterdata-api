@@ -54,6 +54,7 @@ message ProjectFindRequest {
     google.protobuf.StringValue description = 3;
     google.protobuf.StringValue tenant_id = 4;
     Paging paging = 5;
+    map <string,string> annotations = 6;
 }
 
 message ProjectResponse {

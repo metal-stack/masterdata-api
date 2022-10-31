@@ -104,6 +104,11 @@ func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 	if req.TenantId != nil {
 		filter["project ->> 'tenant_id'"] = req.TenantId.GetValue()
 	}
+	for key, value := range req.Annotations {
+		// select * from project where project -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
+		f := fmt.Sprintf("project -> 'meta' -> 'annotations' ->> '%s'", key)
+		filter[f] = value
+	}
 	nextPage, err := s.Storage.Find(ctx, filter, req.Paging, &res)
 	if err != nil {
 		return nil, err
