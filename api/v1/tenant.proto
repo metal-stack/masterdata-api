@@ -4,6 +4,7 @@ package v1;
 
 option go_package = "./v1";
 
+import "v1/common.proto";
 import "v1/meta.proto";
 import "v1/quota.proto";
 import "v1/iam.proto";
