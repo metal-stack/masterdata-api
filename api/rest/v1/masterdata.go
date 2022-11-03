@@ -77,7 +77,7 @@ func (mlr *MasterdataLookupRequest) Validate() error {
 
 // onlyOneOfPtrsSet returns true if only one of the given pointers is not nil.
 // If values are given they are always counted as not nil.
-func onlyOneOfPtrsSet(ptrs ...interface{}) bool {
+func onlyOneOfPtrsSet(ptrs ...any) bool {
 	count := 0
 	for _, p := range ptrs {
 		rv := reflect.ValueOf(p)

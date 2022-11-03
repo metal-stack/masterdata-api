@@ -20,27 +20,27 @@ func NewStorageStatusWrapper(s datastore.Storage) datastore.Storage {
 	return StorageStatusWrapper{storage: s}
 }
 
-func (s StorageStatusWrapper) Create(ctx context.Context, ve datastore.VersionedJSONEntity) error {
+func (s StorageStatusWrapper) Create(ctx context.Context, ve datastore.Entity) error {
 	return wrapCreateStatusError(s.storage.Create(ctx, ve))
 }
 
-func (s StorageStatusWrapper) Update(ctx context.Context, ve datastore.VersionedJSONEntity) error {
+func (s StorageStatusWrapper) Update(ctx context.Context, ve datastore.Entity) error {
 	return wrapUpdateStatusError(s.storage.Update(ctx, ve))
 }
 
-func (s StorageStatusWrapper) Delete(ctx context.Context, ve datastore.VersionedJSONEntity) error {
+func (s StorageStatusWrapper) Delete(ctx context.Context, ve datastore.Entity) error {
 	return wrapDeleteStatusError(s.storage.Delete(ctx, ve))
 }
 
-func (s StorageStatusWrapper) Get(ctx context.Context, id string, ve datastore.VersionedJSONEntity) error {
+func (s StorageStatusWrapper) Get(ctx context.Context, id string, ve datastore.Entity) error {
 	return wrapGetStatusError(s.storage.Get(ctx, id, ve))
 }
 
-func (s StorageStatusWrapper) GetHistory(ctx context.Context, id string, at time.Time, ve datastore.VersionedJSONEntity) error {
+func (s StorageStatusWrapper) GetHistory(ctx context.Context, id string, at time.Time, ve datastore.Entity) error {
 	return wrapGetStatusError(s.storage.GetHistory(ctx, id, at, ve))
 }
 
-func (s StorageStatusWrapper) Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error) {
+func (s StorageStatusWrapper) Find(ctx context.Context, filter map[string]any, paging *v1.Paging, result any) (*uint64, error) {
 	return s.storage.Find(ctx, filter, paging, result)
 }
 

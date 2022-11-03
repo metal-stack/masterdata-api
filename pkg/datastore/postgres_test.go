@@ -163,7 +163,7 @@ func TestCRUD(t *testing.T) {
 
 	// find existing
 	var tenants []v1.Tenant
-	filter := make(map[string]interface{})
+	filter := make(map[string]any)
 	// filter["tenant->>name"] = "Important Tenant"
 	filter["id"] = "tenant-1"
 	_, err = ds.Find(ctx, filter, nil, &tenants)
@@ -591,7 +591,7 @@ func TestFind(t *testing.T) {
 
 	// now search it
 	var tfr []v1.Tenant
-	filter := make(map[string]interface{})
+	filter := make(map[string]any)
 	filter["id"] = t6
 	_, err = ds.Find(ctx, filter, nil, &tfr)
 	assert.NoError(t, err)
@@ -609,7 +609,7 @@ func TestFind(t *testing.T) {
 		assert.NoError(t, err)
 	}
 	// find all
-	filter = make(map[string]interface{})
+	filter = make(map[string]any)
 	_, err = ds.Find(ctx, filter, nil, &tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, tfr)
@@ -624,7 +624,7 @@ func TestFind(t *testing.T) {
 
 	// find one by name
 	var t8 []v1.Tenant
-	filter = make(map[string]interface{})
+	filter = make(map[string]any)
 	filter["tenant ->> 'name'"] = "tenant-8"
 	_, err = ds.Find(ctx, filter, nil, &t8)
 	assert.NoError(t, err)
@@ -633,7 +633,7 @@ func TestFind(t *testing.T) {
 
 	// find one by description
 	var t4 []v1.Tenant
-	filter = make(map[string]interface{})
+	filter = make(map[string]any)
 	filter["tenant ->> 'description'"] = "Tenant 4"
 	_, err = ds.Find(ctx, filter, nil, &t4)
 	assert.NoError(t, err)

@@ -24,7 +24,7 @@ func Test_onlyOneOfPtrsSet(t *testing.T) {
 	}
 
 	type args struct {
-		ptrs []interface{}
+		ptrs []any
 	}
 	tests := []struct {
 		name string
@@ -34,35 +34,35 @@ func Test_onlyOneOfPtrsSet(t *testing.T) {
 		{
 			name: "all nil",
 			args: args{
-				ptrs: []interface{}{no.a, no.b, no.c},
+				ptrs: []any{no.a, no.b, no.c},
 			},
 			want: false,
 		},
 		{
 			name: "two != nil",
 			args: args{
-				ptrs: []interface{}{two.a, two.b, two.c},
+				ptrs: []any{two.a, two.b, two.c},
 			},
 			want: false,
 		},
 		{
 			name: "all != nil",
 			args: args{
-				ptrs: []interface{}{all.a, all.b, all.c},
+				ptrs: []any{all.a, all.b, all.c},
 			},
 			want: false,
 		},
 		{
 			name: "only one != nil",
 			args: args{
-				ptrs: []interface{}{one.a, one.b, one.c},
+				ptrs: []any{one.a, one.b, one.c},
 			},
 			want: true,
 		},
 		{
 			name: "one != nil, value",
 			args: args{
-				ptrs: []interface{}{one.a, one.b, one.c, "value"},
+				ptrs: []any{one.a, one.b, one.c, "value"},
 			},
 			want: false,
 		},

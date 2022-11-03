@@ -119,7 +119,7 @@ func TestFindTenantByID(t *testing.T) {
 	ctx := context.Background()
 	var t5s []v1.Tenant
 	// filter by id
-	f1 := make(map[string]interface{})
+	f1 := make(map[string]any)
 	tfr := &v1.TenantFindRequest{
 		Id: &wrapperspb.StringValue{Value: "t5"},
 	}
@@ -142,7 +142,7 @@ func TestFindTenantByName(t *testing.T) {
 		Name: &wrapperspb.StringValue{Value: "Fifth"},
 	}
 
-	f2 := make(map[string]interface{})
+	f2 := make(map[string]any)
 	f2["tenant ->> 'name'"] = "Fifth"
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging"), &t6s).Return(nil, nil)
 	resp, err := ts.Find(ctx, tfr)

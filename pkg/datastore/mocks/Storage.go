@@ -19,11 +19,11 @@ type Storage struct {
 }
 
 // Create provides a mock function with given fields: ctx, ve
-func (_m *Storage) Create(ctx context.Context, ve datastore.VersionedJSONEntity) error {
+func (_m *Storage) Create(ctx context.Context, ve datastore.Entity) error {
 	ret := _m.Called(ctx, ve)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, datastore.VersionedJSONEntity) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, datastore.Entity) error); ok {
 		r0 = rf(ctx, ve)
 	} else {
 		r0 = ret.Error(0)
@@ -33,11 +33,11 @@ func (_m *Storage) Create(ctx context.Context, ve datastore.VersionedJSONEntity)
 }
 
 // Delete provides a mock function with given fields: ctx, ve
-func (_m *Storage) Delete(ctx context.Context, ve datastore.VersionedJSONEntity) error {
+func (_m *Storage) Delete(ctx context.Context, ve datastore.Entity) error {
 	ret := _m.Called(ctx, ve)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, datastore.VersionedJSONEntity) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, datastore.Entity) error); ok {
 		r0 = rf(ctx, ve)
 	} else {
 		r0 = ret.Error(0)
@@ -47,11 +47,11 @@ func (_m *Storage) Delete(ctx context.Context, ve datastore.VersionedJSONEntity)
 }
 
 // Find provides a mock function with given fields: ctx, filter, paging, result
-func (_m *Storage) Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error) {
+func (_m *Storage) Find(ctx context.Context, filter map[string]any, paging *v1.Paging, result any) (*uint64, error) {
 	ret := _m.Called(ctx, filter, paging, result)
 
 	var r0 *uint64
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]interface{}, *v1.Paging, interface{}) *uint64); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, map[string]any, *v1.Paging, any) *uint64); ok {
 		r0 = rf(ctx, filter, paging, result)
 	} else {
 		if ret.Get(0) != nil {
@@ -60,7 +60,7 @@ func (_m *Storage) Find(ctx context.Context, filter map[string]interface{}, pagi
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, map[string]interface{}, *v1.Paging, interface{}) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, map[string]any, *v1.Paging, any) error); ok {
 		r1 = rf(ctx, filter, paging, result)
 	} else {
 		r1 = ret.Error(1)
@@ -70,11 +70,11 @@ func (_m *Storage) Find(ctx context.Context, filter map[string]interface{}, pagi
 }
 
 // Get provides a mock function with given fields: ctx, id, ve
-func (_m *Storage) Get(ctx context.Context, id string, ve datastore.VersionedJSONEntity) error {
+func (_m *Storage) Get(ctx context.Context, id string, ve datastore.Entity) error {
 	ret := _m.Called(ctx, id, ve)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, datastore.VersionedJSONEntity) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, datastore.Entity) error); ok {
 		r0 = rf(ctx, id, ve)
 	} else {
 		r0 = ret.Error(0)
@@ -84,11 +84,11 @@ func (_m *Storage) Get(ctx context.Context, id string, ve datastore.VersionedJSO
 }
 
 // GetHistory provides a mock function with given fields: ctx, id, at, ve
-func (_m *Storage) GetHistory(ctx context.Context, id string, at time.Time, ve datastore.VersionedJSONEntity) error {
+func (_m *Storage) GetHistory(ctx context.Context, id string, at time.Time, ve datastore.Entity) error {
 	ret := _m.Called(ctx, id, at, ve)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, time.Time, datastore.VersionedJSONEntity) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, time.Time, datastore.Entity) error); ok {
 		r0 = rf(ctx, id, at, ve)
 	} else {
 		r0 = ret.Error(0)
@@ -98,11 +98,11 @@ func (_m *Storage) GetHistory(ctx context.Context, id string, at time.Time, ve d
 }
 
 // Update provides a mock function with given fields: ctx, ve
-func (_m *Storage) Update(ctx context.Context, ve datastore.VersionedJSONEntity) error {
+func (_m *Storage) Update(ctx context.Context, ve datastore.Entity) error {
 	ret := _m.Called(ctx, ve)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, datastore.VersionedJSONEntity) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, datastore.Entity) error); ok {
 		r0 = rf(ctx, ve)
 	} else {
 		r0 = ret.Error(0)

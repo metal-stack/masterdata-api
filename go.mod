@@ -15,7 +15,7 @@ require (
 	github.com/metal-stack/metal-lib v0.11.2
 	github.com/metal-stack/security v0.6.5
 	github.com/metal-stack/v v1.0.3
-	github.com/prometheus/client_golang v1.13.0
+	github.com/prometheus/client_golang v1.13.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.1
@@ -29,7 +29,7 @@ require (
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.6.0 // indirect
-	github.com/Microsoft/hcsshim v0.9.4 // indirect
+	github.com/Microsoft/hcsshim v0.9.5 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
@@ -94,7 +94,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
-	go.mongodb.org/mongo-driver v1.10.3 // indirect
+	go.mongodb.org/mongo-driver v1.10.4 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect

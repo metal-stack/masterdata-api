@@ -26,12 +26,12 @@ var Now = time.Now
 // Storage is a interface to store objects.
 type Storage interface {
 	// generic
-	Create(ctx context.Context, ve VersionedJSONEntity) error
-	Update(ctx context.Context, ve VersionedJSONEntity) error
-	Delete(ctx context.Context, ve VersionedJSONEntity) error
-	Get(ctx context.Context, id string, ve VersionedJSONEntity) error
-	GetHistory(ctx context.Context, id string, at time.Time, ve VersionedJSONEntity) error
-	Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error)
+	Create(ctx context.Context, ve Entity) error
+	Update(ctx context.Context, ve Entity) error
+	Delete(ctx context.Context, ve Entity) error
+	Get(ctx context.Context, id string, ve Entity) error
+	GetHistory(ctx context.Context, id string, at time.Time, ve Entity) error
+	Find(ctx context.Context, filter map[string]any, paging *v1.Paging, result any) (*uint64, error)
 }
 
 const defaultPagingLimit = uint64(100)
@@ -55,24 +55,24 @@ func addPaging(q squirrel.SelectBuilder, paging *v1.Paging) (squirrel.SelectBuil
 	return q, &nextpage
 }
 
-// JSONEntity is storable in json format
-type JSONEntity interface {
+// jsonEntity is storable in json format
+type jsonEntity interface {
 	JSONField() string
 	TableName() string
 	Schema() string
 }
 
-// VersionedEntity defines a database entity which is stored with version information
-type VersionedEntity interface {
+// versionedEntity defines a database entity which is stored with version information
+type versionedEntity interface {
 	GetMeta() *v1.Meta
 	Kind() string
 	APIVersion() string
 }
 
-// VersionedJSONEntity defines a database entity which is stored in jsonb format and with version information
-type VersionedJSONEntity interface {
-	JSONEntity
-	VersionedEntity
+// Entity defines a database entity which is stored in jsonb format and with version information
+type Entity interface {
+	jsonEntity
+	versionedEntity
 }
 
 // Datastore is the adapter to talk to the database
@@ -80,7 +80,7 @@ type Datastore struct {
 	log   *zap.Logger
 	db    *sqlx.DB
 	sb    squirrel.StatementBuilderType
-	types map[string]VersionedJSONEntity
+	types map[string]Entity
 }
 
 type Op string
@@ -92,12 +92,12 @@ const (
 )
 
 // NewPostgresStorage creates a new Storage which uses postgres.
-func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, sslmode string, ves ...VersionedJSONEntity) (*Datastore, error) {
+func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, sslmode string, ves ...Entity) (*Datastore, error) {
 	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %w", err)
 	}
-	types := make(map[string]VersionedJSONEntity)
+	types := make(map[string]Entity)
 	for _, ve := range ves {
 		jsonField := ve.JSONField()
 		logger.Info("creating schema", zap.String("entity", jsonField))
@@ -118,7 +118,7 @@ func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, 
 }
 
 // Create a entity
-func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
+func (ds *Datastore) Create(ctx context.Context, ve Entity) error {
 	jsonField := ve.JSONField()
 	tableName := ve.TableName()
 	_, ok := ds.types[jsonField]
@@ -131,7 +131,7 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 	id := meta.GetId()
 	if id == "" {
-		id = uuid.Must(uuid.NewRandom()).String()
+		id = uuid.NewString()
 		meta.SetId(id)
 	}
 	kind := meta.GetKind()
@@ -153,7 +153,7 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 
 	q := ds.sb.Insert(
 		tableName,
-	).SetMap(map[string]interface{}{
+	).SetMap(map[string]any{
 		"id":      id,
 		jsonField: ve,
 	}).Suffix(
@@ -183,7 +183,7 @@ func (ds *Datastore) Create(ctx context.Context, ve VersionedJSONEntity) error {
 }
 
 // Update the entity
-func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
+func (ds *Datastore) Update(ctx context.Context, ve Entity) error {
 	jsonField := ve.JSONField()
 	tableName := ve.TableName()
 	_, ok := ds.types[jsonField]
@@ -212,7 +212,7 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 
 	elemt := reflect.TypeOf(ve).Elem()
-	existingVE, ok := reflect.New(elemt).Interface().(VersionedJSONEntity)
+	existingVE, ok := reflect.New(elemt).Interface().(Entity)
 	if !ok {
 		return fmt.Errorf("entity is not a VersionedJSONEntity: %v", ve)
 	}
@@ -240,7 +240,7 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 	ve.GetMeta().SetCreatedTime(existingVE.GetMeta().GetCreatedTime())
 
 	q := ds.sb.Update(tableName).
-		SetMap(map[string]interface{}{
+		SetMap(map[string]any{
 			jsonField: ve,
 		}).
 		Where(squirrel.Eq{
@@ -274,7 +274,7 @@ func (ds *Datastore) Update(ctx context.Context, ve VersionedJSONEntity) error {
 
 // Get the entity for given id
 // returns NotFoundError if no entity can be found
-func (ds *Datastore) Get(ctx context.Context, id string, ve VersionedJSONEntity) error {
+func (ds *Datastore) Get(ctx context.Context, id string, ve Entity) error {
 	jsonField := ve.JSONField()
 	tableName := ve.TableName()
 	_, ok := ds.types[jsonField]
@@ -307,7 +307,7 @@ func (ds *Datastore) Get(ctx context.Context, id string, ve VersionedJSONEntity)
 }
 
 // Delete deletes the entity
-func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
+func (ds *Datastore) Delete(ctx context.Context, ve Entity) error {
 	jsonField := ve.JSONField()
 	tableName := ve.TableName()
 	_, ok := ds.types[jsonField]
@@ -316,7 +316,7 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 	}
 
 	elemt := reflect.TypeOf(ve).Elem()
-	existingVE, ok := reflect.New(elemt).Interface().(VersionedJSONEntity)
+	existingVE, ok := reflect.New(elemt).Interface().(Entity)
 	if !ok {
 		return fmt.Errorf("entity is not a VersionedJSONEntity: %v", ve)
 	}
@@ -367,7 +367,7 @@ func (ds *Datastore) Delete(ctx context.Context, ve VersionedJSONEntity) error {
 }
 
 // Find returns matching elements from the database
-func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging, result interface{}) (*uint64, error) {
+func (ds *Datastore) Find(ctx context.Context, filter map[string]any, paging *v1.Paging, result any) (*uint64, error) {
 	resultv := reflect.ValueOf(result)
 	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {
 		return nil, fmt.Errorf("result argument must be a slice address")
@@ -376,7 +376,7 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 	slicev := resultv.Elem()
 	elemt := slicev.Type().Elem()
 
-	ve, ok := reflect.New(elemt).Interface().(VersionedJSONEntity)
+	ve, ok := reflect.New(elemt).Interface().(Entity)
 	if !ok {
 		return nil, fmt.Errorf("result slice element type must implement VersionedJSONEntity-Interface")
 	}
@@ -434,7 +434,7 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]interface{}, pa
 
 // Get the history entity for given id and latest before or equal the given point in time
 // returns NotFoundError if no entity can be found
-func (ds *Datastore) GetHistory(ctx context.Context, id string, at time.Time, ve VersionedJSONEntity) error {
+func (ds *Datastore) GetHistory(ctx context.Context, id string, at time.Time, ve Entity) error {
 	return ds.getHistoryWithPredicate(ctx, squirrel.And{
 		squirrel.Eq{
 			"id": id,
@@ -446,7 +446,7 @@ func (ds *Datastore) GetHistory(ctx context.Context, id string, at time.Time, ve
 }
 
 // Get the first history entity for given id, returns NotFoundError if no entity can be found
-func (ds *Datastore) GetHistoryCreated(ctx context.Context, id string, ve VersionedJSONEntity) error {
+func (ds *Datastore) GetHistoryCreated(ctx context.Context, id string, ve Entity) error {
 	return ds.getHistoryWithPredicate(ctx, squirrel.And{
 		squirrel.Eq{
 			"id": id,
@@ -459,7 +459,7 @@ func (ds *Datastore) GetHistoryCreated(ctx context.Context, id string, ve Versio
 
 // Get the top matching history entity for given filter criteria,
 // returns NotFoundError if no entity can be found
-func (ds *Datastore) getHistoryWithPredicate(ctx context.Context, pred interface{}, ve VersionedJSONEntity) error {
+func (ds *Datastore) getHistoryWithPredicate(ctx context.Context, pred any, ve Entity) error {
 	jsonField := ve.JSONField()
 	tableName := historyTablename(ve.TableName())
 	_, ok := ds.types[jsonField]
@@ -487,11 +487,11 @@ func (ds *Datastore) getHistoryWithPredicate(ctx context.Context, pred interface
 }
 
 // insertHistory inserts the given entity in the history table of the entity using the runner, which may be a Tx.
-func (ds *Datastore) insertHistory(ve VersionedJSONEntity, op Op, createdAt time.Time, runner squirrel.BaseRunner) error {
+func (ds *Datastore) insertHistory(ve Entity, op Op, createdAt time.Time, runner squirrel.BaseRunner) error {
 	jsonField := ve.JSONField()
 	tableName := ve.TableName()
 	qh := ds.sb.Insert(historyTablename(tableName)).
-		SetMap(map[string]interface{}{
+		SetMap(map[string]any{
 			"id":         ve.GetMeta().Id,
 			"op":         op,
 			"created_at": createdAt,

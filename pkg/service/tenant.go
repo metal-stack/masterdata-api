@@ -68,7 +68,7 @@ func (s *TenantService) GetHistory(ctx context.Context, req *v1.TenantGetHistory
 
 func (s *TenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v1.TenantListResponse, error) {
 	var res []v1.Tenant
-	filter := make(map[string]interface{})
+	filter := make(map[string]any)
 	if req.Id != nil {
 		filter["id"] = req.GetId().GetValue()
 	}

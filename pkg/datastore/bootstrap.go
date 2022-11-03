@@ -107,7 +107,7 @@ func (ds *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	ds.log.Info("initdb", zap.Stringer("type", elementType), zap.String("apiversion", apiversion))
 
 	// no we have the type, create new from type and marshall in that new struct
-	newEntity, ok := reflect.New(elementType.Elem()).Interface().(VersionedJSONEntity)
+	newEntity, ok := reflect.New(elementType.Elem()).Interface().(Entity)
 	if !ok {
 		panic(fmt.Sprintf("entity type %s must implement VersionedJSONEntity-Interface", elementType.String()))
 	}
@@ -122,7 +122,7 @@ func (ds *Datastore) createOrUpdate(ctx context.Context, ydoc []byte) error {
 
 	// now check that this type is already present for this id,
 	// therefore create nil interface to get into
-	existingEntity := reflect.New(elementType.Elem()).Interface().(VersionedJSONEntity)
+	existingEntity := reflect.New(elementType.Elem()).Interface().(Entity)
 	err = ds.Get(ctx, mm.Meta.GetId(), existingEntity)
 	if err != nil {
 		if errors.As(err, &NotFoundError{}) {

@@ -19,11 +19,11 @@ type ProjectServiceClient struct {
 
 // Create provides a mock function with given fields: ctx, in, opts
 func (_m *ProjectServiceClient) Create(ctx context.Context, in *v1.ProjectCreateRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -49,11 +49,11 @@ func (_m *ProjectServiceClient) Create(ctx context.Context, in *v1.ProjectCreate
 
 // Delete provides a mock function with given fields: ctx, in, opts
 func (_m *ProjectServiceClient) Delete(ctx context.Context, in *v1.ProjectDeleteRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -79,11 +79,11 @@ func (_m *ProjectServiceClient) Delete(ctx context.Context, in *v1.ProjectDelete
 
 // Find provides a mock function with given fields: ctx, in, opts
 func (_m *ProjectServiceClient) Find(ctx context.Context, in *v1.ProjectFindRequest, opts ...grpc.CallOption) (*v1.ProjectListResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -109,11 +109,11 @@ func (_m *ProjectServiceClient) Find(ctx context.Context, in *v1.ProjectFindRequ
 
 // Get provides a mock function with given fields: ctx, in, opts
 func (_m *ProjectServiceClient) Get(ctx context.Context, in *v1.ProjectGetRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -139,11 +139,11 @@ func (_m *ProjectServiceClient) Get(ctx context.Context, in *v1.ProjectGetReques
 
 // GetHistory provides a mock function with given fields: ctx, in, opts
 func (_m *ProjectServiceClient) GetHistory(ctx context.Context, in *v1.ProjectGetHistoryRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -169,11 +169,11 @@ func (_m *ProjectServiceClient) GetHistory(ctx context.Context, in *v1.ProjectGe
 
 // Update provides a mock function with given fields: ctx, in, opts
 func (_m *ProjectServiceClient) Update(ctx context.Context, in *v1.ProjectUpdateRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)

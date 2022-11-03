@@ -19,11 +19,11 @@ type TenantServiceClient struct {
 
 // Create provides a mock function with given fields: ctx, in, opts
 func (_m *TenantServiceClient) Create(ctx context.Context, in *v1.TenantCreateRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -49,11 +49,11 @@ func (_m *TenantServiceClient) Create(ctx context.Context, in *v1.TenantCreateRe
 
 // Delete provides a mock function with given fields: ctx, in, opts
 func (_m *TenantServiceClient) Delete(ctx context.Context, in *v1.TenantDeleteRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -79,11 +79,11 @@ func (_m *TenantServiceClient) Delete(ctx context.Context, in *v1.TenantDeleteRe
 
 // Find provides a mock function with given fields: ctx, in, opts
 func (_m *TenantServiceClient) Find(ctx context.Context, in *v1.TenantFindRequest, opts ...grpc.CallOption) (*v1.TenantListResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -109,11 +109,11 @@ func (_m *TenantServiceClient) Find(ctx context.Context, in *v1.TenantFindReques
 
 // Get provides a mock function with given fields: ctx, in, opts
 func (_m *TenantServiceClient) Get(ctx context.Context, in *v1.TenantGetRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -139,11 +139,11 @@ func (_m *TenantServiceClient) Get(ctx context.Context, in *v1.TenantGetRequest,
 
 // GetHistory provides a mock function with given fields: ctx, in, opts
 func (_m *TenantServiceClient) GetHistory(ctx context.Context, in *v1.TenantGetHistoryRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
@@ -169,11 +169,11 @@ func (_m *TenantServiceClient) GetHistory(ctx context.Context, in *v1.TenantGetH
 
 // Update provides a mock function with given fields: ctx, in, opts
 func (_m *TenantServiceClient) Update(ctx context.Context, in *v1.TenantUpdateRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	_va := make([]interface{}, len(opts))
+	_va := make([]any, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
 	}
-	var _ca []interface{}
+	var _ca []any
 	_ca = append(_ca, ctx, in)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)

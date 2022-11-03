@@ -23,7 +23,7 @@ func (ds *Datastore) MigrateDB(healthServer *health.Server) error {
 			&migrator.Migration{
 				Name: "Consolidate History for Tenant and Project",
 				Func: func(tx *sql.Tx) error {
-					entities := []interface{}{&[]v1.Project{}, &[]v1.Tenant{}}
+					entities := []any{&[]v1.Project{}, &[]v1.Tenant{}}
 					for _, e := range entities {
 						err := ds.consolidateHistory(tx, e)
 						if err != nil {
@@ -35,7 +35,7 @@ func (ds *Datastore) MigrateDB(healthServer *health.Server) error {
 				},
 			},
 		),
-		migrator.WithLogger(migrator.LoggerFunc(func(msg string, args ...interface{}) {
+		migrator.WithLogger(migrator.LoggerFunc(func(msg string, args ...any) {
 			ds.log.Sugar().Infof(msg, args...)
 		})),
 	)
@@ -54,7 +54,7 @@ func (ds *Datastore) MigrateDB(healthServer *health.Server) error {
 
 // consolidateHistory ensures, that for each VersionedJSONEntity there is at least one "created"-row in the history table.
 // The type of entities to consolidate is specified by the given pointer to a slice of entities.
-func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePtr interface{}) error {
+func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePtr any) error {
 
 	entitySliceV := reflect.ValueOf(entitySlicePtr)
 	if entitySliceV.Kind() != reflect.Ptr || entitySliceV.Elem().Kind() != reflect.Slice {
@@ -63,7 +63,7 @@ func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePtr interface{}) 
 	entitySliceElem := entitySliceV.Elem()
 	entitySliceElementType := entitySliceElem.Type().Elem()
 
-	filter := make(map[string]interface{})
+	filter := make(map[string]any)
 	_, err := ds.Find(context.Background(), filter, nil, entitySlicePtr)
 	if err != nil {
 		return err
@@ -71,12 +71,12 @@ func (ds *Datastore) consolidateHistory(tx *sql.Tx, entitySlicePtr interface{}) 
 
 	for i := 0; i < entitySliceElem.Len(); i++ {
 		vpi := entitySliceElem.Index(i).Addr().Interface()
-		enityVe, ok := vpi.(VersionedJSONEntity)
+		enityVe, ok := vpi.(Entity)
 		if !ok {
 			return fmt.Errorf("element type must implement VersionedJSONEntity-Interface, was %T", vpi)
 		}
 
-		historyVe, ok := reflect.New(entitySliceElementType).Interface().(VersionedJSONEntity)
+		historyVe, ok := reflect.New(entitySliceElementType).Interface().(Entity)
 		if !ok {
 			return fmt.Errorf("element type must implement VersionedJSONEntity-Interface")
 		}

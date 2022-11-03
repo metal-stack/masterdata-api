@@ -64,7 +64,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	tcr := &v1.ProjectCreateRequest{
 		Project: p1,
 	}
-	filter := make(map[string]interface{})
+	filter := make(map[string]any)
 	filter["project ->> 'tenant_id'"] = p1.TenantId
 	var projects []v1.Project
 	// see: https://github.com/stretchr/testify/blob/master/mock/mock.go#L149-L162
@@ -150,7 +150,7 @@ func TestFindProjectByID(t *testing.T) {
 	ctx := context.Background()
 	var t5s []v1.Project
 	// filter by id
-	f1 := make(map[string]interface{})
+	f1 := make(map[string]any)
 	tfr := &v1.ProjectFindRequest{
 		Id: &wrapperspb.StringValue{Value: "p5"},
 	}
@@ -173,7 +173,7 @@ func TestFindProjectByName(t *testing.T) {
 		Name: &wrapperspb.StringValue{Value: "Sixth"},
 	}
 
-	f2 := make(map[string]interface{})
+	f2 := make(map[string]any)
 	f2["project ->> 'name'"] = "Sixth"
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging"), &t6s).Return(nil, nil)
 	resp, err := ts.Find(ctx, tfr)
@@ -192,7 +192,7 @@ func TestFindProjectByTenant(t *testing.T) {
 		TenantId: &wrapperspb.StringValue{Value: "p1"},
 	}
 
-	f2 := make(map[string]interface{})
+	f2 := make(map[string]any)
 	f2["project ->> 'tenant_id'"] = "p1"
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging"), &t6s).Return(nil, nil)
 	resp, err := ts.Find(ctx, tfr)

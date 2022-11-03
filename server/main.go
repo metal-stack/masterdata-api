@@ -192,7 +192,7 @@ func run() {
 	// grpcServer := grpc.NewServer(opts...)
 	grpcServer := grpc.NewServer(opts...)
 
-	ves := []datastore.VersionedJSONEntity{
+	ves := []datastore.Entity{
 		&apiv1.Project{},
 		&apiv1.Tenant{},
 	}

@@ -41,7 +41,7 @@ func (s *ProjectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 	// Check if tenant defines project quotas
 	if tenant.GetQuotas() != nil && tenant.GetQuotas().GetProject() != nil && tenant.GetQuotas().GetProject().GetQuota() != nil {
 		maxProjects := tenant.GetQuotas().GetProject().GetQuota().GetValue()
-		filter := make(map[string]interface{})
+		filter := make(map[string]any)
 		filter["project ->> 'tenant_id'"] = project.GetTenantId()
 		var projects []v1.Project
 		_, err = s.Storage.Find(ctx, filter, nil, &projects)
@@ -91,7 +91,7 @@ func (s *ProjectService) GetHistory(ctx context.Context, req *v1.ProjectGetHisto
 }
 func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (*v1.ProjectListResponse, error) {
 	var res []v1.Project
-	filter := make(map[string]interface{})
+	filter := make(map[string]any)
 	if req.Id != nil {
 		filter["id"] = req.Id.GetValue()
 	}
