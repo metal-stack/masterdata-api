@@ -84,11 +84,20 @@ func TestMain(m *testing.M) {
 
 	for {
 		var err error
-		ds, err = NewPostgresStorage(log, ip, port.Port(), "postgres", "password", "postgres", "disable", &v1.Project{}, &v1.Tenant{})
+		ves := []Entity{
+			&v1.Project{},
+			&v1.Tenant{},
+		}
+		ds, err = NewPostgresStorage(log, ip, port.Port(), "postgres", "password", "postgres", "disable")
 		if err != nil {
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
+		err = ds.Initialize(ctx, ves...)
+		if err != nil {
+			log.Error("Could not initialize db", zap.Error(err))
+		}
+
 		err = ds.db.Ping()
 		if err != nil {
 			log.Error("Could not connect to postgres server", zap.Error(err))

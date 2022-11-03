@@ -92,29 +92,33 @@ const (
 )
 
 // NewPostgresStorage creates a new Storage which uses postgres.
-func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, sslmode string, ves ...Entity) (*Datastore, error) {
+func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, sslmode string) (*Datastore, error) {
 	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %w", err)
 	}
+	ds := &Datastore{
+		log: logger,
+		db:  db,
+		sb:  squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
+	}
+	return ds, nil
+}
+
+func (ds *Datastore) Initialize(ctx context.Context, ves ...Entity) error {
 	types := make(map[string]Entity)
 	for _, ve := range ves {
 		jsonField := ve.JSONField()
-		logger.Info("creating schema", zap.String("entity", jsonField))
-		_, err = db.Exec(ve.Schema())
+		ds.log.Info("creating schema", zap.String("entity", jsonField))
+		_, err := ds.db.Exec(ve.Schema())
 		if err != nil {
-			logger.Fatal("unable to create schema", zap.String("entity", jsonField), zap.Error(err))
-			return nil, err
+			ds.log.Fatal("unable to create schema", zap.String("entity", jsonField), zap.Error(err))
+			return err
 		}
 		types[jsonField] = ve
 	}
-	ds := &Datastore{
-		log:   logger,
-		db:    db,
-		sb:    squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
-		types: types,
-	}
-	return ds, nil
+	ds.types = types
+	return nil
 }
 
 // Create a entity

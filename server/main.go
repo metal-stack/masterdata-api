@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -203,9 +204,13 @@ func run() {
 	dbName := viper.GetString("dbname")
 	dbSSLMode := viper.GetString("dbsslmode")
 
-	storage, err := datastore.NewPostgresStorage(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode, ves...)
+	storage, err := datastore.NewPostgresStorage(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode)
 	if err != nil {
 		logger.Fatal("failed to create postgres connection", zap.Error(err))
+	}
+	err = storage.Initialize(context.Background(), ves...)
+	if err != nil {
+		logger.Fatal("failed to initialize database", zap.Error(err))
 	}
 
 	healthServer := health.NewHealthServer()
