@@ -26,6 +26,10 @@ protoc:
 test:
 	CGO_ENABLED=1 go test -cover -race -timeout 30s ./...
 
+.PHONY: bench
+bench:
+	cd pkg/datastore && CGO_ENABLED=1 go test -bench=. -benchmem -benchtime=1000x && cd -
+
 .PHONY: lint
 lint:
 	golangci-lint run

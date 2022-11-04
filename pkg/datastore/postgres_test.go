@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/testcontainers/testcontainers-go"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -16,22 +17,10 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest"
 )
 
-var (
-	tenantDS Storage[*v1.Tenant]
-	log      *zap.Logger
-)
-
-// to test unregistered type checks
-type invalidVersionedEntity struct{}
-
-func (v *invalidVersionedEntity) JSONField() string  { return "invalid" }
-func (v *invalidVersionedEntity) TableName() string  { return "" }
-func (v *invalidVersionedEntity) Schema() string     { return "" }
-func (v *invalidVersionedEntity) Kind() string       { return "Invalid" }
-func (v *invalidVersionedEntity) APIVersion() string { return "v1" }
-func (v *invalidVersionedEntity) GetMeta() *v1.Meta  { return nil }
+var db *sqlx.DB
 
 func TestMain(m *testing.M) {
 	code := 0
@@ -47,72 +36,17 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
-	log, _ = zap.NewProduction()
-
-	ctx := context.Background()
-	req := testcontainers.ContainerRequest{
-		Image:        "postgres:15-alpine",
-		ExposedPorts: []string{"5432/tcp"},
-		Env:          map[string]string{"POSTGRES_PASSWORD": "password"},
-		// TODO: should work, but dont, hence using the loop below to check pg is up an ready for connections.
-		// WaitingFor:   wait.ForLog("database system is ready to accept connections"),
-		// WaitingFor: wait.ForListeningPort("5432/tcp"),
-	}
-
-	postgres, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
+	var err error
+	db, err = createPostgresConnection()
 	if err != nil {
-		log.Info(err.Error())
+		panic(err)
 	}
-	defer func() {
-		err := postgres.Terminate(ctx)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-	}()
-
-	ip, err := postgres.Host(ctx)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	port, err := postgres.MappedPort(ctx, "5432/tcp")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	for {
-		var err error
-		ves := []Entity{
-			&v1.Project{},
-			&v1.Tenant{},
-		}
-		db, err := NewPostgresDB(log, ip, port.Port(), "postgres", "password", "postgres", "disable", ves...)
-		if err != nil {
-			time.Sleep(100 * time.Millisecond)
-			continue
-		}
-		tenantDS, err = NewPostgresStorage(log, db, &v1.Tenant{})
-		if err != nil {
-			time.Sleep(100 * time.Millisecond)
-			continue
-		}
-
-		err = db.Ping()
-		if err != nil {
-			log.Error("Could not connect to postgres server", zap.Error(err))
-		}
-		if err == nil {
-			break
-		}
-	}
-
-	log.Info("connected to postgres")
 	code = m.Run()
 }
 
 func TestCRUD(t *testing.T) {
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	tcr := &v1.Tenant{
@@ -121,7 +55,7 @@ func TestCRUD(t *testing.T) {
 		Description: "A very important Tenant",
 	}
 
-	err := tenantDS.Create(ctx, tcr)
+	err = tenantDS.Create(ctx, tcr)
 	assert.NoError(t, err)
 	assert.NotNil(t, tcr)
 	// specified id is persisted
@@ -192,6 +126,8 @@ func TestCRUD(t *testing.T) {
 }
 
 func TestUpdateOptimisticLock(t *testing.T) {
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	tcr := &v1.Tenant{
@@ -200,7 +136,7 @@ func TestUpdateOptimisticLock(t *testing.T) {
 		Description: "A very important Tenant",
 	}
 
-	err := tenantDS.Create(ctx, tcr)
+	err = tenantDS.Create(ctx, tcr)
 	assert.NoError(t, err)
 	assert.NotNil(t, tcr)
 	assert.Equal(t, int64(0), tcr.Meta.Version)
@@ -236,6 +172,8 @@ func TestUpdateOptimisticLock(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	const t1 = "t1"
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -245,7 +183,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	// meta is nil
-	err := tenantDS.Create(ctx, tcr1)
+	err = tenantDS.Create(ctx, tcr1)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "create of type:tenant failed, meta is nil")
 
@@ -325,6 +263,8 @@ func TestCreate(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	const t3 = "t3"
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -333,7 +273,7 @@ func TestUpdate(t *testing.T) {
 		Name:        "ctenant",
 		Description: "C Tenant",
 	}
-	err := tenantDS.Update(ctx, tcr1)
+	err = tenantDS.Update(ctx, tcr1)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "update of type:tenant failed, meta is nil")
 
@@ -396,16 +336,20 @@ func TestUpdate(t *testing.T) {
 
 //nolint:unparam
 func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name string, desc string) {
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	var tgrhc v1.Tenant
-	err := tenantDS.GetHistoryCreated(ctx, id, &tgrhc)
+	err = tenantDS.GetHistoryCreated(ctx, id, &tgrhc)
 	assert.NoError(t, err)
 	assert.Equal(t, name, tgrhc.Name)
 	assert.Equal(t, desc, tgrhc.GetDescription())
 }
 
 func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, name string, desc string) {
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	var tgrh v1.Tenant
-	err := tenantDS.GetHistory(ctx, id, tm, &tgrh)
+	err = tenantDS.GetHistory(ctx, id, tm, &tgrh)
 	assert.NoError(t, err)
 	assert.Equal(t, name, tgrh.Name)
 	assert.Equal(t, desc, tgrh.GetDescription())
@@ -413,10 +357,12 @@ func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, na
 
 func TestGet(t *testing.T) {
 	const t4 = "t4"
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	// unknown id
-	_, err := tenantDS.Get(ctx, "unknown-id")
+	_, err = tenantDS.Get(ctx, "unknown-id")
 	assert.Error(t, err)
 	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
 
@@ -442,6 +388,8 @@ func TestGet(t *testing.T) {
 
 func TestGetHistory(t *testing.T) {
 	const t5 = "t5"
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -449,7 +397,7 @@ func TestGetHistory(t *testing.T) {
 
 	// unknown id
 	var tgr1 v1.Tenant
-	err := tenantDS.GetHistory(ctx, "unknown-id", tsNow, &tgr1)
+	err = tenantDS.GetHistory(ctx, "unknown-id", tsNow, &tgr1)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:unknown-id] map[created_at:2020-04-30 18:00:00 +0000 UTC]] not found")
 
@@ -531,6 +479,8 @@ func TestGetHistory(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	const t6 = "t6"
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -540,7 +490,7 @@ func TestFind(t *testing.T) {
 		Name:        "ftenant",
 		Description: "F Tenant",
 	}
-	err := tenantDS.Create(ctx, tcr1)
+	err = tenantDS.Create(ctx, tcr1)
 	assert.NoError(t, err)
 	assert.Equal(t, t6, tcr1.GetMeta().GetId())
 	assert.Equal(t, "ftenant", tcr1.GetName())
@@ -597,6 +547,8 @@ func TestFind(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	const t9 = "t9"
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -604,7 +556,7 @@ func TestDelete(t *testing.T) {
 	tdr1 := &v1.Tenant{
 		Meta: &v1.Meta{Id: "unknown-id"},
 	}
-	err := tenantDS.Delete(ctx, tdr1)
+	err = tenantDS.Delete(ctx, tdr1)
 	assert.Error(t, err)
 	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
 
@@ -638,6 +590,8 @@ func TestDelete(t *testing.T) {
 }
 
 func TestAnnotationsAndLabels(t *testing.T) {
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	tcr := &v1.Tenant{
@@ -655,7 +609,7 @@ func TestAnnotationsAndLabels(t *testing.T) {
 		Description: "A very important Tenant",
 	}
 
-	err := tenantDS.Create(ctx, tcr)
+	err = tenantDS.Create(ctx, tcr)
 	assert.NoError(t, err)
 	assert.NotNil(t, tcr)
 	assert.Equal(t, int64(0), tcr.Meta.Version)
@@ -723,4 +677,54 @@ func setNow(t time.Time) {
 // resetNow resets the overriden Now to time.Now
 func resetNow() {
 	Now = time.Now
+}
+
+func createPostgresConnection() (*sqlx.DB, error) {
+
+	ctx := context.Background()
+	req := testcontainers.ContainerRequest{
+		Image:        "postgres:15-alpine",
+		ExposedPorts: []string{"5432/tcp"},
+		Env:          map[string]string{"POSTGRES_PASSWORD": "password"},
+		// TODO: should work, but dont, hence using the loop below to check pg is up an ready for connections.
+		// WaitingFor:   wait.ForLog("database system is ready to accept connections"),
+		// WaitingFor: wait.ForListeningPort("5432/tcp"),
+	}
+
+	postgres, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	ip, err := postgres.Host(ctx)
+	if err != nil {
+		return nil, err
+	}
+	port, err := postgres.MappedPort(ctx, "5432/tcp")
+	if err != nil {
+		return nil, err
+	}
+
+	log := zap.NewNop()
+	var db *sqlx.DB
+	for {
+		var err error
+		ves := []Entity{
+			&v1.Project{},
+			&v1.Tenant{},
+		}
+		db, err = NewPostgresDB(log, ip, port.Port(), "postgres", "password", "postgres", "disable", ves...)
+		if err != nil {
+			time.Sleep(100 * time.Millisecond)
+			continue
+		}
+		err = db.Ping()
+		if err == nil {
+			break
+		}
+	}
+	return db, nil
 }
