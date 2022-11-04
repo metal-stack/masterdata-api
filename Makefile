@@ -28,7 +28,7 @@ test:
 
 .PHONY: bench
 bench:
-	cd pkg/datastore && CGO_ENABLED=1 go test -bench=. -benchmem -benchtime=1000x && cd -
+	cd pkg/datastore && CGO_ENABLED=1 go test -bench=. -benchmem -run=- -count 1 && cd -
 
 .PHONY: lint
 lint:

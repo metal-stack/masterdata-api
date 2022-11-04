@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -46,6 +47,28 @@ func BenchmarkCreateTenant(b *testing.B) {
 				Id: uuid.NewString(),
 			},
 		})
+		assert.NoError(b, err)
+	}
+}
+
+func BenchmarkUpdateTenant(b *testing.B) {
+	t1 := &v1.Tenant{
+		Meta: &v1.Meta{
+			Id: "t1-update",
+		},
+	}
+	err := ds.Create(context.Background(), t1)
+	assert.NoError(b, err)
+	defer func() {
+		ds.Delete(context.Background(), "t1-update")
+	}()
+
+	for n := 0; n < b.N; n++ {
+		t1, err := ds.Get(context.Background(), t1.Meta.Id)
+		assert.NoError(b, err)
+		t1.Name = fmt.Sprintf("t1-create-%d", n)
+		t1.Meta.Version = int64(t1.Meta.Version)
+		err = ds.Update(context.Background(), t1)
 		assert.NoError(b, err)
 	}
 }
