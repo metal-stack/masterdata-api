@@ -12,36 +12,43 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type StorageStatusWrapper struct {
-	storage datastore.Storage
+type StorageStatusWrapper[E datastore.Entity] struct {
+	storage datastore.Storage[E]
 }
 
-func NewStorageStatusWrapper(s datastore.Storage) datastore.Storage {
-	return StorageStatusWrapper{storage: s}
+func NewStorageStatusWrapper[E datastore.Entity](s datastore.Storage[E]) datastore.Storage[E] {
+	return StorageStatusWrapper[E]{
+		storage: s,
+	}
 }
 
-func (s StorageStatusWrapper) Create(ctx context.Context, ve datastore.Entity) error {
+func (s StorageStatusWrapper[E]) Create(ctx context.Context, ve E) error {
 	return wrapCreateStatusError(s.storage.Create(ctx, ve))
 }
 
-func (s StorageStatusWrapper) Update(ctx context.Context, ve datastore.Entity) error {
+func (s StorageStatusWrapper[E]) Update(ctx context.Context, ve E) error {
 	return wrapUpdateStatusError(s.storage.Update(ctx, ve))
 }
 
-func (s StorageStatusWrapper) Delete(ctx context.Context, ve datastore.Entity) error {
+func (s StorageStatusWrapper[E]) Delete(ctx context.Context, ve E) error {
 	return wrapDeleteStatusError(s.storage.Delete(ctx, ve))
 }
 
-func (s StorageStatusWrapper) Get(ctx context.Context, id string, ve datastore.Entity) error {
-	return wrapGetStatusError(s.storage.Get(ctx, id, ve))
+func (s StorageStatusWrapper[E]) Get(ctx context.Context, id string) (E, error) {
+	e, err := s.storage.Get(ctx, id)
+	return e, wrapGetStatusError(err)
 }
 
-func (s StorageStatusWrapper) GetHistory(ctx context.Context, id string, at time.Time, ve datastore.Entity) error {
+func (s StorageStatusWrapper[E]) GetHistory(ctx context.Context, id string, at time.Time, ve E) error {
 	return wrapGetStatusError(s.storage.GetHistory(ctx, id, at, ve))
 }
 
-func (s StorageStatusWrapper) Find(ctx context.Context, filter map[string]any, paging *v1.Paging, result any) (*uint64, error) {
-	return s.storage.Find(ctx, filter, paging, result)
+func (s StorageStatusWrapper[E]) GetHistoryCreated(ctx context.Context, id string, ve E) error {
+	return wrapGetStatusError(s.storage.GetHistoryCreated(ctx, id, ve))
+}
+
+func (s StorageStatusWrapper[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
+	return s.storage.Find(ctx, filter, paging)
 }
 
 // wrapCreateStatusError wraps some errors in a grpc status error

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"reflect"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -20,18 +19,19 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// exchangable for testing
+// exchangeable for testing
 var Now = time.Now
 
 // Storage is a interface to store objects.
-type Storage interface {
+type Storage[E Entity] interface {
 	// generic
-	Create(ctx context.Context, ve Entity) error
-	Update(ctx context.Context, ve Entity) error
-	Delete(ctx context.Context, ve Entity) error
-	Get(ctx context.Context, id string, ve Entity) error
-	GetHistory(ctx context.Context, id string, at time.Time, ve Entity) error
-	Find(ctx context.Context, filter map[string]any, paging *v1.Paging, result any) (*uint64, error)
+	Create(ctx context.Context, ve E) error
+	Update(ctx context.Context, ve E) error
+	Delete(ctx context.Context, ve E) error
+	Get(ctx context.Context, id string) (E, error)
+	GetHistory(ctx context.Context, id string, at time.Time, ve E) error
+	GetHistoryCreated(ctx context.Context, id string, ve E) error
+	Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error)
 }
 
 const defaultPagingLimit = uint64(100)
@@ -76,11 +76,12 @@ type Entity interface {
 }
 
 // Datastore is the adapter to talk to the database
-type Datastore struct {
-	log   *zap.Logger
-	db    *sqlx.DB
-	sb    squirrel.StatementBuilderType
-	types map[string]Entity
+type Datastore[E Entity] struct {
+	log       *zap.Logger
+	db        *sqlx.DB
+	sb        squirrel.StatementBuilderType
+	jsonField string
+	tableName string
 }
 
 type Op string
@@ -92,46 +93,40 @@ const (
 )
 
 // NewPostgresStorage creates a new Storage which uses postgres.
-func NewPostgresStorage(logger *zap.Logger, host, port, user, password, dbname, sslmode string) (*Datastore, error) {
+func NewPostgresDB(logger *zap.Logger, host, port, user, password, dbname, sslmode string, ves ...Entity) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %w", err)
 	}
-	ds := &Datastore{
-		log: logger,
-		db:  db,
-		sb:  squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
+	for _, ve := range ves {
+		jsonField := ve.JSONField()
+		logger.Info("creating schema", zap.String("entity", jsonField))
+		_, err := db.Exec(ve.Schema())
+		if err != nil {
+			logger.Fatal("unable to create schema", zap.String("entity", jsonField), zap.Error(err))
+			return nil, err
+		}
+	}
+	return db, nil
+}
+
+// NewPostgresStorage creates a new Storage which uses postgres.
+func NewPostgresStorage[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage[E], error) {
+	ds := &Datastore[E]{
+		log:       logger,
+		db:        db,
+		sb:        squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
+		jsonField: e.JSONField(),
+		tableName: e.TableName(),
 	}
 	return ds, nil
 }
 
-func (ds *Datastore) Initialize(ctx context.Context, ves ...Entity) error {
-	types := make(map[string]Entity)
-	for _, ve := range ves {
-		jsonField := ve.JSONField()
-		ds.log.Info("creating schema", zap.String("entity", jsonField))
-		_, err := ds.db.Exec(ve.Schema())
-		if err != nil {
-			ds.log.Fatal("unable to create schema", zap.String("entity", jsonField), zap.Error(err))
-			return err
-		}
-		types[jsonField] = ve
-	}
-	ds.types = types
-	return nil
-}
-
 // Create a entity
-func (ds *Datastore) Create(ctx context.Context, ve Entity) error {
-	jsonField := ve.JSONField()
-	tableName := ve.TableName()
-	_, ok := ds.types[jsonField]
-	if !ok {
-		return fmt.Errorf("type:%s is not registered", jsonField)
-	}
+func (ds *Datastore[E]) Create(ctx context.Context, ve E) error {
 	meta := ve.GetMeta()
 	if meta == nil {
-		return fmt.Errorf("create of type:%s failed, meta is nil", jsonField)
+		return fmt.Errorf("create of type:%s failed, meta is nil", ds.jsonField)
 	}
 	id := meta.GetId()
 	if id == "" {
@@ -142,13 +137,13 @@ func (ds *Datastore) Create(ctx context.Context, ve Entity) error {
 	if kind == "" {
 		meta.Kind = ve.Kind()
 	} else if kind != ve.Kind() {
-		return fmt.Errorf("create of type:%s failed, kind is set to:%s but must be:%s", jsonField, kind, ve.Kind())
+		return fmt.Errorf("create of type:%s failed, kind is set to:%s but must be:%s", ds.jsonField, kind, ve.Kind())
 	}
 	apiVersion := meta.GetApiversion()
 	if apiVersion == "" {
 		meta.Apiversion = ve.APIVersion()
 	} else if apiVersion != ve.APIVersion() {
-		return fmt.Errorf("create of type:%s failed, apiversion must be set to:%s", jsonField, ve.APIVersion())
+		return fmt.Errorf("create of type:%s failed, apiversion must be set to:%s", ds.jsonField, ve.APIVersion())
 	}
 
 	createdAtPb, createdAt := PbNow()
@@ -156,15 +151,15 @@ func (ds *Datastore) Create(ctx context.Context, ve Entity) error {
 	meta.SetCreatedTime(createdAtPb)
 
 	q := ds.sb.Insert(
-		tableName,
+		ds.tableName,
 	).SetMap(map[string]any{
-		"id":      id,
-		jsonField: ve,
+		"id":         id,
+		ds.jsonField: ve,
 	}).Suffix(
-		"RETURNING " + jsonField,
+		"RETURNING " + ds.jsonField,
 	)
 	sql, vals, _ := q.ToSql()
-	ds.log.Info("create", zap.String("entity", tableName), zap.String("sql", sql), zap.Any("values", vals))
+	ds.log.Info("create", zap.String("entity", ds.tableName), zap.String("sql", sql), zap.Any("values", vals))
 
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -175,7 +170,7 @@ func (ds *Datastore) Create(ctx context.Context, ve Entity) error {
 	err = q.RunWith(tx).QueryRowContext(ctx).Scan(ve)
 	if err != nil {
 		if IsErrorCode(err, UniqueViolationError) {
-			return NewDuplicateKeyError(fmt.Sprintf("an entity of type:%s with the id:%s already exists", jsonField, meta.Id))
+			return NewDuplicateKeyError(fmt.Sprintf("an entity of type:%s with the id:%s already exists", ds.jsonField, meta.Id))
 		}
 		return err
 	}
@@ -187,49 +182,37 @@ func (ds *Datastore) Create(ctx context.Context, ve Entity) error {
 }
 
 // Update the entity
-func (ds *Datastore) Update(ctx context.Context, ve Entity) error {
-	jsonField := ve.JSONField()
-	tableName := ve.TableName()
-	_, ok := ds.types[jsonField]
-	if !ok {
-		return fmt.Errorf("type:%s is not registered", jsonField)
-	}
+func (ds *Datastore[E]) Update(ctx context.Context, ve E) error {
 	meta := ve.GetMeta()
 	if meta == nil {
-		return fmt.Errorf("update of type:%s failed, meta is nil", jsonField)
+		return fmt.Errorf("update of type:%s failed, meta is nil", ds.jsonField)
 	}
 	id := meta.GetId()
 	if id == "" {
-		return fmt.Errorf("entity of type:%s has no id, cannot update: %v", jsonField, ve)
+		return fmt.Errorf("entity of type:%s has no id, cannot update: %v", ds.jsonField, ve)
 	}
 	kind := meta.GetKind()
 	if kind == "" {
 		meta.Kind = ve.Kind()
 	} else if kind != ve.Kind() {
-		return fmt.Errorf("update of type:%s failed, kind is set to:%s but must be:%s", jsonField, kind, ve.Kind())
+		return fmt.Errorf("update of type:%s failed, kind is set to:%s but must be:%s", ds.jsonField, kind, ve.Kind())
 	}
 	apiVersion := meta.GetApiversion()
 	if apiVersion == "" {
 		meta.Apiversion = ve.APIVersion()
 	} else if apiVersion != ve.APIVersion() {
-		return fmt.Errorf("update of type:%s failed, apiversion must be set to:%s", jsonField, ve.APIVersion())
+		return fmt.Errorf("update of type:%s failed, apiversion must be set to:%s", ds.jsonField, ve.APIVersion())
 	}
 
-	elemt := reflect.TypeOf(ve).Elem()
-	existingVE, ok := reflect.New(elemt).Interface().(Entity)
-	if !ok {
-		return fmt.Errorf("entity is not a VersionedJSONEntity: %v", ve)
-	}
-
-	err := ds.Get(ctx, id, existingVE)
+	existingVE, err := ds.Get(ctx, id)
 	if err != nil {
-		return fmt.Errorf("update - no entity of type:%s with id:%s found", jsonField, id)
+		return fmt.Errorf("update - no entity of type:%s with id:%s found", ds.jsonField, id)
 	}
 
 	if ve.GetMeta().GetVersion() < existingVE.GetMeta().GetVersion() {
 		return NewOptimisticLockError(
 			fmt.Sprintf("optimistic lock error updating %s with id %s, existing version %d mismatches entity version %d",
-				jsonField, id, existingVE.GetMeta().GetVersion(), ve.GetMeta().GetVersion(),
+				ds.jsonField, id, existingVE.GetMeta().GetVersion(), ve.GetMeta().GetVersion(),
 			),
 		)
 	}
@@ -243,18 +226,18 @@ func (ds *Datastore) Update(ctx context.Context, ve Entity) error {
 	// simple strategy: copy unmodifiable fields from existing before update
 	ve.GetMeta().SetCreatedTime(existingVE.GetMeta().GetCreatedTime())
 
-	q := ds.sb.Update(tableName).
+	q := ds.sb.Update(ds.tableName).
 		SetMap(map[string]any{
-			jsonField: ve,
+			ds.jsonField: ve,
 		}).
 		Where(squirrel.Eq{
 			"id": id,
 		}).
 		Suffix(
-			"RETURNING " + jsonField,
+			"RETURNING " + ds.jsonField,
 		)
 	sql, vals, _ := q.ToSql()
-	ds.log.Info("update", zap.String("entity", tableName), zap.String("sql", sql), zap.Any("values", vals))
+	ds.log.Info("update", zap.String("entity", ds.tableName), zap.String("sql", sql), zap.Any("values", vals))
 
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -278,65 +261,53 @@ func (ds *Datastore) Update(ctx context.Context, ve Entity) error {
 
 // Get the entity for given id
 // returns NotFoundError if no entity can be found
-func (ds *Datastore) Get(ctx context.Context, id string, ve Entity) error {
-	jsonField := ve.JSONField()
-	tableName := ve.TableName()
-	_, ok := ds.types[jsonField]
-	if !ok {
-		return fmt.Errorf("type:%s is not registered", jsonField)
-	}
+func (ds *Datastore[E]) Get(ctx context.Context, id string) (E, error) {
+	var zero E
 	q := ds.sb.Select(
-		jsonField,
+		ds.jsonField,
 	).From(
-		tableName,
+		ds.tableName,
 	).Where(squirrel.Eq{
 		"id": id,
 	})
 
 	sql, _, _ := q.ToSql()
-	ds.log.Info("get", zap.String("entity", jsonField), zap.String("sql", sql), zap.String("id", id))
+	ds.log.Info("get", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.String("id", id))
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
-		return err
+		return zero, err
 	}
 	defer func() {
 		_ = rows.Close()
 		_ = rows.Err()
 	}()
 	if rows.Next() {
-		return rows.Scan(ve)
+		e := new(E)
+		err = rows.Scan(e)
+		if err != nil {
+			return zero, err
+		}
+		return *e, nil
 	}
 	// we have no row
-	return NewNotFoundError(fmt.Sprintf("entity of type:%s with id:%s not found", jsonField, id))
+	return zero, NewNotFoundError(fmt.Sprintf("entity of type:%s with id:%s not found", ds.jsonField, id))
 }
 
 // Delete deletes the entity
-func (ds *Datastore) Delete(ctx context.Context, ve Entity) error {
-	jsonField := ve.JSONField()
-	tableName := ve.TableName()
-	_, ok := ds.types[jsonField]
-	if !ok {
-		return fmt.Errorf("type:%s is not registered", jsonField)
-	}
-
-	elemt := reflect.TypeOf(ve).Elem()
-	existingVE, ok := reflect.New(elemt).Interface().(Entity)
-	if !ok {
-		return fmt.Errorf("entity is not a VersionedJSONEntity: %v", ve)
-	}
-	err := ds.Get(ctx, ve.GetMeta().Id, existingVE)
+func (ds *Datastore[E]) Delete(ctx context.Context, ve E) error {
+	ve, err := ds.Get(ctx, ve.GetMeta().Id)
 	if err != nil {
 		return err
 	}
 
 	// delete dataset in table
-	q := ds.sb.Delete(tableName).
+	q := ds.sb.Delete(ds.tableName).
 		Where(squirrel.Eq{"id": ve.GetMeta().GetId()})
 	sql, _, err := q.ToSql()
 	if err != nil {
 		return err
 	}
-	ds.log.Debug("delete", zap.String("entity", jsonField), zap.String("sql", sql))
+	ds.log.Debug("delete", zap.String("entity", ds.jsonField), zap.String("sql", sql))
 
 	// in tx
 	tx, err := ds.db.BeginTx(ctx, nil)
@@ -355,14 +326,14 @@ func (ds *Datastore) Delete(ctx context.Context, ve Entity) error {
 		return err
 	}
 	if rowsAffected > 1 {
-		return NewDataCorruptionError(fmt.Sprintf("datacorruption: delete of %s with id %s affected %d rows", jsonField, ve.GetMeta().Id, rowsAffected))
+		return NewDataCorruptionError(fmt.Sprintf("data corruption: delete of %s with id %s affected %d rows", ds.jsonField, ve.GetMeta().Id, rowsAffected))
 	}
 	if rowsAffected < 1 {
-		return NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s affected %d rows", jsonField, ve.GetMeta().Id, rowsAffected))
+		return NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s affected %d rows", ds.jsonField, ve.GetMeta().Id, rowsAffected))
 	}
 
 	// insert dataset in history table
-	err = ds.insertHistory(existingVE, opDelete, Now(), tx)
+	err = ds.insertHistory(ve, opDelete, Now(), tx)
 	if err != nil {
 		return err
 	}
@@ -371,28 +342,9 @@ func (ds *Datastore) Delete(ctx context.Context, ve Entity) error {
 }
 
 // Find returns matching elements from the database
-func (ds *Datastore) Find(ctx context.Context, filter map[string]any, paging *v1.Paging, result any) (*uint64, error) {
-	resultv := reflect.ValueOf(result)
-	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {
-		return nil, fmt.Errorf("result argument must be a slice address")
-	}
-
-	slicev := resultv.Elem()
-	elemt := slicev.Type().Elem()
-
-	ve, ok := reflect.New(elemt).Interface().(Entity)
-	if !ok {
-		return nil, fmt.Errorf("result slice element type must implement VersionedJSONEntity-Interface")
-	}
-	jsonField := ve.JSONField()
-	tableName := ve.TableName()
-	_, ok = ds.types[jsonField]
-	if !ok {
-		return nil, fmt.Errorf("type:%s is not registered", jsonField)
-	}
-
-	q := ds.sb.Select(jsonField).
-		From(tableName)
+func (ds *Datastore[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
+	q := ds.sb.Select(ds.jsonField).
+		From(ds.tableName)
 
 	if len(filter) > 0 {
 		q = q.Where(filter)
@@ -407,38 +359,39 @@ func (ds *Datastore) Find(ctx context.Context, filter map[string]any, paging *v1
 
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer func() {
 		_ = rows.Close()
 		_ = rows.Err()
 	}()
 
+	ves := []E{}
 	rowcount := uint64(0)
 	for rows.Next() {
-		elemp := reflect.New(elemt)
-		err = rows.Scan(elemp.Interface())
+		e := new(E)
+		err = rows.Scan(e)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		slicev = reflect.Append(slicev, elemp.Elem())
+		ves = append(ves, *e)
 		rowcount++
 	}
-	resultv.Elem().Set(slicev)
+	ds.log.Info("find", zap.Any("ves", ves))
 
 	err = rows.Err()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if paging != nil && paging.Count != nil && rowcount == *paging.Count {
-		return nextPage, err
+		return ves, nextPage, err
 	}
-	return nil, err
+	return ves, nil, err
 }
 
 // Get the history entity for given id and latest before or equal the given point in time
 // returns NotFoundError if no entity can be found
-func (ds *Datastore) GetHistory(ctx context.Context, id string, at time.Time, ve Entity) error {
+func (ds *Datastore[E]) GetHistory(ctx context.Context, id string, at time.Time, ve E) error {
 	return ds.getHistoryWithPredicate(ctx, squirrel.And{
 		squirrel.Eq{
 			"id": id,
@@ -450,7 +403,7 @@ func (ds *Datastore) GetHistory(ctx context.Context, id string, at time.Time, ve
 }
 
 // Get the first history entity for given id, returns NotFoundError if no entity can be found
-func (ds *Datastore) GetHistoryCreated(ctx context.Context, id string, ve Entity) error {
+func (ds *Datastore[E]) GetHistoryCreated(ctx context.Context, id string, ve E) error {
 	return ds.getHistoryWithPredicate(ctx, squirrel.And{
 		squirrel.Eq{
 			"id": id,
@@ -463,17 +416,12 @@ func (ds *Datastore) GetHistoryCreated(ctx context.Context, id string, ve Entity
 
 // Get the top matching history entity for given filter criteria,
 // returns NotFoundError if no entity can be found
-func (ds *Datastore) getHistoryWithPredicate(ctx context.Context, pred any, ve Entity) error {
-	jsonField := ve.JSONField()
-	tableName := historyTablename(ve.TableName())
-	_, ok := ds.types[jsonField]
-	if !ok {
-		return fmt.Errorf("type:%s is not registered", jsonField)
-	}
-	q := ds.sb.Select(jsonField).From(tableName).Where(pred).OrderByClause("created_at DESC").Limit(1)
+func (ds *Datastore[E]) getHistoryWithPredicate(ctx context.Context, pred any, ve E) error {
+	tablename := historyTablename(ds.tableName)
+	q := ds.sb.Select(ds.jsonField).From(tablename).Where(pred).OrderByClause("created_at DESC").Limit(1)
 
 	sql, _, _ := q.ToSql()
-	ds.log.Info("get", zap.String("entity", jsonField), zap.String("sql", sql), zap.Any("predicate", pred))
+	ds.log.Info("get", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("predicate", pred))
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
 		return err
@@ -487,19 +435,17 @@ func (ds *Datastore) getHistoryWithPredicate(ctx context.Context, pred any, ve E
 		return rows.Scan(ve)
 	}
 	// we have no row
-	return NewNotFoundError(fmt.Sprintf("entity of type:%s with predicate:%s not found", jsonField, pred))
+	return NewNotFoundError(fmt.Sprintf("entity of type:%s with predicate:%s not found", ds.jsonField, pred))
 }
 
 // insertHistory inserts the given entity in the history table of the entity using the runner, which may be a Tx.
-func (ds *Datastore) insertHistory(ve Entity, op Op, createdAt time.Time, runner squirrel.BaseRunner) error {
-	jsonField := ve.JSONField()
-	tableName := ve.TableName()
-	qh := ds.sb.Insert(historyTablename(tableName)).
+func (ds *Datastore[E]) insertHistory(ve E, op Op, createdAt time.Time, runner squirrel.BaseRunner) error {
+	qh := ds.sb.Insert(historyTablename(ds.tableName)).
 		SetMap(map[string]any{
 			"id":         ve.GetMeta().Id,
 			"op":         op,
 			"created_at": createdAt,
-			jsonField:    ve,
+			ds.jsonField: ve,
 		})
 	_, err := qh.RunWith(runner).Exec()
 	if err != nil {
@@ -521,7 +467,7 @@ func PbNow() (*timestamppb.Timestamp, time.Time) {
 }
 
 // rollback tries to rollback the given transaction and logs an eventual rollback error
-func (ds *Datastore) rollback(tx *sql.Tx) {
+func (ds *Datastore[E]) rollback(tx *sql.Tx) {
 	err := tx.Rollback()
 	if err != nil && !errors.Is(err, sql.ErrTxDone) {
 		ds.log.Error("error rolling back", zap.Error(err))

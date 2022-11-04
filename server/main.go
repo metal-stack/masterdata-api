@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -204,29 +203,35 @@ func run() {
 	dbName := viper.GetString("dbname")
 	dbSSLMode := viper.GetString("dbsslmode")
 
-	storage, err := datastore.NewPostgresStorage(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode)
+	db, err := datastore.NewPostgresDB(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode, ves...)
 	if err != nil {
 		logger.Fatal("failed to create postgres connection", zap.Error(err))
 	}
-	err = storage.Initialize(context.Background(), ves...)
-	if err != nil {
-		logger.Fatal("failed to initialize database", zap.Error(err))
-	}
+	// storage, err := datastore.NewPostgresStorage(logger, db)
+	// if err != nil {
+	// 	logger.Fatal("failed to initialize storage", zap.Error(err))
+	// }
 
 	healthServer := health.NewHealthServer()
 
-	err = storage.Initdb(healthServer, "initdb.d")
-	if err != nil {
-		logger.Error("unable to apply initdb content", zap.Error(err))
-	}
+	// err = storage.Initdb(healthServer, "initdb.d")
+	// if err != nil {
+	// 	logger.Error("unable to apply initdb content", zap.Error(err))
+	// }
 
-	err = storage.MigrateDB(healthServer)
-	if err != nil {
-		logger.Error("unable to apply migrate db", zap.Error(err))
-	}
+	// err = storage.MigrateDB(healthServer)
+	// if err != nil {
+	// 	logger.Error("unable to apply migrate db", zap.Error(err))
+	// }
 
-	projectService := service.NewProjectService(storage, logger)
-	tenantService := service.NewTenantService(storage, logger)
+	projectService, err := service.NewProjectService(db, logger)
+	if err != nil {
+		logger.Fatal("unable to create project service", zap.Error(err))
+	}
+	tenantService, err := service.NewTenantService(db, logger)
+	if err != nil {
+		logger.Fatal("unable to create tenant service", zap.Error(err))
+	}
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
