@@ -43,7 +43,7 @@ func (s *tenantService) Update(ctx context.Context, req *v1.TenantUpdateRequest)
 
 func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
 	tenant := req.NewTenant()
-	err := s.tenantStore.Delete(ctx, tenant)
+	err := s.tenantStore.Delete(ctx, tenant.Meta.Id)
 	return tenant.NewTenantResponse(), err
 }
 

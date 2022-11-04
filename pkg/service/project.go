@@ -78,7 +78,7 @@ func (s *projectService) Update(ctx context.Context, req *v1.ProjectUpdateReques
 }
 func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteRequest) (*v1.ProjectResponse, error) {
 	project := req.NewProject()
-	err := s.projectStore.Delete(ctx, project)
+	err := s.projectStore.Delete(ctx, project.Meta.Id)
 	return project.NewProjectResponse(), err
 }
 func (s *projectService) Get(ctx context.Context, req *v1.ProjectGetRequest) (*v1.ProjectResponse, error) {

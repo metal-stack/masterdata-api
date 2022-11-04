@@ -30,8 +30,8 @@ func (s StorageStatusWrapper[E]) Update(ctx context.Context, ve E) error {
 	return wrapUpdateStatusError(s.storage.Update(ctx, ve))
 }
 
-func (s StorageStatusWrapper[E]) Delete(ctx context.Context, ve E) error {
-	return wrapDeleteStatusError(s.storage.Delete(ctx, ve))
+func (s StorageStatusWrapper[E]) Delete(ctx context.Context, id string) error {
+	return wrapDeleteStatusError(s.storage.Delete(ctx, id))
 }
 
 func (s StorageStatusWrapper[E]) Get(ctx context.Context, id string) (E, error) {

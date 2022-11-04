@@ -27,7 +27,7 @@ type Storage[E Entity] interface {
 	// generic
 	Create(ctx context.Context, ve E) error
 	Update(ctx context.Context, ve E) error
-	Delete(ctx context.Context, ve E) error
+	Delete(ctx context.Context, id string) error
 	Get(ctx context.Context, id string) (E, error)
 	GetHistory(ctx context.Context, id string, at time.Time, ve E) error
 	GetHistoryCreated(ctx context.Context, id string, ve E) error
@@ -124,6 +124,7 @@ func NewPostgresStorage[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage
 
 // Create a entity
 func (ds *Datastore[E]) Create(ctx context.Context, ve E) error {
+	ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.Any("id", ve))
 	meta := ve.GetMeta()
 	if meta == nil {
 		return fmt.Errorf("create of type:%s failed, meta is nil", ds.jsonField)
@@ -146,7 +147,7 @@ func (ds *Datastore[E]) Create(ctx context.Context, ve E) error {
 		return fmt.Errorf("create of type:%s failed, apiversion must be set to:%s", ds.jsonField, ve.APIVersion())
 	}
 
-	createdAtPb, createdAt := PbNow()
+	createdAtPb, createdAt := pbNow()
 	meta.SetVersion(0)
 	meta.SetCreatedTime(createdAtPb)
 
@@ -158,8 +159,6 @@ func (ds *Datastore[E]) Create(ctx context.Context, ve E) error {
 	}).Suffix(
 		"RETURNING " + ds.jsonField,
 	)
-	sql, vals, _ := q.ToSql()
-	ds.log.Info("create", zap.String("entity", ds.tableName), zap.String("sql", sql), zap.Any("values", vals))
 
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -183,6 +182,7 @@ func (ds *Datastore[E]) Create(ctx context.Context, ve E) error {
 
 // Update the entity
 func (ds *Datastore[E]) Update(ctx context.Context, ve E) error {
+	ds.log.Info("update", zap.String("entity", ds.jsonField))
 	meta := ve.GetMeta()
 	if meta == nil {
 		return fmt.Errorf("update of type:%s failed, meta is nil", ds.jsonField)
@@ -217,12 +217,12 @@ func (ds *Datastore[E]) Update(ctx context.Context, ve E) error {
 		)
 	}
 
-	pbNow, now := PbNow()
+	pbNow, now := pbNow()
 
 	ve.GetMeta().SetVersion(ve.GetMeta().GetVersion() + 1)
 	ve.GetMeta().SetUpdatedTime(pbNow)
 
-	// handle non updateable fields like created_time
+	// handle non updatable fields like created_time
 	// simple strategy: copy unmodifiable fields from existing before update
 	ve.GetMeta().SetCreatedTime(existingVE.GetMeta().GetCreatedTime())
 
@@ -236,8 +236,6 @@ func (ds *Datastore[E]) Update(ctx context.Context, ve E) error {
 		Suffix(
 			"RETURNING " + ds.jsonField,
 		)
-	sql, vals, _ := q.ToSql()
-	ds.log.Info("update", zap.String("entity", ds.tableName), zap.String("sql", sql), zap.Any("values", vals))
 
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -262,6 +260,7 @@ func (ds *Datastore[E]) Update(ctx context.Context, ve E) error {
 // Get the entity for given id
 // returns NotFoundError if no entity can be found
 func (ds *Datastore[E]) Get(ctx context.Context, id string) (E, error) {
+	ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.String("id", id))
 	var zero E
 	q := ds.sb.Select(
 		ds.jsonField,
@@ -271,44 +270,26 @@ func (ds *Datastore[E]) Get(ctx context.Context, id string) (E, error) {
 		"id": id,
 	})
 
-	sql, _, _ := q.ToSql()
-	ds.log.Info("get", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.String("id", id))
-	rows, err := q.QueryContext(ctx)
+	row := q.QueryRowContext(ctx)
+	e := new(E)
+	err := row.Scan(e)
 	if err != nil {
-		return zero, err
+		return zero, NewNotFoundError(fmt.Sprintf("entity of type:%s with id:%s not found %v", ds.jsonField, id, err))
 	}
-	defer func() {
-		_ = rows.Close()
-		_ = rows.Err()
-	}()
-	if rows.Next() {
-		e := new(E)
-		err = rows.Scan(e)
-		if err != nil {
-			return zero, err
-		}
-		return *e, nil
-	}
-	// we have no row
-	return zero, NewNotFoundError(fmt.Sprintf("entity of type:%s with id:%s not found", ds.jsonField, id))
+	return *e, nil
 }
 
 // Delete deletes the entity
-func (ds *Datastore[E]) Delete(ctx context.Context, ve E) error {
-	ve, err := ds.Get(ctx, ve.GetMeta().Id)
+func (ds *Datastore[E]) Delete(ctx context.Context, id string) error {
+	ds.log.Debug("delete", zap.String("entity", ds.jsonField), zap.String("id", id))
+	ve, err := ds.Get(ctx, id)
 	if err != nil {
 		return err
 	}
 
 	// delete dataset in table
 	q := ds.sb.Delete(ds.tableName).
-		Where(squirrel.Eq{"id": ve.GetMeta().GetId()})
-	sql, _, err := q.ToSql()
-	if err != nil {
-		return err
-	}
-	ds.log.Debug("delete", zap.String("entity", ds.jsonField), zap.String("sql", sql))
-
+		Where(squirrel.Eq{"id": id})
 	// in tx
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -326,10 +307,10 @@ func (ds *Datastore[E]) Delete(ctx context.Context, ve E) error {
 		return err
 	}
 	if rowsAffected > 1 {
-		return NewDataCorruptionError(fmt.Sprintf("data corruption: delete of %s with id %s affected %d rows", ds.jsonField, ve.GetMeta().Id, rowsAffected))
+		return NewDataCorruptionError(fmt.Sprintf("data corruption: delete of %s with id %s affected %d rows", ds.jsonField, id, rowsAffected))
 	}
 	if rowsAffected < 1 {
-		return NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s affected %d rows", ds.jsonField, ve.GetMeta().Id, rowsAffected))
+		return NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s affected %d rows", ds.jsonField, id, rowsAffected))
 	}
 
 	// insert dataset in history table
@@ -343,6 +324,7 @@ func (ds *Datastore[E]) Delete(ctx context.Context, ve E) error {
 
 // Find returns matching elements from the database
 func (ds *Datastore[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
+	ds.log.Debug("find", zap.String("entity", ds.jsonField), zap.Any("filter", filter))
 	q := ds.sb.Select(ds.jsonField).
 		From(ds.tableName)
 
@@ -354,20 +336,15 @@ func (ds *Datastore[E]) Find(ctx context.Context, filter map[string]any, paging 
 	// Add paging query if paging is defined
 	q, nextPage := addPaging(q, paging)
 
-	sql, vals, _ := q.ToSql()
-	ds.log.Debug("find", zap.String("sql", sql), zap.Any("values", vals))
-
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
 	defer func() {
 		_ = rows.Close()
-		_ = rows.Err()
 	}()
 
 	ves := []E{}
-	rowcount := uint64(0)
 	for rows.Next() {
 		e := new(E)
 		err = rows.Scan(e)
@@ -375,18 +352,16 @@ func (ds *Datastore[E]) Find(ctx context.Context, filter map[string]any, paging 
 			return nil, nil, err
 		}
 		ves = append(ves, *e)
-		rowcount++
 	}
-	ds.log.Info("find", zap.Any("ves", ves))
 
 	err = rows.Err()
 	if err != nil {
 		return nil, nil, err
 	}
-	if paging != nil && paging.Count != nil && rowcount == *paging.Count {
+	if paging != nil && paging.Count != nil && uint64(len(ves)) == *paging.Count {
 		return ves, nextPage, err
 	}
-	return ves, nil, err
+	return ves, nil, nil
 }
 
 // Get the history entity for given id and latest before or equal the given point in time
@@ -459,8 +434,8 @@ func historyTablename(table string) string {
 	return fmt.Sprintf("%s_history", table)
 }
 
-// PbNow returns the current time as Protobuf and time
-func PbNow() (*timestamppb.Timestamp, time.Time) {
+// pbNow returns the current time as Protobuf and time
+func pbNow() (*timestamppb.Timestamp, time.Time) {
 	now := Now()
 	nowPb := timestamppb.New(now)
 	return nowPb, now

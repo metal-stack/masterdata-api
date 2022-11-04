@@ -2,32 +2,35 @@ package datastore
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
-func BenchMain(m *testing.B) {
-	fmt.Println("benchmain")
+var (
+	ds Storage[*v1.Tenant]
+)
+
+func init() {
+	db, _ = createPostgresConnection()
+	ds, _ = NewPostgresStorage(zap.NewNop(), db, &v1.Tenant{})
 }
 
 func BenchmarkGetTenant(b *testing.B) {
-	db, err := createPostgresConnection()
-	assert.NoError(b, err)
-	ds, err := NewPostgresStorage(zap.NewNop(), db, &v1.Tenant{})
-	require.NoError(b, err)
 
-	err = ds.Create(context.Background(), &v1.Tenant{
+	t1 := &v1.Tenant{
 		Meta: &v1.Meta{
 			Id: "t1",
 		},
-	})
+	}
+	err := ds.Create(context.Background(), t1)
 	assert.NoError(b, err)
+	defer func() {
+		ds.Delete(context.Background(), "t1")
+	}()
 
 	for n := 0; n < b.N; n++ {
 		t, err := ds.Get(context.Background(), "t1")
@@ -37,13 +40,8 @@ func BenchmarkGetTenant(b *testing.B) {
 }
 
 func BenchmarkCreateTenant(b *testing.B) {
-	db, err := createPostgresConnection()
-	assert.NoError(b, err)
-	ds, err := NewPostgresStorage(zap.NewNop(), db, &v1.Tenant{})
-	require.NoError(b, err)
-
 	for n := 0; n < b.N; n++ {
-		err = ds.Create(context.Background(), &v1.Tenant{
+		err := ds.Create(context.Background(), &v1.Tenant{
 			Meta: &v1.Meta{
 				Id: uuid.NewString(),
 			},
@@ -53,18 +51,16 @@ func BenchmarkCreateTenant(b *testing.B) {
 }
 
 func BenchmarkFindTenant(b *testing.B) {
-	db, err := createPostgresConnection()
-	assert.NoError(b, err)
-	ds, err := NewPostgresStorage(zap.NewNop(), db, &v1.Tenant{})
-	require.NoError(b, err)
-
-	err = ds.Create(context.Background(), &v1.Tenant{
+	err := ds.Create(context.Background(), &v1.Tenant{
 		Meta: &v1.Meta{
 			Id: "t1",
 		},
 		Name: "tenant-1",
 	})
 	assert.NoError(b, err)
+	defer func() {
+		ds.Delete(context.Background(), "t1")
+	}()
 
 	for n := 0; n < b.N; n++ {
 		f := make(map[string]any)

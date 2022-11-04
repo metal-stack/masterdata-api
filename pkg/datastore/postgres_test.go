@@ -79,7 +79,7 @@ func TestCRUD(t *testing.T) {
 	// get unknown
 	tgr2, err := tenantDS.Get(ctx, "unknown-id")
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found sql: no rows in result set")
 	assert.NotNil(t, &tgr2)
 
 	// update without meta and id
@@ -114,14 +114,14 @@ func TestCRUD(t *testing.T) {
 	assert.Equal(t, "Important Tenant", tenants[0].Name)
 
 	// delete existing
-	err = tenantDS.Delete(ctx, tcr)
+	err = tenantDS.Delete(ctx, tcr.Meta.Id)
 	assert.NoError(t, err)
 	assert.NotNil(t, tcr)
 
 	// delete not existing
-	err = tenantDS.Delete(ctx, tcr)
+	err = tenantDS.Delete(ctx, tcr.Meta.Id)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:tenant-1 not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:tenant-1 not found sql: no rows in result set")
 
 }
 
@@ -364,7 +364,7 @@ func TestGet(t *testing.T) {
 	// unknown id
 	_, err = tenantDS.Get(ctx, "unknown-id")
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found sql: no rows in result set")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -457,7 +457,7 @@ func TestGetHistory(t *testing.T) {
 
 	deletedTS := time.Date(2020, 4, 30, 22, 0, 0, 0, time.UTC)
 	setNow(deletedTS)
-	err = tenantDS.Delete(ctx, tcr1)
+	err = tenantDS.Delete(ctx, tcr1.Meta.Id)
 	assert.NoError(t, err)
 
 	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
@@ -556,9 +556,9 @@ func TestDelete(t *testing.T) {
 	tdr1 := &v1.Tenant{
 		Meta: &v1.Meta{Id: "unknown-id"},
 	}
-	err = tenantDS.Delete(ctx, tdr1)
+	err = tenantDS.Delete(ctx, tdr1.Meta.Id)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found sql: no rows in result set")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -576,12 +576,12 @@ func TestDelete(t *testing.T) {
 	tdr2 := &v1.Tenant{
 		Meta: &v1.Meta{Id: t9},
 	}
-	err = tenantDS.Delete(ctx, tdr2)
+	err = tenantDS.Delete(ctx, tdr2.Meta.Id)
 	assert.NoError(t, err)
 
 	_, err = tenantDS.Get(ctx, t9)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:t9 not found")
+	assert.EqualError(t, err, "entity of type:tenant with id:t9 not found sql: no rows in result set")
 
 	var tgrh v1.Tenant
 	err = tenantDS.GetHistory(ctx, t9, time.Now(), &tgrh)

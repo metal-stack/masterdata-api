@@ -97,7 +97,7 @@ func TestDeleteTenant(t *testing.T) {
 		Id: "t3",
 	}
 
-	storageMock.On("Delete", ctx, t3).Return(nil)
+	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
 	resp, err := ts.Delete(ctx, tdr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
