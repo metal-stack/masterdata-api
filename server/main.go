@@ -210,10 +210,10 @@ func run() {
 
 	healthServer := health.NewHealthServer()
 
-	// err = storage.Initdb(healthServer, "initdb.d")
-	// if err != nil {
-	// 	logger.Error("unable to apply initdb content", zap.Error(err))
-	// }
+	err = datastore.Initdb(logger.Sugar(), db, healthServer, "initdb.d")
+	if err != nil {
+		logger.Error("unable to apply initdb content", zap.Error(err))
+	}
 
 	// err = storage.MigrateDB(healthServer)
 	// if err != nil {

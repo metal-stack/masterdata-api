@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
 	healthv1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/health"
@@ -16,24 +17,50 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// FIXME iterate over all E here
+type bootstrap[E Entity] struct {
+	log *zap.SugaredLogger
+	ds  Storage[E]
+}
 
 // Initdb reads all yaml files in given directory and apply their content as initial datasets.
-func (ds *datastore[E]) Initdb(healthServer *health.Server, dir string) error {
+func Initdb(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server, dir string) error {
 	files, err := filepath.Glob(path.Join(dir, "*.yaml"))
 	if err != nil {
 		return err
 	}
+
+	ts, err := NewPostgresStorage(log.Desugar(), db, &v1.Tenant{})
+	if err != nil {
+		return err
+	}
+	tbs := &bootstrap[*v1.Tenant]{
+		log: log,
+		ds:  ts,
+	}
+
+	ps, err := NewPostgresStorage(log.Desugar(), db, &v1.Project{})
+	if err != nil {
+		return err
+	}
+	pbs := &bootstrap[*v1.Project]{
+		log: log,
+		ds:  ps,
+	}
 	for _, f := range files {
-		ds.log.Info("read initdb", zap.Any("file", f))
-		err = ds.processConfig(f)
+		log.Infow("read initdb", "file", f)
+		err = tbs.processConfig(f)
 		if err != nil {
 			return err
 		}
 	}
-
-	var e E
-	healthServer.SetServingStatus("initdb-"+e.Kind(), healthv1.HealthCheckResponse_SERVING)
+	for _, f := range files {
+		log.Infow("read initdb", "file", f)
+		err = pbs.processConfig(f)
+		if err != nil {
+			return err
+		}
+	}
+	healthServer.SetServingStatus("initdb", healthv1.HealthCheckResponse_SERVING)
 	return nil
 }
 
@@ -61,7 +88,7 @@ func splitYamlDocs(doc string) []string {
 }
 
 // processConfig processes all yaml docs contained in the given file
-func (ds *datastore[E]) processConfig(file string) error {
+func (ds *bootstrap[E]) processConfig(file string) error {
 	yml, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -79,7 +106,7 @@ func (ds *datastore[E]) processConfig(file string) error {
 	return nil
 }
 
-func (ds *datastore[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
+func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 
 	// all entities must contain a meta, parse that to get kind and apiversion
 	var mm MetaMeta
@@ -87,19 +114,19 @@ func (ds *datastore[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	if err != nil {
 		return err
 	}
-	ds.log.Info("initdb", zap.Any("meta", mm.Meta.GetKind()))
+	bs.log.Infow("initdb", "meta", mm.Meta.GetKind())
 
 	kind := mm.Meta.GetKind()
 	apiversion := mm.Meta.GetApiversion()
 	var e E
 	if kind != e.Kind() {
-		ds.log.Info("skip", zap.String("kind from yaml", kind), zap.String("required kind", e.Kind()))
+		bs.log.Infow("skip", "kind from yaml", kind, "required kind", e.Kind())
 		return nil
 	}
 
 	// messy extraction of apiversion from type
 	if e.APIVersion() != apiversion {
-		ds.log.Error("initdb apiversion does not match", zap.String("given", apiversion), zap.String("expected", e.APIVersion()))
+		bs.log.Errorw("initdb apiversion does not match", "given", apiversion, "expected", e.APIVersion())
 		return nil
 	}
 
@@ -114,12 +141,12 @@ func (ds *datastore[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	// now check that this type is already present for this id,
 	// therefore create nil interface to get into
 	exists := true
-	existingEntity, err := ds.Get(ctx, mm.Meta.GetId())
+	existingEntity, err := bs.ds.Get(ctx, mm.Meta.GetId())
 	if err != nil {
 		if errors.As(err, &NotFoundError{}) {
 			exists = false
 		} else {
-			ds.log.Error("initdb", zap.Error(err))
+			bs.log.Errorw("initdb", "error", err)
 			return err
 		}
 	}
@@ -128,20 +155,20 @@ func (ds *datastore[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	if exists {
 		oldVersion := existingEntity.GetMeta().GetVersion()
 		newVersion := e.GetMeta().GetVersion()
-		ds.log.Info("initdb found existing, update", zap.String("kind", newKind), zap.String("id", newID), zap.Any("old version", oldVersion), zap.Any("new version", newVersion))
+		bs.log.Infow("initdb found existing, update", "kind", newKind, "id", newID, "old version", oldVersion, "new version", newVersion)
 		if oldVersion >= newVersion {
-			ds.log.Info("initdb existing version is equal or higher, skip update", zap.String("kind", newKind), zap.String("id", newID))
+			bs.log.Infow("initdb existing version is equal or higher, skip update", "kind", newKind, "id", newID)
 			return nil
 		}
 
 		e.GetMeta().SetVersion(existingEntity.GetMeta().GetVersion())
-		err = ds.Update(ctx, e)
+		err = bs.ds.Update(ctx, e)
 		if err != nil {
 			return err
 		}
 	} else {
-		ds.log.Info("initdb create", zap.String("kind", newKind), zap.String("id", newID))
-		err = ds.Create(ctx, e)
+		bs.log.Infow("initdb create", "kind", newKind, "id", newID)
+		err = bs.ds.Create(ctx, e)
 		if err != nil {
 			return err
 		}
