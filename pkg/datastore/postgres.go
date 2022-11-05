@@ -34,49 +34,18 @@ type Storage[E Entity] interface {
 	Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error)
 }
 
-const defaultPagingLimit = uint64(100)
-
-func addPaging(q squirrel.SelectBuilder, paging *v1.Paging) (squirrel.SelectBuilder, *uint64) {
-	if paging == nil {
-		return q, nil
-	}
-
-	limit := defaultPagingLimit
-	if paging.Count != nil {
-		limit = *paging.Count
-	}
-	offset := uint64(0)
-	nextpage := uint64(1)
-	if paging.Page != nil {
-		offset = *paging.Page * limit
-		nextpage = *paging.Page + 1
-	}
-	q = q.Limit(limit).Offset(offset)
-	return q, &nextpage
-}
-
-// jsonEntity is storable in json format
-type jsonEntity interface {
+// Entity defines a database entity which is stored in jsonb format and with version information
+type Entity interface {
 	JSONField() string
 	TableName() string
 	Schema() string
-}
-
-// versionedEntity defines a database entity which is stored with version information
-type versionedEntity interface {
 	GetMeta() *v1.Meta
 	Kind() string
 	APIVersion() string
 }
 
-// Entity defines a database entity which is stored in jsonb format and with version information
-type Entity interface {
-	jsonEntity
-	versionedEntity
-}
-
-// Datastore is the adapter to talk to the database
-type Datastore[E Entity] struct {
+// datastore is the adapter to talk to the database
+type datastore[E Entity] struct {
 	log       *zap.Logger
 	db        *sqlx.DB
 	sb        squirrel.StatementBuilderType
@@ -112,7 +81,7 @@ func NewPostgresDB(logger *zap.Logger, host, port, user, password, dbname, sslmo
 
 // NewPostgresStorage creates a new Storage which uses postgres.
 func NewPostgresStorage[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage[E], error) {
-	ds := &Datastore[E]{
+	ds := &datastore[E]{
 		log:       logger,
 		db:        db,
 		sb:        squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
@@ -123,7 +92,7 @@ func NewPostgresStorage[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage
 }
 
 // Create a entity
-func (ds *Datastore[E]) Create(ctx context.Context, ve E) error {
+func (ds *datastore[E]) Create(ctx context.Context, ve E) error {
 	ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.Any("id", ve))
 	meta := ve.GetMeta()
 	if meta == nil {
@@ -181,7 +150,7 @@ func (ds *Datastore[E]) Create(ctx context.Context, ve E) error {
 }
 
 // Update the entity
-func (ds *Datastore[E]) Update(ctx context.Context, ve E) error {
+func (ds *datastore[E]) Update(ctx context.Context, ve E) error {
 	ds.log.Info("update", zap.String("entity", ds.jsonField))
 	meta := ve.GetMeta()
 	if meta == nil {
@@ -259,7 +228,7 @@ func (ds *Datastore[E]) Update(ctx context.Context, ve E) error {
 
 // Get the entity for given id
 // returns NotFoundError if no entity can be found
-func (ds *Datastore[E]) Get(ctx context.Context, id string) (E, error) {
+func (ds *datastore[E]) Get(ctx context.Context, id string) (E, error) {
 	ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.String("id", id))
 	var zero E
 	q := ds.sb.Select(
@@ -280,7 +249,7 @@ func (ds *Datastore[E]) Get(ctx context.Context, id string) (E, error) {
 }
 
 // Delete deletes the entity
-func (ds *Datastore[E]) Delete(ctx context.Context, id string) error {
+func (ds *datastore[E]) Delete(ctx context.Context, id string) error {
 	ds.log.Debug("delete", zap.String("entity", ds.jsonField), zap.String("id", id))
 	ve, err := ds.Get(ctx, id)
 	if err != nil {
@@ -323,7 +292,7 @@ func (ds *Datastore[E]) Delete(ctx context.Context, id string) error {
 }
 
 // Find returns matching elements from the database
-func (ds *Datastore[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
+func (ds *datastore[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
 	ds.log.Debug("find", zap.String("entity", ds.jsonField), zap.Any("filter", filter))
 	q := ds.sb.Select(ds.jsonField).
 		From(ds.tableName)
@@ -366,7 +335,7 @@ func (ds *Datastore[E]) Find(ctx context.Context, filter map[string]any, paging 
 
 // Get the history entity for given id and latest before or equal the given point in time
 // returns NotFoundError if no entity can be found
-func (ds *Datastore[E]) GetHistory(ctx context.Context, id string, at time.Time, ve E) error {
+func (ds *datastore[E]) GetHistory(ctx context.Context, id string, at time.Time, ve E) error {
 	return ds.getHistoryWithPredicate(ctx, squirrel.And{
 		squirrel.Eq{
 			"id": id,
@@ -378,7 +347,7 @@ func (ds *Datastore[E]) GetHistory(ctx context.Context, id string, at time.Time,
 }
 
 // Get the first history entity for given id, returns NotFoundError if no entity can be found
-func (ds *Datastore[E]) GetHistoryCreated(ctx context.Context, id string, ve E) error {
+func (ds *datastore[E]) GetHistoryCreated(ctx context.Context, id string, ve E) error {
 	return ds.getHistoryWithPredicate(ctx, squirrel.And{
 		squirrel.Eq{
 			"id": id,
@@ -391,7 +360,7 @@ func (ds *Datastore[E]) GetHistoryCreated(ctx context.Context, id string, ve E) 
 
 // Get the top matching history entity for given filter criteria,
 // returns NotFoundError if no entity can be found
-func (ds *Datastore[E]) getHistoryWithPredicate(ctx context.Context, pred any, ve E) error {
+func (ds *datastore[E]) getHistoryWithPredicate(ctx context.Context, pred any, ve E) error {
 	tablename := historyTablename(ds.tableName)
 	q := ds.sb.Select(ds.jsonField).From(tablename).Where(pred).OrderByClause("created_at DESC").Limit(1)
 
@@ -414,7 +383,7 @@ func (ds *Datastore[E]) getHistoryWithPredicate(ctx context.Context, pred any, v
 }
 
 // insertHistory inserts the given entity in the history table of the entity using the runner, which may be a Tx.
-func (ds *Datastore[E]) insertHistory(ve E, op Op, createdAt time.Time, runner squirrel.BaseRunner) error {
+func (ds *datastore[E]) insertHistory(ve E, op Op, createdAt time.Time, runner squirrel.BaseRunner) error {
 	qh := ds.sb.Insert(historyTablename(ds.tableName)).
 		SetMap(map[string]any{
 			"id":         ve.GetMeta().Id,
@@ -442,9 +411,30 @@ func pbNow() (*timestamppb.Timestamp, time.Time) {
 }
 
 // rollback tries to rollback the given transaction and logs an eventual rollback error
-func (ds *Datastore[E]) rollback(tx *sql.Tx) {
+func (ds *datastore[E]) rollback(tx *sql.Tx) {
 	err := tx.Rollback()
 	if err != nil && !errors.Is(err, sql.ErrTxDone) {
 		ds.log.Error("error rolling back", zap.Error(err))
 	}
+}
+
+const defaultPagingLimit = uint64(100)
+
+func addPaging(q squirrel.SelectBuilder, paging *v1.Paging) (squirrel.SelectBuilder, *uint64) {
+	if paging == nil {
+		return q, nil
+	}
+
+	limit := defaultPagingLimit
+	if paging.Count != nil {
+		limit = *paging.Count
+	}
+	offset := uint64(0)
+	nextpage := uint64(1)
+	if paging.Page != nil {
+		offset = *paging.Page * limit
+		nextpage = *paging.Page + 1
+	}
+	q = q.Limit(limit).Offset(offset)
+	return q, &nextpage
 }

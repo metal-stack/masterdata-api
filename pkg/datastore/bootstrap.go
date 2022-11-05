@@ -19,7 +19,7 @@ import (
 // FIXME iterate over all E here
 
 // Initdb reads all yaml files in given directory and apply their content as initial datasets.
-func (ds *Datastore[E]) Initdb(healthServer *health.Server, dir string) error {
+func (ds *datastore[E]) Initdb(healthServer *health.Server, dir string) error {
 	files, err := filepath.Glob(path.Join(dir, "*.yaml"))
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func splitYamlDocs(doc string) []string {
 }
 
 // processConfig processes all yaml docs contained in the given file
-func (ds *Datastore[E]) processConfig(file string) error {
+func (ds *datastore[E]) processConfig(file string) error {
 	yml, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (ds *Datastore[E]) processConfig(file string) error {
 	return nil
 }
 
-func (ds *Datastore[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
+func (ds *datastore[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 
 	// all entities must contain a meta, parse that to get kind and apiversion
 	var mm MetaMeta

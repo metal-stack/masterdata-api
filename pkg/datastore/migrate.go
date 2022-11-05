@@ -11,7 +11,7 @@ import (
 )
 
 // MigrateDB applies necessary DB Migrations.
-func (ds *Datastore[E]) MigrateDB(healthServer *health.Server) error {
+func (ds *datastore[E]) MigrateDB(healthServer *health.Server) error {
 
 	m, err := migrator.New(
 		migrator.Migrations(
@@ -50,7 +50,7 @@ func (ds *Datastore[E]) MigrateDB(healthServer *health.Server) error {
 
 // consolidateHistory ensures, that for each VersionedJSONEntity there is at least one "created"-row in the history table.
 // The type of entities to consolidate is specified by the given pointer to a slice of entities.
-func (ds *Datastore[E]) consolidateHistory(tx *sql.Tx, entitySlicePtr any) error {
+func (ds *datastore[E]) consolidateHistory(tx *sql.Tx, entitySlicePtr any) error {
 
 	// entitySliceV := reflect.ValueOf(entitySlicePtr)
 	// if entitySliceV.Kind() != reflect.Ptr || entitySliceV.Elem().Kind() != reflect.Slice {

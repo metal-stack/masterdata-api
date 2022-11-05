@@ -30,7 +30,7 @@ func BenchmarkGetTenant(b *testing.B) {
 	err := ds.Create(context.Background(), t1)
 	assert.NoError(b, err)
 	defer func() {
-		ds.Delete(context.Background(), "t1")
+		_ = ds.Delete(context.Background(), "t1")
 	}()
 
 	for n := 0; n < b.N; n++ {
@@ -60,7 +60,7 @@ func BenchmarkUpdateTenant(b *testing.B) {
 	err := ds.Create(context.Background(), t1)
 	assert.NoError(b, err)
 	defer func() {
-		ds.Delete(context.Background(), "t1-update")
+		_ = ds.Delete(context.Background(), "t1-update")
 	}()
 
 	for n := 0; n < b.N; n++ {
@@ -82,7 +82,7 @@ func BenchmarkFindTenant(b *testing.B) {
 	})
 	assert.NoError(b, err)
 	defer func() {
-		ds.Delete(context.Background(), "t1")
+		_ = ds.Delete(context.Background(), "t1")
 	}()
 
 	for n := 0; n < b.N; n++ {
