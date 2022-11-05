@@ -207,10 +207,6 @@ func run() {
 	if err != nil {
 		logger.Fatal("failed to create postgres connection", zap.Error(err))
 	}
-	// storage, err := datastore.NewPostgresStorage(logger, db)
-	// if err != nil {
-	// 	logger.Fatal("failed to initialize storage", zap.Error(err))
-	// }
 
 	healthServer := health.NewHealthServer()
 

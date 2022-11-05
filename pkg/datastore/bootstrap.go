@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path"
 	"path/filepath"
@@ -12,7 +13,10 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/health"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
 )
+
+// FIXME iterate over all E here
 
 // Initdb reads all yaml files in given directory and apply their content as initial datasets.
 func (ds *Datastore[E]) Initdb(healthServer *health.Server, dir string) error {
@@ -77,76 +81,70 @@ func (ds *Datastore[E]) processConfig(file string) error {
 
 func (ds *Datastore[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 
-	// // all entities must contain a meta, parse that to get kind and apiversion
-	// var mm MetaMeta
-	// err := yaml.Unmarshal(ydoc, &mm)
-	// if err != nil {
-	// 	return err
-	// }
-	// ds.log.Info("initdb", zap.Any("meta", mm.Meta.GetKind()))
+	// all entities must contain a meta, parse that to get kind and apiversion
+	var mm MetaMeta
+	err := yaml.Unmarshal(ydoc, &mm)
+	if err != nil {
+		return err
+	}
+	ds.log.Info("initdb", zap.Any("meta", mm.Meta.GetKind()))
 
-	// kind := mm.Meta.GetKind()
-	// apiversion := mm.Meta.GetApiversion()
-	// var e E
-	// if kind != e.Kind() {
-	// 	ds.log.Info("skip", zap.String("kind from yaml", kind), zap.String("required kind", e.Kind()))
-	// 	return nil
-	// }
+	kind := mm.Meta.GetKind()
+	apiversion := mm.Meta.GetApiversion()
+	var e E
+	if kind != e.Kind() {
+		ds.log.Info("skip", zap.String("kind from yaml", kind), zap.String("required kind", e.Kind()))
+		return nil
+	}
 
-	// // messy extraction of apiversion from type
-	// if e.APIVersion() != apiversion {
-	// 	ds.log.Error("initdb apiversion does not match", zap.String("given", apiversion), zap.String("expected", e.APIVersion()))
-	// 	return nil
-	// }
-	// ds.log.Info("initdb", zap.Stringer("type", elementType), zap.String("apiversion", apiversion))
+	// messy extraction of apiversion from type
+	if e.APIVersion() != apiversion {
+		ds.log.Error("initdb apiversion does not match", zap.String("given", apiversion), zap.String("expected", e.APIVersion()))
+		return nil
+	}
 
-	// // no we have the type, create new from type and marshall in that new struct
-	// newEntity, ok := reflect.New(elementType.Elem()).Interface().(Entity)
-	// if !ok {
-	// 	panic(fmt.Sprintf("entity type %s must implement VersionedJSONEntity-Interface", elementType.String()))
-	// }
+	err = yaml.Unmarshal(ydoc, e)
+	if err != nil {
+		return err
+	}
 
-	// err = yaml.Unmarshal(ydoc, e)
-	// if err != nil {
-	// 	return err
-	// }
+	newKind := e.GetMeta().GetKind()
+	newID := e.GetMeta().GetId()
 
-	// newKind := e.GetMeta().GetKind()
-	// newID := e.GetMeta().GetId()
+	// now check that this type is already present for this id,
+	// therefore create nil interface to get into
+	exists := true
+	existingEntity, err := ds.Get(ctx, mm.Meta.GetId())
+	if err != nil {
+		if errors.As(err, &NotFoundError{}) {
+			exists = false
+		} else {
+			ds.log.Error("initdb", zap.Error(err))
+			return err
+		}
+	}
+	// now check if it exists by checking for id presence
+	// then update, otherwise create
+	if exists {
+		oldVersion := existingEntity.GetMeta().GetVersion()
+		newVersion := e.GetMeta().GetVersion()
+		ds.log.Info("initdb found existing, update", zap.String("kind", newKind), zap.String("id", newID), zap.Any("old version", oldVersion), zap.Any("new version", newVersion))
+		if oldVersion >= newVersion {
+			ds.log.Info("initdb existing version is equal or higher, skip update", zap.String("kind", newKind), zap.String("id", newID))
+			return nil
+		}
 
-	// // now check that this type is already present for this id,
-	// // therefore create nil interface to get into
-	// err = ds.Get(ctx, mm.Meta.GetId(), e)
-	// if err != nil {
-	// 	if errors.As(err, &NotFoundError{}) {
-	// 		e = nil
-	// 	} else {
-	// 		ds.log.Error("initdb", zap.Error(err))
-	// 		return err
-	// 	}
-	// }
-	// // now check if it exists by checking for id presence
-	// // then update, otherwise create
-	// if existingEntity != nil {
-	// 	oldVersion := existingEntity.GetMeta().GetVersion()
-	// 	newVersion := newEntity.GetMeta().GetVersion()
-	// 	ds.log.Info("initdb found existing, update", zap.String("kind", newKind), zap.String("id", newID), zap.Any("old version", oldVersion), zap.Any("new version", newVersion))
-	// 	if oldVersion >= newVersion {
-	// 		ds.log.Info("initdb existing version is equal or higher, skip update", zap.String("kind", newKind), zap.String("id", newID))
-	// 		return nil
-	// 	}
-
-	// 	newEntity.GetMeta().SetVersion(existingEntity.GetMeta().GetVersion())
-	// 	err = ds.Update(ctx, newEntity)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// } else {
-	// 	ds.log.Info("initdb create", zap.String("kind", newKind), zap.String("id", newID))
-	// 	err = ds.Create(ctx, newEntity)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+		e.GetMeta().SetVersion(existingEntity.GetMeta().GetVersion())
+		err = ds.Update(ctx, e)
+		if err != nil {
+			return err
+		}
+	} else {
+		ds.log.Info("initdb create", zap.String("kind", newKind), zap.String("id", newID))
+		err = ds.Create(ctx, e)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
