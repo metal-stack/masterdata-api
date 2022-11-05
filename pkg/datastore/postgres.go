@@ -46,11 +46,12 @@ type Entity interface {
 
 // datastore is the adapter to talk to the database
 type datastore[E Entity] struct {
-	log       *zap.Logger
-	db        *sqlx.DB
-	sb        squirrel.StatementBuilderType
-	jsonField string
-	tableName string
+	log              *zap.Logger
+	db               *sqlx.DB
+	sb               squirrel.StatementBuilderType
+	jsonField        string
+	tableName        string
+	historyTableName string
 }
 
 type Op string
@@ -82,18 +83,19 @@ func NewPostgresDB(logger *zap.Logger, host, port, user, password, dbname, sslmo
 // NewPostgresStorage creates a new Storage which uses postgres.
 func NewPostgresStorage[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage[E], error) {
 	ds := &datastore[E]{
-		log:       logger,
-		db:        db,
-		sb:        squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
-		jsonField: e.JSONField(),
-		tableName: e.TableName(),
+		log:              logger,
+		db:               db,
+		sb:               squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
+		jsonField:        e.JSONField(),
+		tableName:        e.TableName(),
+		historyTableName: fmt.Sprintf("%s_history", e.TableName()),
 	}
 	return ds, nil
 }
 
 // Create a entity
 func (ds *datastore[E]) Create(ctx context.Context, ve E) error {
-	ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.Any("id", ve))
+	ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.Any("value", ve))
 	meta := ve.GetMeta()
 	if meta == nil {
 		return fmt.Errorf("create of type:%s failed, meta is nil", ds.jsonField)
@@ -361,8 +363,7 @@ func (ds *datastore[E]) GetHistoryCreated(ctx context.Context, id string, ve E) 
 // Get the top matching history entity for given filter criteria,
 // returns NotFoundError if no entity can be found
 func (ds *datastore[E]) getHistoryWithPredicate(ctx context.Context, pred any, ve E) error {
-	tablename := historyTablename(ds.tableName)
-	q := ds.sb.Select(ds.jsonField).From(tablename).Where(pred).OrderByClause("created_at DESC").Limit(1)
+	q := ds.sb.Select(ds.jsonField).From(ds.historyTableName).Where(pred).OrderByClause("created_at DESC").Limit(1)
 
 	sql, _, _ := q.ToSql()
 	ds.log.Info("get", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("predicate", pred))
@@ -384,7 +385,7 @@ func (ds *datastore[E]) getHistoryWithPredicate(ctx context.Context, pred any, v
 
 // insertHistory inserts the given entity in the history table of the entity using the runner, which may be a Tx.
 func (ds *datastore[E]) insertHistory(ve E, op Op, createdAt time.Time, runner squirrel.BaseRunner) error {
-	qh := ds.sb.Insert(historyTablename(ds.tableName)).
+	qh := ds.sb.Insert(ds.historyTableName).
 		SetMap(map[string]any{
 			"id":         ve.GetMeta().Id,
 			"op":         op,
@@ -396,11 +397,6 @@ func (ds *datastore[E]) insertHistory(ve E, op Op, createdAt time.Time, runner s
 		return err
 	}
 	return nil
-}
-
-// historyTablename returns the tablename of the table-twin with historic data.
-func historyTablename(table string) string {
-	return fmt.Sprintf("%s_history", table)
 }
 
 // pbNow returns the current time as Protobuf and time
