@@ -215,10 +215,10 @@ func run() {
 		logger.Error("unable to apply initdb content", zap.Error(err))
 	}
 
-	// err = storage.MigrateDB(healthServer)
-	// if err != nil {
-	// 	logger.Error("unable to apply migrate db", zap.Error(err))
-	// }
+	err = datastore.MigrateDB(logger.Sugar(), db, healthServer)
+	if err != nil {
+		logger.Error("unable to apply migrate db", zap.Error(err))
+	}
 
 	projectService, err := service.NewProjectService(db, logger)
 	if err != nil {

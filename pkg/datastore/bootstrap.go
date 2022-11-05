@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	healthv1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
@@ -24,6 +25,7 @@ type bootstrap[E Entity] struct {
 
 // Initdb reads all yaml files in given directory and apply their content as initial datasets.
 func Initdb(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server, dir string) error {
+	start := time.Now()
 	files, err := filepath.Glob(path.Join(dir, "*.yaml"))
 	if err != nil {
 		return err
@@ -47,19 +49,20 @@ func Initdb(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server, di
 		ds:  ps,
 	}
 	for _, f := range files {
-		log.Infow("read initdb", "file", f)
+		log.Infow("read initdb for tenants", "file", f)
 		err = tbs.processConfig(f)
 		if err != nil {
 			return err
 		}
 	}
 	for _, f := range files {
-		log.Infow("read initdb", "file", f)
+		log.Infow("read initdb for projects", "file", f)
 		err = pbs.processConfig(f)
 		if err != nil {
 			return err
 		}
 	}
+	log.Infow("done reading initdb files", "took", time.Since(start))
 	healthServer.SetServingStatus("initdb", healthv1.HealthCheckResponse_SERVING)
 	return nil
 }
@@ -118,6 +121,7 @@ func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 
 	kind := mm.Meta.GetKind()
 	apiversion := mm.Meta.GetApiversion()
+
 	var e E
 	if kind != e.Kind() {
 		bs.log.Infow("skip", "kind from yaml", kind, "required kind", e.Kind())
@@ -130,10 +134,12 @@ func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 		return nil
 	}
 
-	err = yaml.Unmarshal(ydoc, e)
+	ee := new(E)
+	err = yaml.Unmarshal(ydoc, ee)
 	if err != nil {
 		return err
 	}
+	e = *ee
 
 	newKind := e.GetMeta().GetKind()
 	newID := e.GetMeta().GetId()
