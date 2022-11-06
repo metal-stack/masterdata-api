@@ -144,23 +144,29 @@ func TestDeleteProject(t *testing.T) {
 	assert.Equal(t, tdr.Id, resp.GetProject().GetMeta().GetId())
 }
 
-// FIXME reenable
-// func TestGetProject(t *testing.T) {
-// 	storageMock := &mocks.Storage{}
-// 	ts := NewProjectService(storageMock, log)
-// 	ctx := context.Background()
-// 	t4 := &v1.Project{}
-// 	tgr := &v1.ProjectGetRequest{
-// 		Id: "p4",
-// 	}
+func TestGetProject(t *testing.T) {
+	storageMock := &mocks.Storage[*v1.Project]{}
+	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	ts := &projectService{
+		projectStore: storageMock,
+		tenantStore:  tenantStorageMock,
+		log:          zaptest.NewLogger(t),
+	}
+	ctx := context.Background()
+	t4 := &v1.Project{
+		Meta: &v1.Meta{Id: "p4"},
+	}
+	tgr := &v1.ProjectGetRequest{
+		Id: "p4",
+	}
 
-// 	storageMock.On("Get", ctx, "p4", t4).Return(nil)
-// 	resp, err := ts.Get(ctx, tgr)
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, resp)
-// 	assert.NotNil(t, resp.GetProject())
-// 	assert.Equal(t, tgr.Id, resp.GetProject().GetMeta().GetId())
-// }
+	storageMock.On("Get", ctx, "p4").Return(t4, nil)
+	resp, err := ts.Get(ctx, tgr)
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotNil(t, resp.GetProject())
+	assert.Equal(t, tgr.Id, resp.GetProject().GetMeta().GetId())
+}
 
 func TestFindProjectByID(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Project]{}

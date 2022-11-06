@@ -105,23 +105,27 @@ func TestDeleteTenant(t *testing.T) {
 	assert.Equal(t, tdr.Id, resp.GetTenant().GetMeta().GetId())
 }
 
-// FIXME reenable
-// func TestGetTenant(t *testing.T) {
-// 	storageMock := &mocks.Storage{}
-// 	ts := NewTenantService(storageMock, log)
-// 	ctx := context.Background()
-// 	t4 := &v1.Tenant{}
-// 	tgr := &v1.TenantGetRequest{
-// 		Id: "t4",
-// 	}
+func TestGetTenant(t *testing.T) {
+	storageMock := &mocks.Storage[*v1.Tenant]{}
+	ts := &tenantService{
+		tenantStore: storageMock,
+		log:         zaptest.NewLogger(t),
+	}
+	ctx := context.Background()
+	t4 := &v1.Tenant{
+		Meta: &v1.Meta{Id: "t4"},
+	}
+	tgr := &v1.TenantGetRequest{
+		Id: "t4",
+	}
 
-// 	storageMock.On("Get", ctx, "t4", t4).Return(nil)
-// 	resp, err := ts.Get(ctx, tgr)
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, resp)
-// 	assert.NotNil(t, resp.GetTenant())
-// 	assert.Equal(t, tgr.Id, resp.GetTenant().GetMeta().GetId())
-// }
+	storageMock.On("Get", ctx, "t4").Return(t4, nil)
+	resp, err := ts.Get(ctx, tgr)
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotNil(t, resp.GetTenant())
+	assert.Equal(t, tgr.Id, resp.GetTenant().GetMeta().GetId())
+}
 
 func TestFindTenantByID(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
