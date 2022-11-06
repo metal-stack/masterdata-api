@@ -242,7 +242,7 @@ func (ds *datastore[E]) Update(ctx context.Context, ve E) error {
 // Get the entity for given id
 // returns NotFoundError if no entity can be found
 func (ds *datastore[E]) Get(ctx context.Context, id string) (E, error) {
-	ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.String("id", id))
+	ds.log.Debug("get", zap.String("entity", ds.jsonField), zap.String("id", id))
 	var zero E
 	q := ds.sb.Select(
 		ds.jsonField,
