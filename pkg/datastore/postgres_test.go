@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
@@ -543,6 +544,46 @@ func TestFind(t *testing.T) {
 	assert.NotNil(t, t4)
 	assert.Len(t, t4, 1)
 
+}
+
+func TestFindWithPaging(t *testing.T) {
+	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	// prevent side effects
+	db.MustExec("DELETE from tenants")
+	require.NoError(t, err)
+	assert.NotNil(t, tenantDS, "Datastore must not be nil")
+	ctx := context.Background()
+
+	// create some tenants
+
+	count := 100
+	for i := 0; i < count; i++ {
+		tn := &v1.Tenant{
+			Meta: &v1.Meta{Id: fmt.Sprintf("t-%d", i)},
+			Name: "paging",
+		}
+		err := tenantDS.Create(ctx, tn)
+		assert.NoError(t, err)
+	}
+
+	// First find all with no paging
+	ts, nextpage, err := tenantDS.Find(ctx, nil, nil)
+	assert.NoError(t, err)
+	assert.Nil(t, nextpage)
+	assert.Len(t, ts, 100)
+
+	// Then find the first 60 results
+	ts, nextpage, err = tenantDS.Find(ctx, nil, &v1.Paging{Count: pointer.Pointer(uint64(60))})
+	assert.NoError(t, err)
+	assert.NotNil(t, nextpage)
+	assert.Equal(t, uint64(1), *nextpage)
+	assert.Len(t, ts, 60)
+
+	// At least the next 60, but only 40 left and no more pages
+	ts, nextpage, err = tenantDS.Find(ctx, nil, &v1.Paging{Page: nextpage, Count: pointer.Pointer(uint64(60))})
+	assert.NoError(t, err)
+	assert.Nil(t, nextpage)
+	assert.Len(t, ts, 40)
 }
 
 func TestDelete(t *testing.T) {
