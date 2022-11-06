@@ -14,6 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	// import for sqlx to use postgres driver
 	_ "github.com/lib/pq"
@@ -131,6 +132,11 @@ func (ds *datastore[E]) Create(ctx context.Context, ve E) error {
 		"RETURNING " + ds.jsonField,
 	)
 
+	if ce := ds.log.Check(zapcore.DebugLevel, ""); ce != nil {
+		sql, vals, _ := q.ToSql()
+		ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("values", vals))
+	}
+
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -207,6 +213,11 @@ func (ds *datastore[E]) Update(ctx context.Context, ve E) error {
 		Suffix(
 			"RETURNING " + ds.jsonField,
 		)
+
+	if ce := ds.log.Check(zapcore.DebugLevel, ""); ce != nil {
+		sql, vals, _ := q.ToSql()
+		ds.log.Debug("update", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("values", vals))
+	}
 
 	tx, err := ds.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -306,6 +317,11 @@ func (ds *datastore[E]) Find(ctx context.Context, filter map[string]any, paging 
 
 	// Add paging query if paging is defined
 	q, nextPage := addPaging(q, paging)
+
+	if ce := ds.log.Check(zapcore.DebugLevel, ""); ce != nil {
+		sql, vals, _ := q.ToSql()
+		ds.log.Debug("find", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("values", vals))
+	}
 
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
