@@ -25,10 +25,10 @@ type (
 	}
 
 	TenantCreateRequest struct {
-		Tenant *Tenant `json:"tenant,omitempty"`
+		Tenant
 	}
 	TenantUpdateRequest struct {
-		Tenant *Tenant `json:"tenant,omitempty"`
+		Tenant
 	}
 
 	TenantFindRequest struct {
