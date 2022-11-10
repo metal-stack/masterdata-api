@@ -24,6 +24,9 @@ type (
 		IDMType string `json:"idm_type,omitempty"`
 	}
 
+	TenantCreateRequest struct {
+		Tenant *Tenant `json:"tenant,omitempty"`
+	}
 	TenantUpdateRequest struct {
 		Tenant *Tenant `json:"tenant,omitempty"`
 	}
