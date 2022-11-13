@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCRUD(t *testing.T) {
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -80,7 +80,7 @@ func TestCRUD(t *testing.T) {
 	// get unknown
 	tgr2, err := tenantDS.Get(ctx, "unknown-id")
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found sql: no rows in result set")
+	assert.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
 	assert.NotNil(t, &tgr2)
 
 	// update without meta and id
@@ -122,12 +122,12 @@ func TestCRUD(t *testing.T) {
 	// delete not existing
 	err = tenantDS.Delete(ctx, tcr.Meta.Id)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:tenant-1 not found sql: no rows in result set")
+	assert.EqualError(t, err, "tenant with id:tenant-1 not found sql: no rows in result set")
 
 }
 
 func TestUpdateOptimisticLock(t *testing.T) {
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -173,7 +173,7 @@ func TestUpdateOptimisticLock(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	const t1 = "t1"
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -264,7 +264,7 @@ func TestCreate(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	const t3 = "t3"
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -337,7 +337,7 @@ func TestUpdate(t *testing.T) {
 
 //nolint:unparam
 func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name string, desc string) {
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	var tgrhc v1.Tenant
 	err = tenantDS.GetHistoryCreated(ctx, id, &tgrhc)
@@ -347,7 +347,7 @@ func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name stri
 }
 
 func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, name string, desc string) {
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	var tgrh v1.Tenant
 	err = tenantDS.GetHistory(ctx, id, tm, &tgrh)
@@ -358,14 +358,14 @@ func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, na
 
 func TestGet(t *testing.T) {
 	const t4 = "t4"
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	// unknown id
 	_, err = tenantDS.Get(ctx, "unknown-id")
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found sql: no rows in result set")
+	assert.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -389,7 +389,7 @@ func TestGet(t *testing.T) {
 
 func TestGetHistory(t *testing.T) {
 	const t5 = "t5"
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -480,7 +480,7 @@ func TestGetHistory(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	const t6 = "t6"
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -547,7 +547,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestFindWithPaging(t *testing.T) {
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	// prevent side effects
 	db.MustExec("DELETE from tenants")
 	require.NoError(t, err)
@@ -588,7 +588,7 @@ func TestFindWithPaging(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	const t9 = "t9"
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -599,7 +599,7 @@ func TestDelete(t *testing.T) {
 	}
 	err = tenantDS.Delete(ctx, tdr1.Meta.Id)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:unknown-id not found sql: no rows in result set")
+	assert.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -622,7 +622,7 @@ func TestDelete(t *testing.T) {
 
 	_, err = tenantDS.Get(ctx, t9)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with id:t9 not found sql: no rows in result set")
+	assert.EqualError(t, err, "tenant with id:t9 not found sql: no rows in result set")
 
 	var tgrh v1.Tenant
 	err = tenantDS.GetHistory(ctx, t9, time.Now(), &tgrh)
@@ -631,7 +631,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestAnnotationsAndLabels(t *testing.T) {
-	tenantDS, err := NewPostgresStorage(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()

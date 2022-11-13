@@ -16,7 +16,7 @@ type tenantService struct {
 }
 
 func NewTenantService(db *sqlx.DB, l *zap.Logger) (*tenantService, error) {
-	ts, err := datastore.NewPostgresStorage(l, db, &v1.Tenant{})
+	ts, err := datastore.New(l, db, &v1.Tenant{})
 	if err != nil {
 		return nil, err
 	}

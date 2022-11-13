@@ -81,8 +81,8 @@ func NewPostgresDB(logger *zap.Logger, host, port, user, password, dbname, sslmo
 	return db, nil
 }
 
-// NewPostgresStorage creates a new Storage which uses postgres.
-func NewPostgresStorage[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage[E], error) {
+// New creates a new Storage which uses the given database abstraction.
+func New[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage[E], error) {
 	ds := &datastore[E]{
 		log:              logger,
 		db:               db,
@@ -256,7 +256,7 @@ func (ds *datastore[E]) Get(ctx context.Context, id string) (E, error) {
 	e := new(E)
 	err := row.Scan(e)
 	if err != nil {
-		return zero, NewNotFoundError(fmt.Sprintf("entity of type:%s with id:%s not found %v", ds.jsonField, id, err))
+		return zero, NewNotFoundError(fmt.Sprintf("%s with id:%s not found %v", ds.jsonField, id, err))
 	}
 	return *e, nil
 }

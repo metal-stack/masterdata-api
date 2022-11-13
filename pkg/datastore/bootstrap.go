@@ -31,7 +31,7 @@ func Initdb(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server, di
 		return err
 	}
 
-	ts, err := NewPostgresStorage(log.Desugar(), db, &v1.Tenant{})
+	ts, err := New(log.Desugar(), db, &v1.Tenant{})
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func Initdb(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server, di
 		ds:  ts,
 	}
 
-	ps, err := NewPostgresStorage(log.Desugar(), db, &v1.Project{})
+	ps, err := New(log.Desugar(), db, &v1.Project{})
 	if err != nil {
 		return err
 	}

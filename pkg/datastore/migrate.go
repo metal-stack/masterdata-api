@@ -21,7 +21,7 @@ func MigrateDB(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server)
 			&migrator.Migration{
 				Name: "Sample Migration for Tenant",
 				Func: func(tx *sql.Tx) error {
-					ts, err := NewPostgresStorage(log.Desugar(), db, &v1.Tenant{})
+					ts, err := New(log.Desugar(), db, &v1.Tenant{})
 					if err != nil {
 						return err
 					}

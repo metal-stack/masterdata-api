@@ -19,11 +19,11 @@ type projectService struct {
 }
 
 func NewProjectService(db *sqlx.DB, l *zap.Logger) (*projectService, error) {
-	ps, err := datastore.NewPostgresStorage(l, db, &v1.Project{})
+	ps, err := datastore.New(l, db, &v1.Project{})
 	if err != nil {
 		return nil, err
 	}
-	ts, err := datastore.NewPostgresStorage(l, db, &v1.Tenant{})
+	ts, err := datastore.New(l, db, &v1.Tenant{})
 	if err != nil {
 		return nil, err
 	}
