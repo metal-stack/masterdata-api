@@ -256,7 +256,10 @@ func (ds *datastore[E]) Get(ctx context.Context, id string) (E, error) {
 	e := new(E)
 	err := row.Scan(e)
 	if err != nil {
-		return zero, NewNotFoundError(fmt.Sprintf("%s with id:%s not found %v", ds.jsonField, id, err))
+		if errors.Is(err, sql.ErrNoRows) {
+			return zero, NewNotFoundError(fmt.Sprintf("%s with id:%s not found %v", ds.jsonField, id, err))
+		}
+		return zero, err
 	}
 	return *e, nil
 }
