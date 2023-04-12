@@ -47,7 +47,7 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:     moduleName,
-	Short:   "an api manage masterdata data for metal cloud components",
+	Short:   "api to manage masterdata data for metal cloud components",
 	Version: v.V.String(),
 	Run: func(cmd *cobra.Command, args []string) {
 		run()
