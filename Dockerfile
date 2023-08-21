@@ -6,10 +6,8 @@ RUN apk -U add curl \
     ${GRPC_HEALTH_PROBE_URL}/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 \
  && chmod +x /bin/grpc_health_probe
 
-FROM ghcr.io/metal-stack/builder:latest as builder
-
 FROM alpine:3.18
 RUN apk -U add ca-certificates
-COPY --from=builder /work/bin/server /masterdata-api
 COPY --from=health-downloader /bin/grpc_health_probe /bin/grpc_health_probe
+COPY bin/server /masterdata-api
 CMD ["/masterdata-api"]
