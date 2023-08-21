@@ -15,7 +15,7 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/health"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v3"
+	"sigs.k8s.io/yaml"
 )
 
 type bootstrap[E Entity] struct {
