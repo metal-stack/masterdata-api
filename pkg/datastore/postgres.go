@@ -186,7 +186,7 @@ func (ds *datastore[E]) Update(ctx context.Context, ve E) error {
 		return fmt.Errorf("update - no entity of type:%s with id:%s found", ds.jsonField, id)
 	}
 
-	if ve.GetMeta().GetVersion() < existingVE.GetMeta().GetVersion() {
+	if ve.GetMeta().GetVersion()+1 <= existingVE.GetMeta().GetVersion() {
 		return NewOptimisticLockError(
 			fmt.Sprintf("optimistic lock error updating %s with id %s, existing version %d mismatches entity version %d",
 				ds.jsonField, id, existingVE.GetMeta().GetVersion(), ve.GetMeta().GetVersion(),
