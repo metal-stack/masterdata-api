@@ -51,7 +51,7 @@ func (p *Project) Value() (driver.Value, error) {
 
 // Scan make the Project struct implement the sql.Scanner interface. This method
 // simply decodes a JSON-encoded value into the struct fields.
-func (p *Project) Scan(value interface{}) error {
+func (p *Project) Scan(value any) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("type assertion to []byte failed")

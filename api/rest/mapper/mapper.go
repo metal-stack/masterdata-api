@@ -207,6 +207,15 @@ func ToMdmV1TenantFindRequest(r *v1.TenantFindRequest) *mdmv1.TenantFindRequest 
 	if r.Name != nil {
 		mdmv1r.Name = &wrapperspb.StringValue{Value: *r.Name}
 	}
+	if r.Paging != nil {
+		mdmv1r.Paging = &mdmv1.Paging{
+			Page:  r.Paging.Count,
+			Count: r.Paging.Count,
+		}
+	}
+	if r.Annotations != nil {
+		mdmv1r.Annotations = r.Annotations
+	}
 
 	return mdmv1r
 }

@@ -47,7 +47,7 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:     moduleName,
-	Short:   "an api manage masterdata data for metal cloud components",
+	Short:   "api to manage masterdata data for metal cloud components",
 	Version: v.V.String(),
 	Run: func(cmd *cobra.Command, args []string) {
 		run()
@@ -192,7 +192,7 @@ func run() {
 	// grpcServer := grpc.NewServer(opts...)
 	grpcServer := grpc.NewServer(opts...)
 
-	ves := []datastore.VersionedJSONEntity{
+	ves := []datastore.Entity{
 		&apiv1.Project{},
 		&apiv1.Tenant{},
 	}
@@ -203,25 +203,31 @@ func run() {
 	dbName := viper.GetString("dbname")
 	dbSSLMode := viper.GetString("dbsslmode")
 
-	storage, err := datastore.NewPostgresStorage(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode, ves...)
+	db, err := datastore.NewPostgresDB(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode, ves...)
 	if err != nil {
 		logger.Fatal("failed to create postgres connection", zap.Error(err))
 	}
 
 	healthServer := health.NewHealthServer()
 
-	err = storage.Initdb(healthServer, "initdb.d")
+	err = datastore.Initdb(logger.Sugar(), db, healthServer, "initdb.d")
 	if err != nil {
 		logger.Error("unable to apply initdb content", zap.Error(err))
 	}
 
-	err = storage.MigrateDB(healthServer)
+	err = datastore.MigrateDB(logger.Sugar(), db, healthServer)
 	if err != nil {
 		logger.Error("unable to apply migrate db", zap.Error(err))
 	}
 
-	projectService := service.NewProjectService(storage, logger)
-	tenantService := service.NewTenantService(storage, logger)
+	projectService, err := service.NewProjectService(db, logger)
+	if err != nil {
+		logger.Fatal("unable to create project service", zap.Error(err))
+	}
+	tenantService, err := service.NewTenantService(db, logger)
+	if err != nil {
+		logger.Fatal("unable to create tenant service", zap.Error(err))
+	}
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)

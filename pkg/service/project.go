@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"go.uber.org/zap"
@@ -11,23 +12,32 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type ProjectService struct {
-	Storage datastore.Storage
-	log     *zap.Logger
+type projectService struct {
+	projectStore datastore.Storage[*v1.Project]
+	tenantStore  datastore.Storage[*v1.Tenant]
+	log          *zap.Logger
 }
 
-func NewProjectService(s datastore.Storage, l *zap.Logger) *ProjectService {
-	return &ProjectService{
-		Storage: NewStorageStatusWrapper(s),
-		log:     l,
+func NewProjectService(db *sqlx.DB, l *zap.Logger) (*projectService, error) {
+	ps, err := datastore.New(l, db, &v1.Project{})
+	if err != nil {
+		return nil, err
 	}
+	ts, err := datastore.New(l, db, &v1.Tenant{})
+	if err != nil {
+		return nil, err
+	}
+	return &projectService{
+		projectStore: NewStorageStatusWrapper(ps),
+		tenantStore:  NewStorageStatusWrapper(ts),
+		log:          l,
+	}, nil
 }
 
-func (s *ProjectService) Create(ctx context.Context, req *v1.ProjectCreateRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) Create(ctx context.Context, req *v1.ProjectCreateRequest) (*v1.ProjectResponse, error) {
 	project := req.Project
 
-	tenant := &v1.Tenant{}
-	err := s.Storage.Get(ctx, project.GetTenantId(), tenant)
+	tenant, err := s.tenantStore.Get(ctx, project.GetTenantId())
 	if err != nil && v1.IsNotFound(err) {
 		return nil, status.Error(codes.NotFound, fmt.Sprintf("unable to find tenant:%s for project", project.GetTenantId()))
 	}
@@ -41,10 +51,9 @@ func (s *ProjectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 	// Check if tenant defines project quotas
 	if tenant.GetQuotas() != nil && tenant.GetQuotas().GetProject() != nil && tenant.GetQuotas().GetProject().GetQuota() != nil {
 		maxProjects := tenant.GetQuotas().GetProject().GetQuota().GetValue()
-		filter := make(map[string]interface{})
+		filter := make(map[string]any)
 		filter["project ->> 'tenant_id'"] = project.GetTenantId()
-		var projects []v1.Project
-		_, err = s.Storage.Find(ctx, filter, nil, &projects)
+		projects, _, err := s.projectStore.Find(ctx, filter, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -59,39 +68,37 @@ func (s *ProjectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 	if project.Meta == nil {
 		project.Meta = &v1.Meta{}
 	}
-	err = s.Storage.Create(ctx, project)
+	err = s.projectStore.Create(ctx, project)
 	return project.NewProjectResponse(), err
 }
-func (s *ProjectService) Update(ctx context.Context, req *v1.ProjectUpdateRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) Update(ctx context.Context, req *v1.ProjectUpdateRequest) (*v1.ProjectResponse, error) {
 	project := req.Project
-	err := s.Storage.Update(ctx, project)
+	err := s.projectStore.Update(ctx, project)
 	return project.NewProjectResponse(), err
 }
-func (s *ProjectService) Delete(ctx context.Context, req *v1.ProjectDeleteRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteRequest) (*v1.ProjectResponse, error) {
 	project := req.NewProject()
-	err := s.Storage.Delete(ctx, project)
+	err := s.projectStore.Delete(ctx, project.Meta.Id)
 	return project.NewProjectResponse(), err
 }
-func (s *ProjectService) Get(ctx context.Context, req *v1.ProjectGetRequest) (*v1.ProjectResponse, error) {
-	project := &v1.Project{}
-	err := s.Storage.Get(ctx, req.Id, project)
+func (s *projectService) Get(ctx context.Context, req *v1.ProjectGetRequest) (*v1.ProjectResponse, error) {
+	project, err := s.projectStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
 	return project.NewProjectResponse(), nil
 }
-func (s *ProjectService) GetHistory(ctx context.Context, req *v1.ProjectGetHistoryRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) GetHistory(ctx context.Context, req *v1.ProjectGetHistoryRequest) (*v1.ProjectResponse, error) {
 	project := &v1.Project{}
 	at := req.At.AsTime()
-	err := s.Storage.GetHistory(ctx, req.Id, at, project)
+	err := s.projectStore.GetHistory(ctx, req.Id, at, project)
 	if err != nil {
 		return nil, err
 	}
 	return project.NewProjectResponse(), nil
 }
-func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (*v1.ProjectListResponse, error) {
-	var res []v1.Project
-	filter := make(map[string]interface{})
+func (s *projectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (*v1.ProjectListResponse, error) {
+	filter := make(map[string]any)
 	if req.Id != nil {
 		filter["id"] = req.Id.GetValue()
 	}
@@ -109,13 +116,13 @@ func (s *ProjectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 		f := fmt.Sprintf("project -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
 	}
-	nextPage, err := s.Storage.Find(ctx, filter, req.Paging, &res)
+	res, nextPage, err := s.projectStore.Find(ctx, filter, req.Paging)
 	if err != nil {
 		return nil, err
 	}
 	resp := new(v1.ProjectListResponse)
 	for i := range res {
-		p := &res[i]
+		p := res[i]
 		resp.Projects = append(resp.Projects, p)
 	}
 	resp.NextPage = nextPage

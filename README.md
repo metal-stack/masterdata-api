@@ -43,19 +43,6 @@ On every error happening during initdb is logged, but the affected entity is not
 make all
 ```
 
-### Install protoc
-
-```bash
-* https://github.com/protocolbuffers/protobuf
-* latest https://gist.github.com/sofyanhadia/37787e5ed098c97919b8c593f0ec44d8#gistcomment-2760267
-```
-
-### Install protoc-gen-go
-
-```bash
-go get -u github.com/golang/protobuf/protoc-gen-go
-```
-
 ## Run
 
 ```bash
@@ -63,12 +50,14 @@ make postgres-up
 ```
 
 Start client with extensive logging
+
 ```bash
 make clean protoc client
 GRPC_GO_LOG_VERBOSITY_LEVEL=99 GRPC_GO_LOG_SEVERITY_LEVEL=info bin/client
 ```
 
 Start server
+
 ```bash
 make clean protoc server
 bin/server
@@ -82,7 +71,40 @@ http://localhost:2112/metrics
 
 ## pprof
 
-```
+```bash
 go tool pprof -http :8080 localhost:2113/debug/pprof/heap
 go tool pprof -http :8080 localhost:2113/debug/pprof/goroutine
 ```
+
+## Generics migration
+
+In order to get rid of all the reflection based logic in `postgres.go`, we decided to migrate to generics which are available since go 1.18.
+This leads to much nicer code to read and also brings some benefits regarding allocations. Performance is at the same level as the reflection based approach.
+
+To measure the impact, a bunch of benchmarks have been implemented for all CRUD operations provided by `postgres.go`.
+
+Results comparing old(reflection based) vs. new(generics based):
+
+```plain
+
+name             old time/op    new time/op    delta
+GetTenant-16       92.9µs ±11%    94.4µs ± 5%     ~     (p=0.421 n=5+5)
+CreateTenant-16    3.06ms ± 9%    3.40ms ± 4%  +10.95%  (p=0.008 n=5+5)
+UpdateTenant-16    3.59ms ± 9%    3.81ms ±19%     ~     (p=0.548 n=5+5)
+FindTenant-16       259µs ±12%     224µs ± 3%  -13.75%  (p=0.008 n=5+5)
+
+name             old alloc/op   new alloc/op   delta
+GetTenant-16       5.68kB ± 0%    4.40kB ± 0%  -22.55%  (p=0.029 n=4+4)
+CreateTenant-16    10.8kB ± 0%     9.6kB ± 0%  -11.22%  (p=0.008 n=5+5)
+UpdateTenant-16    22.7kB ± 0%    19.0kB ± 0%  -16.26%  (p=0.008 n=5+5)
+FindTenant-16      7.15kB ± 0%    5.19kB ± 0%  -27.38%  (p=0.016 n=4+5)
+
+name             old allocs/op  new allocs/op  delta
+GetTenant-16          118 ± 0%        92 ± 0%  -22.03%  (p=0.008 n=5+5)
+CreateTenant-16       238 ± 0%       204 ± 0%  -14.29%  (p=0.008 n=5+5)
+UpdateTenant-16       500 ± 0%       408 ± 0%  -18.40%  (p=0.008 n=5+5)
+FindTenant-16         146 ± 0%       108 ± 0%  -26.03%  (p=0.008 n=5+5)
+
+```
+
+As shown, performance is about the same, but allocations in terms of bytes and count have been reduced quite significant.

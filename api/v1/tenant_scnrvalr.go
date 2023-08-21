@@ -51,7 +51,7 @@ func (t *Tenant) Value() (driver.Value, error) {
 
 // Scan make the Tenant struct implement the sql.Scanner interface. This method
 // simply decodes a JSON-encoded value into the struct fields.
-func (t *Tenant) Scan(value interface{}) error {
+func (t *Tenant) Scan(value any) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("type assertion to []byte failed")

@@ -24,13 +24,18 @@ type (
 		IDMType string `json:"idm_type,omitempty"`
 	}
 
+	TenantCreateRequest struct {
+		Tenant
+	}
 	TenantUpdateRequest struct {
-		Tenant *Tenant `json:"tenant,omitempty"`
+		Tenant
 	}
 
 	TenantFindRequest struct {
-		Id   *string `json:"id,omitempty"`
-		Name *string `json:"name,omitempty"`
+		Id          *string           `json:"id,omitempty"`
+		Name        *string           `json:"name,omitempty"`
+		Paging      *Paging           `json:"paging,omitempty"`
+		Annotations map[string]string `json:"annotations,omitempty"`
 	}
 
 	TenantResponse struct {
@@ -39,5 +44,10 @@ type (
 
 	TenantListResponse struct {
 		Tenants []*TenantResponse `json:"tenants,omitempty"`
+	}
+
+	Paging struct {
+		Page  *uint64 `json:"page,omitempty"`
+		Count *uint64 `json:"count,omitempty"`
 	}
 )

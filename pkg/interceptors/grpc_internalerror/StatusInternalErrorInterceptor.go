@@ -15,7 +15,7 @@ import (
 // UnaryServerInterceptor returns a new unary server interceptor for panic recovery.
 func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ any, err error) {
 
 		result, err := handler(ctx, req)
 		_, ok := status.FromError(err)
@@ -30,7 +30,7 @@ func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 // StreamServerInterceptor returns a new streaming server interceptor for panic recovery.
 func StreamServerInterceptor() grpc.StreamServerInterceptor {
 
-	return func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) (err error) {
+	return func(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) (err error) {
 
 		err = handler(srv, stream)
 		_, ok := status.FromError(err)

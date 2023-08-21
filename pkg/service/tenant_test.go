@@ -13,6 +13,7 @@ import (
 
 	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest"
 )
 
 var log *zap.Logger
@@ -27,8 +28,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateTenant(t *testing.T) {
-	storageMock := &mocks.Storage{}
-	ts := NewTenantService(storageMock, log)
+	storageMock := &mocks.Storage[*v1.Tenant]{}
+	ts := &tenantService{
+		tenantStore: storageMock,
+		log:         zaptest.NewLogger(t),
+	}
 	ctx := context.Background()
 
 	t1 := &v1.Tenant{
@@ -56,8 +60,11 @@ func TestCreateTenant(t *testing.T) {
 }
 
 func TestUpdateTenant(t *testing.T) {
-	storageMock := &mocks.Storage{}
-	ts := NewTenantService(storageMock, log)
+	storageMock := &mocks.Storage[*v1.Tenant]{}
+	ts := &tenantService{
+		tenantStore: storageMock,
+		log:         zaptest.NewLogger(t),
+	}
 	ctx := context.Background()
 
 	t1 := &v1.Tenant{
@@ -77,8 +84,11 @@ func TestUpdateTenant(t *testing.T) {
 }
 
 func TestDeleteTenant(t *testing.T) {
-	storageMock := &mocks.Storage{}
-	ts := NewTenantService(storageMock, log)
+	storageMock := &mocks.Storage[*v1.Tenant]{}
+	ts := &tenantService{
+		tenantStore: storageMock,
+		log:         zaptest.NewLogger(t),
+	}
 	ctx := context.Background()
 	t3 := &v1.Tenant{
 		Meta: &v1.Meta{Id: "t3"},
@@ -87,7 +97,7 @@ func TestDeleteTenant(t *testing.T) {
 		Id: "t3",
 	}
 
-	storageMock.On("Delete", ctx, t3).Return(nil)
+	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
 	resp, err := ts.Delete(ctx, tdr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -95,56 +105,66 @@ func TestDeleteTenant(t *testing.T) {
 	assert.Equal(t, tdr.Id, resp.GetTenant().GetMeta().GetId())
 }
 
-// FIXME reenable
-// func TestGetTenant(t *testing.T) {
-// 	storageMock := &mocks.Storage{}
-// 	ts := NewTenantService(storageMock, log)
-// 	ctx := context.Background()
-// 	t4 := &v1.Tenant{}
-// 	tgr := &v1.TenantGetRequest{
-// 		Id: "t4",
-// 	}
+func TestGetTenant(t *testing.T) {
+	storageMock := &mocks.Storage[*v1.Tenant]{}
+	ts := &tenantService{
+		tenantStore: storageMock,
+		log:         zaptest.NewLogger(t),
+	}
+	ctx := context.Background()
+	t4 := &v1.Tenant{
+		Meta: &v1.Meta{Id: "t4"},
+	}
+	tgr := &v1.TenantGetRequest{
+		Id: "t4",
+	}
 
-// 	storageMock.On("Get", ctx, "t4", t4).Return(nil)
-// 	resp, err := ts.Get(ctx, tgr)
-// 	assert.NoError(t, err)
-// 	assert.NotNil(t, resp)
-// 	assert.NotNil(t, resp.GetTenant())
-// 	assert.Equal(t, tgr.Id, resp.GetTenant().GetMeta().GetId())
-// }
+	storageMock.On("Get", ctx, "t4").Return(t4, nil)
+	resp, err := ts.Get(ctx, tgr)
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotNil(t, resp.GetTenant())
+	assert.Equal(t, tgr.Id, resp.GetTenant().GetMeta().GetId())
+}
 
 func TestFindTenantByID(t *testing.T) {
-	storageMock := &mocks.Storage{}
-	ts := NewTenantService(storageMock, log)
+	storageMock := &mocks.Storage[*v1.Tenant]{}
+	ts := &tenantService{
+		tenantStore: storageMock,
+		log:         zaptest.NewLogger(t),
+	}
 	ctx := context.Background()
-	var t5s []v1.Tenant
+	var t5s []*v1.Tenant
 	// filter by id
-	f1 := make(map[string]interface{})
+	f1 := make(map[string]any)
 	tfr := &v1.TenantFindRequest{
 		Id: &wrapperspb.StringValue{Value: "t5"},
 	}
 
 	f1["id"] = "t5"
-	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging"), &t5s).Return(nil, nil)
+	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging")).Return(t5s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
 }
 
 func TestFindTenantByName(t *testing.T) {
-	storageMock := &mocks.Storage{}
-	ts := NewTenantService(storageMock, log)
+	storageMock := &mocks.Storage[*v1.Tenant]{}
+	ts := &tenantService{
+		tenantStore: storageMock,
+		log:         zaptest.NewLogger(t),
+	}
 	ctx := context.Background()
 
 	// filter by name
-	var t6s []v1.Tenant
+	var t6s []*v1.Tenant
 	tfr := &v1.TenantFindRequest{
 		Name: &wrapperspb.StringValue{Value: "Fifth"},
 	}
 
-	f2 := make(map[string]interface{})
+	f2 := make(map[string]any)
 	f2["tenant ->> 'name'"] = "Fifth"
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging"), &t6s).Return(nil, nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)

@@ -19,12 +19,17 @@ clean:
 
 .PHONY: protoc
 protoc:
-	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/v1/*.proto
-	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work metalstack/builder protoc -I api --go_out=plugins=grpc:api api/grpc/health/v1/*.proto
+	docker pull ghcr.io/metal-stack/builder
+	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work ghcr.io/metal-stack/builder protoc -I api --go_out=plugins=grpc:api api/v1/*.proto
+	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work ghcr.io/metal-stack/builder protoc -I api --go_out=plugins=grpc:api api/grpc/health/v1/*.proto
 
 .PHONY: test
 test:
 	CGO_ENABLED=1 go test -cover -race -timeout 30s ./...
+
+.PHONY: bench
+bench:
+	cd pkg/datastore && CGO_ENABLED=1 go test -bench=. -run=- -benchmem -count 5 && cd -
 
 .PHONY: lint
 lint:
@@ -55,13 +60,13 @@ mocks:
 		--user $$(id -u):$$(id -g) \
 		-w /work \
 		-v ${PWD}:/work \
-		vektra/mockery:v2.14.0 -r --keeptree --dir api/v1 --output api/v1/mocks --all
+		vektra/mockery:v2.24.0 -r --keeptree --dir api/v1 --output api/v1/mocks --all
 
 	docker run --rm \
 		--user $$(id -u):$$(id -g) \
 		-w /work \
 		-v ${PWD}:/work \
-		vektra/mockery:v2.14.0 -r --keeptree --dir pkg/datastore --output pkg/datastore/mocks --all
+		vektra/mockery:v2.24.0 -r --keeptree --dir pkg/datastore --output pkg/datastore/mocks --all
 
 .PHONY: postgres-up
 postgres-up: postgres-rm

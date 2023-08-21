@@ -3,10 +3,10 @@
 // +build ignore
 
 /*
-	Generates methods necessary to fulfil the Scanner and Valuer Interface.
+Generates methods necessary to fulfil the Scanner and Valuer Interface.
 
-	Example Usage for Type "Tenant" in package "v1"
-	//go:generate go run ../../pkg/gen/gensv.go -package v1 -type Tenant
+Example Usage for Type "Tenant" in package "v1"
+//go:generate go run ../../pkg/gen/gensv.go -package v1 -type Tenant
 */
 package main
 
@@ -82,7 +82,7 @@ type Generator struct {
 	buf bytes.Buffer // Accumulated output.
 }
 
-func (g *Generator) Printf(format string, args ...interface{}) {
+func (g *Generator) Printf(format string, args ...any) {
 	fmt.Fprintf(&g.buf, format, args...)
 }
 
@@ -193,7 +193,7 @@ func ({{ .typeVariable }} *{{ .typeName }}) Value() (driver.Value, error) {
 
 // Scan make the {{ .typeName }} struct implement the sql.Scanner interface. This method
 // simply decodes a JSON-encoded value into the struct fields.
-func ({{ .typeVariable }} *{{ .typeName }}) Scan(value interface{}) error {
+func ({{ .typeVariable }} *{{ .typeName }}) Scan(value any) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return fmt.Errorf("type assertion to []byte failed")
