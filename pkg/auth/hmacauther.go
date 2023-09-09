@@ -16,7 +16,8 @@ type contextKey string
 
 const (
 	// HmacDefaultKey is a exported constant for convenience
-	HmacDefaultKey = "4Rahs0WnJ4rJE8ZiwiLec62z"
+	// FIXME where is this used ?
+	HmacDefaultKey = "4Rahs0WnJ4rJE8ZiwiLec62z" //nolint:gosec
 
 	// hmacMethod fictive non-rest-method used for HMAC-Token
 	hmacMethod = "GRPC"
@@ -61,7 +62,7 @@ func NewHMACAuther(logger *zap.Logger, hmacKey string, user security.User) (*HMA
 // If there is no authentication info in the request, or the verification of the HMAC
 // fails an Status-Error is returned with Code Unauthenticated.
 //
-//  see GetUser()
+//	see GetUser()
 //
 // Used on the service/server-side.
 func (a *HMACAuther) Auth(ctx context.Context) (context.Context, error) {
