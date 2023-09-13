@@ -6,10 +6,10 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lopezator/migrator"
-	healthv1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/health"
 	"go.uber.org/zap"
+	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 // MigrateDB applies necessary DB Migrations.

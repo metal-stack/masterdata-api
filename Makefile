@@ -19,9 +19,7 @@ clean:
 
 .PHONY: protoc
 protoc:
-	docker pull ghcr.io/metal-stack/builder
-	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work ghcr.io/metal-stack/builder protoc -I api --go_out=plugins=grpc:api api/v1/*.proto
-	docker run --rm --user $$(id -u):$$(id -g) -v ${PWD}:/work ghcr.io/metal-stack/builder protoc -I api --go_out=plugins=grpc:api api/grpc/health/v1/*.proto
+	make -C proto protoc
 
 .PHONY: test
 test:
@@ -40,7 +38,7 @@ generate:
 	go generate ./...
 
 .PHONY: server
-server:
+server: protoc generate
 	go build -tags netgo -ldflags "-X 'github.com/metal-stack/v.Version=$(VERSION)' \
 								   -X 'github.com/metal-stack/v.Revision=$(GITVERSION)' \
 								   -X 'github.com/metal-stack/v.GitSHA1=$(SHA)' \

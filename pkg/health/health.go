@@ -5,8 +5,8 @@ import (
 
 	"sync"
 
-	v1 "github.com/metal-stack/masterdata-api/api/grpc/health/v1"
 	"google.golang.org/grpc/codes"
+	v1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
 )
 
