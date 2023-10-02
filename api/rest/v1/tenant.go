@@ -40,7 +40,7 @@ type (
 		Annotations map[string]string `json:"annotations,omitempty"`
 	}
 
-	TenantHistoryRequest struct {
+	TenantGetHistoryRequest struct {
 		At time.Time `json:"at,omitempty"`
 	}
 
