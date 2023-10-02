@@ -1,5 +1,7 @@
 package v1
 
+import "time"
+
 type (
 	Tenant struct {
 		Meta          *Meta      `json:"meta,omitempty"`
@@ -36,6 +38,10 @@ type (
 		Name        *string           `json:"name,omitempty"`
 		Paging      *Paging           `json:"paging,omitempty"`
 		Annotations map[string]string `json:"annotations,omitempty"`
+	}
+
+	TenantHistoryRequest struct {
+		At time.Time `json:"at,omitempty"`
 	}
 
 	TenantResponse struct {
