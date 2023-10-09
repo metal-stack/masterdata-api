@@ -257,6 +257,11 @@ func ToV1Quota(q *mdmv1.Quota) *v1.Quota {
 		Quota: unwrapInt32(q.Quota),
 	}
 }
+
+func ToMdmV1TenantGetHistoryRequest(r *v1.TenantGetHistoryRequest, id string) *mdmv1.TenantGetHistoryRequest {
+	return &mdmv1.TenantGetHistoryRequest{Id: id, At: mustTimeToTimestamp(&r.At)}
+}
+
 func unwrapInt32(w *wrapperspb.Int32Value) *int32 {
 	if w == nil {
 		return nil
