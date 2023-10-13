@@ -15,6 +15,7 @@ service TenantService {
   rpc Delete(TenantDeleteRequest) returns (TenantResponse);
   rpc Get(TenantGetRequest) returns (TenantResponse);
   rpc GetHistory(TenantGetHistoryRequest) returns (TenantResponse);
+  rpc ListHistory(TenantListHistoryRequest) returns (TenantListResponse);
   rpc Find(TenantFindRequest) returns (TenantListResponse);
 }
 
@@ -46,6 +47,10 @@ message TenantGetRequest {
 message TenantGetHistoryRequest {
   string id = 1;
   google.protobuf.Timestamp at = 2;
+}
+message TenantListHistoryRequest {
+  string id = 1;
+  // TODO Add Paging
 }
 
 message TenantFindRequest {

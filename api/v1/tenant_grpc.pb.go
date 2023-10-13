@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TenantService_Create_FullMethodName     = "/v1.TenantService/Create"
-	TenantService_Update_FullMethodName     = "/v1.TenantService/Update"
-	TenantService_Delete_FullMethodName     = "/v1.TenantService/Delete"
-	TenantService_Get_FullMethodName        = "/v1.TenantService/Get"
-	TenantService_GetHistory_FullMethodName = "/v1.TenantService/GetHistory"
-	TenantService_Find_FullMethodName       = "/v1.TenantService/Find"
+	TenantService_Create_FullMethodName      = "/v1.TenantService/Create"
+	TenantService_Update_FullMethodName      = "/v1.TenantService/Update"
+	TenantService_Delete_FullMethodName      = "/v1.TenantService/Delete"
+	TenantService_Get_FullMethodName         = "/v1.TenantService/Get"
+	TenantService_GetHistory_FullMethodName  = "/v1.TenantService/GetHistory"
+	TenantService_ListHistory_FullMethodName = "/v1.TenantService/ListHistory"
+	TenantService_Find_FullMethodName        = "/v1.TenantService/Find"
 )
 
 // TenantServiceClient is the client API for TenantService service.
@@ -36,6 +37,7 @@ type TenantServiceClient interface {
 	Delete(ctx context.Context, in *TenantDeleteRequest, opts ...grpc.CallOption) (*TenantResponse, error)
 	Get(ctx context.Context, in *TenantGetRequest, opts ...grpc.CallOption) (*TenantResponse, error)
 	GetHistory(ctx context.Context, in *TenantGetHistoryRequest, opts ...grpc.CallOption) (*TenantResponse, error)
+	ListHistory(ctx context.Context, in *TenantListHistoryRequest, opts ...grpc.CallOption) (*TenantListResponse, error)
 	Find(ctx context.Context, in *TenantFindRequest, opts ...grpc.CallOption) (*TenantListResponse, error)
 }
 
@@ -92,6 +94,15 @@ func (c *tenantServiceClient) GetHistory(ctx context.Context, in *TenantGetHisto
 	return out, nil
 }
 
+func (c *tenantServiceClient) ListHistory(ctx context.Context, in *TenantListHistoryRequest, opts ...grpc.CallOption) (*TenantListResponse, error) {
+	out := new(TenantListResponse)
+	err := c.cc.Invoke(ctx, TenantService_ListHistory_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tenantServiceClient) Find(ctx context.Context, in *TenantFindRequest, opts ...grpc.CallOption) (*TenantListResponse, error) {
 	out := new(TenantListResponse)
 	err := c.cc.Invoke(ctx, TenantService_Find_FullMethodName, in, out, opts...)
@@ -110,6 +121,7 @@ type TenantServiceServer interface {
 	Delete(context.Context, *TenantDeleteRequest) (*TenantResponse, error)
 	Get(context.Context, *TenantGetRequest) (*TenantResponse, error)
 	GetHistory(context.Context, *TenantGetHistoryRequest) (*TenantResponse, error)
+	ListHistory(context.Context, *TenantListHistoryRequest) (*TenantListResponse, error)
 	Find(context.Context, *TenantFindRequest) (*TenantListResponse, error)
 }
 
@@ -131,6 +143,9 @@ func (UnimplementedTenantServiceServer) Get(context.Context, *TenantGetRequest) 
 }
 func (UnimplementedTenantServiceServer) GetHistory(context.Context, *TenantGetHistoryRequest) (*TenantResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetHistory not implemented")
+}
+func (UnimplementedTenantServiceServer) ListHistory(context.Context, *TenantListHistoryRequest) (*TenantListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListHistory not implemented")
 }
 func (UnimplementedTenantServiceServer) Find(context.Context, *TenantFindRequest) (*TenantListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Find not implemented")
@@ -237,6 +252,24 @@ func _TenantService_GetHistory_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TenantService_ListHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TenantListHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantServiceServer).ListHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantService_ListHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantServiceServer).ListHistory(ctx, req.(*TenantListHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TenantService_Find_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TenantFindRequest)
 	if err := dec(in); err != nil {
@@ -281,6 +314,10 @@ var TenantService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetHistory",
 			Handler:    _TenantService_GetHistory_Handler,
+		},
+		{
+			MethodName: "ListHistory",
+			Handler:    _TenantService_ListHistory_Handler,
 		},
 		{
 			MethodName: "Find",
