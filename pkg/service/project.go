@@ -49,8 +49,8 @@ func (s *projectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 	}
 
 	// Check if tenant defines project quotas
-	if tenant.GetQuotas() != nil && tenant.GetQuotas().GetProject() != nil && tenant.GetQuotas().GetProject().GetQuota() != nil {
-		maxProjects := tenant.GetQuotas().GetProject().GetQuota().GetValue()
+	if tenant.GetQuotas() != nil && tenant.GetQuotas().GetProject() != nil && tenant.GetQuotas().GetProject().GetQuota() != 0 {
+		maxProjects := tenant.GetQuotas().GetProject().GetQuota()
 		filter := make(map[string]any)
 		filter["project ->> 'tenant_id'"] = project.GetTenantId()
 		projects, _, err := s.projectStore.Find(ctx, filter, nil)
@@ -100,16 +100,16 @@ func (s *projectService) GetHistory(ctx context.Context, req *v1.ProjectGetHisto
 func (s *projectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (*v1.ProjectListResponse, error) {
 	filter := make(map[string]any)
 	if req.Id != nil {
-		filter["id"] = req.Id.GetValue()
+		filter["id"] = req.Id
 	}
 	if req.Name != nil {
-		filter["project ->> 'name'"] = req.Name.GetValue()
+		filter["project ->> 'name'"] = req.Name
 	}
 	if req.Description != nil {
-		filter["project ->> 'description'"] = req.Description.GetValue()
+		filter["project ->> 'description'"] = req.Description
 	}
 	if req.TenantId != nil {
-		filter["project ->> 'tenant_id'"] = req.TenantId.GetValue()
+		filter["project ->> 'tenant_id'"] = req.TenantId
 	}
 	for key, value := range req.Annotations {
 		// select * from project where project -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';

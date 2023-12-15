@@ -73,10 +73,10 @@ func (s *tenantService) GetHistory(ctx context.Context, req *v1.TenantGetHistory
 func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v1.TenantListResponse, error) {
 	filter := make(map[string]any)
 	if req.Id != nil {
-		filter["id"] = req.GetId().GetValue()
+		filter["id"] = req.GetId()
 	}
 	if req.Name != nil {
-		filter["tenant ->> 'name'"] = req.GetName().GetValue()
+		filter["tenant ->> 'name'"] = req.GetName()
 	}
 	for key, value := range req.Annotations {
 		// select * from tenants where tenant -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';

@@ -3,7 +3,6 @@ syntax = "proto3";
 package v1;
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/wrappers.proto";
 import "v1/common.proto";
 import "v1/meta.proto";
 import "v1/quota.proto";
@@ -48,10 +47,10 @@ message ProjectGetHistoryRequest {
 }
 
 message ProjectFindRequest {
-  google.protobuf.StringValue id = 1;
-  google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue description = 3;
-  google.protobuf.StringValue tenant_id = 4;
+  optional string id = 1;
+  optional string name = 2;
+  optional string description = 3;
+  optional string tenant_id = 4;
   Paging paging = 5;
   map<string, string> annotations = 6;
 }

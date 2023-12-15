@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/metal-stack/masterdata-api/api/rest/mapper"
+	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 
@@ -58,9 +58,9 @@ func projectExample(c client.Client, log *zap.Logger) {
 		Description: "Demo Project",
 		TenantId:    "customer-1",
 		Quotas: &v1.QuotaSet{
-			Cluster: &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
-			Machine: &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
-			Ip:      &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
+			Cluster: &v1.Quota{Quota: pointer.Pointer(int32(3))},
+			Machine: &v1.Quota{Quota: pointer.Pointer(int32(3))},
+			Ip:      &v1.Quota{Quota: pointer.Pointer(int32(3))},
 		},
 		Meta: &v1.Meta{
 			Annotations: map[string]string{
@@ -157,9 +157,9 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		Name:        "myTenant",
 		Description: "myDesc",
 		DefaultQuotas: &v1.QuotaSet{
-			Cluster: &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
-			Machine: &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
-			Ip:      &v1.Quota{Quota: &wrapperspb.Int32Value{Value: 3}},
+			Cluster: &v1.Quota{Quota: pointer.Pointer(int32(3))},
+			Machine: &v1.Quota{Quota: pointer.Pointer(int32(3))},
+			Ip:      &v1.Quota{Quota: pointer.Pointer(int32(3))},
 		},
 		IamConfig: &v1.IAMConfig{
 			IssuerConfig: &v1.IssuerConfig{
@@ -169,16 +169,14 @@ func tenantExample(c client.Client, log *zap.Logger) {
 			IdmConfig: &v1.IDMConfig{
 				IdmType: "UX",
 				ConnectorConfig: &v1.ConnectorConfig{
-					IdmApiUrl:      "a",
-					IdmApiUser:     "b",
-					IdmApiPassword: "c",
-					IdmSystemId:    "d",
-					IdmAccessCode:  "e",
-					IdmCustomerId:  "f",
-					IdmGroupOu:     "g",
-					IdmGroupnameTemplate: &wrapperspb.StringValue{
-						Value: "asdasdads",
-					},
+					IdmApiUrl:            "a",
+					IdmApiUser:           "b",
+					IdmApiPassword:       "c",
+					IdmSystemId:          "d",
+					IdmAccessCode:        "e",
+					IdmCustomerId:        "f",
+					IdmGroupOu:           "g",
+					IdmGroupnameTemplate: pointer.Pointer("asdasdads"),
 				},
 			},
 		},
@@ -277,7 +275,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 
 	log.Info("find tenant with id")
 	tfrqi := &v1.TenantFindRequest{
-		Id: &wrapperspb.StringValue{Value: t.Tenant.Meta.Id},
+		Id: pointer.Pointer(t.Tenant.Meta.Id),
 	}
 	tfrsi, err := c.Tenant().Find(ctx, tfrqi)
 	if err != nil {

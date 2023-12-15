@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package v1;
 
-import "google/protobuf/wrappers.proto";
-
 message IAMConfig {
   IssuerConfig issuer_config = 1;
   IDMConfig idm_config = 2;
@@ -56,8 +54,7 @@ message ConnectorConfig {
   string idm_access_code = 5;
   string idm_customer_id = 6;
   string idm_group_ou = 7;
-  // optional
-  google.protobuf.StringValue idm_groupname_template = 8;
+  optional string idm_groupname_template = 8;
 
   string idm_domain_name = 9;
   string idm_tenant_prefix = 10;
