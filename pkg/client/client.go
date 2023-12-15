@@ -31,7 +31,7 @@ type GRPCClient struct {
 }
 
 // NewClient creates a new client for the services for the given address, with the certificate and hmac.
-func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, logger *zap.Logger) (Client, error) {
+func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, insecure bool, logger *zap.Logger) (Client, error) {
 
 	address := fmt.Sprintf("%s:%d", hostname, port)
 
@@ -58,10 +58,11 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
-		ServerName:   hostname,
-		Certificates: []tls.Certificate{clientCertificate},
-		RootCAs:      certPool,
-		MinVersion:   tls.VersionTLS12,
+		ServerName:         hostname,
+		Certificates:       []tls.Certificate{clientCertificate},
+		RootCAs:            certPool,
+		MinVersion:         tls.VersionTLS12,
+		InsecureSkipVerify: insecure, // nolint:gosec
 	})
 
 	if hmacKey == "" {

@@ -7,6 +7,7 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"testing"
@@ -53,7 +54,7 @@ func TestCreateTenant(t *testing.T) {
 
 	storageMock.On("Create", ctx, t1).Return(nil)
 	resp, err := ts.Create(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetTenant())
 	assert.Equal(t, tcr.Tenant.GetName(), resp.GetTenant().GetName())
@@ -77,7 +78,7 @@ func TestUpdateTenant(t *testing.T) {
 
 	storageMock.On("Update", ctx, t1).Return(nil)
 	resp, err := ts.Update(ctx, tur)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetTenant())
 	assert.Equal(t, tur.Tenant.GetName(), resp.GetTenant().GetName())
@@ -99,7 +100,7 @@ func TestDeleteTenant(t *testing.T) {
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
 	resp, err := ts.Delete(ctx, tdr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetTenant())
 	assert.Equal(t, tdr.Id, resp.GetTenant().GetMeta().GetId())
@@ -121,7 +122,7 @@ func TestGetTenant(t *testing.T) {
 
 	storageMock.On("Get", ctx, "t4").Return(t4, nil)
 	resp, err := ts.Get(ctx, tgr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetTenant())
 	assert.Equal(t, tgr.Id, resp.GetTenant().GetMeta().GetId())
@@ -144,7 +145,7 @@ func TestFindTenantByID(t *testing.T) {
 	f1["id"] = "t5"
 	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging")).Return(t5s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
 
@@ -166,6 +167,6 @@ func TestFindTenantByName(t *testing.T) {
 	f2["tenant ->> 'name'"] = "Fifth"
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }

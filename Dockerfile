@@ -1,4 +1,4 @@
-FROM alpine:3.18 as health-downloader
+FROM alpine:3.19 as health-downloader
 ENV GRPC_HEALTH_PROBE_VERSION=v0.4.19 \
     GRPC_HEALTH_PROBE_URL=https://github.com/grpc-ecosystem/grpc-health-probe/releases/download
 RUN apk -U add curl \
@@ -6,7 +6,7 @@ RUN apk -U add curl \
     ${GRPC_HEALTH_PROBE_URL}/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 \
  && chmod +x /bin/grpc_health_probe
 
-FROM alpine:3.18
+FROM alpine:3.19
 RUN apk -U add ca-certificates
 COPY --from=health-downloader /bin/grpc_health_probe /bin/grpc_health_probe
 COPY bin/server /masterdata-api

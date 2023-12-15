@@ -2,42 +2,12 @@
 version: v1
 deps:
   - remote: buf.build
-    owner: cncf
-    repository: xds
-    commit: 0d869d8e763c430498070035c02ac001
-    digest: shake256:b86eabc7d6290b46989d8db4ea39f7e4932d736373960ad4bf0d3118a76d5159c40cab7086fbb82d981aad1effcf45a3ff514adfff882460aa9dd2eb6d5535f5
-  - remote: buf.build
-    owner: envoyproxy
-    repository: envoy
-    commit: 1ec8ea8729b64cde89d18b254411ff28
-    digest: shake256:8e972e382fe3e88301c4d3a51297e0edbfd696dc61e958dfd9ba0b0cb9c8ec6659d3f248e6206ea70987947a84ffc2107437d8275381d0ce1bda6e35c012be2a
-  - remote: buf.build
-    owner: envoyproxy
-    repository: protoc-gen-validate
-    commit: eac44469a7af47e7839a7f1f3d7ac004
-    digest: shake256:0feabcde01b6b11e3c75a5e3f807968d5995626546f39c37e5d4205892b3a59cced0ed83b35a2eb9e6dddd3309660ad46b737c9dcd224b425de0a6654ce04417
-  - remote: buf.build
     owner: googleapis
     repository: googleapis
-    commit: 28151c0d0a1641bf938a7672c500e01d
-    digest: shake256:49215edf8ef57f7863004539deff8834cfb2195113f0b890dd1f67815d9353e28e668019165b9d872395871eeafcbab3ccfdb2b5f11734d3cca95be9e8d139de
+    commit: b30c5775bfb3485d9da2e87b26590ac9
+    digest: shake256:9d0caaf056949a0e1c883b9849d8a2fa66e22f18a2a48f867d1a8c700aa22abee50ad3ef0d8171637457cadc43c584998bdf3adac55da0f9e4614c72686b057d
   - remote: buf.build
     owner: grpc
     repository: grpc
-    commit: a5b3a068eb8c45dea1ce4f36873286f8
-    digest: shake256:ea78e2b906f1a2d5094d4b7fb576f4a05f5ab2f2a6957c4a6fb780e3aa49a5d7dc9a1845f9bff115e8033600cd5ede8f22284d7e8bc7c32c73bde753cfce24a8
-  - remote: buf.build
-    owner: opencensus
-    repository: opencensus
-    commit: 7e475551350545bda1ccb1e258c7b125
-    digest: shake256:22499ad9824a29151f38e3ea026166bd2258f1f1b40d11246cb80718bff5d4a7fecd47ef857f5cd98609d7847c93329f603a4e43348abd7ac1ead22a6a964b05
-  - remote: buf.build
-    owner: opentelemetry
-    repository: opentelemetry
-    commit: 2ad07e196ee74068901737616c3f9e6c
-    digest: shake256:b3ac419a36c0ab35b3d05ac4425cb6d824f8d8dbdebf12dd71f6f7ef6e728a527251080d22dddcfeae104840457153bf4f70e890562d120e76c609958c386fdc
-  - remote: buf.build
-    owner: prometheus
-    repository: client-model
-    commit: 741a6a7bbc7645f89b588c47a06fceb3
-    digest: shake256:1b6db8908bc8557f4e87b308ea98debe476a119fb620e41d873df1065dd0d1b04dbb4466b5da52b985efd47f5f6658c2e33d11df63557e96ff6d54752cffdef2
+    commit: ff5662c7e50149f3b007ee6481105c5d
+    digest: shake256:9448b300198378b91aa68e56ad5b9d27a1ffd04697ce36407b9638e01fc3d26a6adddcbedb3de882f8b6545079250294eeb921a0f337e149a0856ff47114cadd

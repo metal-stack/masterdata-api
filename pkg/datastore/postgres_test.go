@@ -57,7 +57,7 @@ func TestCRUD(t *testing.T) {
 	}
 
 	err = tenantDS.Create(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	// specified id is persisted
 	assert.Equal(t, "tenant-1", tcr.Meta.Id)
@@ -67,11 +67,11 @@ func TestCRUD(t *testing.T) {
 	assert.Equal(t, "A very important Tenant", tcr.GetDescription())
 
 	err = tenantDS.Create(ctx, tcr)
-	assert.EqualError(t, err, "an entity of type:tenant with the id:tenant-1 already exists")
+	require.EqualError(t, err, "an entity of type:tenant with the id:tenant-1 already exists")
 
 	// get existing
 	tgr, err := tenantDS.Get(ctx, tcr.Meta.GetId())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, &tgr)
 	assert.Equal(t, "tenant-1", tgr.Meta.Id)
 	assert.Equal(t, "A Tenant", tgr.GetName())
@@ -79,14 +79,14 @@ func TestCRUD(t *testing.T) {
 
 	// get unknown
 	tgr2, err := tenantDS.Get(ctx, "unknown-id")
-	assert.Error(t, err)
-	assert.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
 	assert.NotNil(t, &tgr2)
 
 	// update without meta and id
 	err = tenantDS.Update(ctx, tgr2)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "update of type:tenant failed, meta is nil")
+	require.Error(t, err)
+	require.EqualError(t, err, "update of type:tenant failed, meta is nil")
 
 	// update with unknown id
 	tcr2 := &v1.Tenant{
@@ -95,13 +95,13 @@ func TestCRUD(t *testing.T) {
 		Description: "A not so important Tenant",
 	}
 	err = tenantDS.Update(ctx, tcr2)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "update - no entity of type:tenant with id:tenant-2 found")
+	require.Error(t, err)
+	require.EqualError(t, err, "update - no entity of type:tenant with id:tenant-2 found")
 
 	// update name
 	tcr.Name = "Important Tenant"
 	err = tenantDS.Update(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "Important Tenant", tcr.GetName())
 
 	// find existing
@@ -109,20 +109,20 @@ func TestCRUD(t *testing.T) {
 	// filter["tenant->>name"] = "Important Tenant"
 	filter["id"] = "tenant-1"
 	tenants, _, err := tenantDS.Find(ctx, filter, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tenants)
 	assert.Len(t, tenants, 1)
 	assert.Equal(t, "Important Tenant", tenants[0].Name)
 
 	// delete existing
 	err = tenantDS.Delete(ctx, tcr.Meta.Id)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 
 	// delete not existing
 	err = tenantDS.Delete(ctx, tcr.Meta.Id)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "tenant with id:tenant-1 not found sql: no rows in result set")
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:tenant-1 not found sql: no rows in result set")
 
 }
 
@@ -138,7 +138,7 @@ func TestUpdateOptimisticLock(t *testing.T) {
 	}
 
 	err = tenantDS.Create(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	assert.Equal(t, int64(0), tcr.Meta.Version)
 	assert.Equal(t, "A Tenant", tcr.GetName())
@@ -152,14 +152,14 @@ func TestUpdateOptimisticLock(t *testing.T) {
 	// update instance
 	tcr.Name = "updated name"
 	err = tenantDS.Update(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	// incremented version after update
 	assert.Equal(t, int64(1), tcr.Meta.Version)
 
 	// re-read from db
 	tgr, err := tenantDS.Get(ctx, tcr.Meta.GetId())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// version is incremented
 	assert.Equal(t, int64(1), tgr.Meta.Version)
 	// updated data is reflected
@@ -185,8 +185,8 @@ func TestCreate(t *testing.T) {
 
 	// meta is nil
 	err = tenantDS.Create(ctx, tcr1)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "create of type:tenant failed, meta is nil")
+	require.Error(t, err)
+	require.EqualError(t, err, "create of type:tenant failed, meta is nil")
 
 	// valid entity
 	tcr1 = &v1.Tenant{
@@ -195,7 +195,7 @@ func TestCreate(t *testing.T) {
 		Description: "A Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// specified id is persisted
 	assert.Equal(t, t1, tcr1.Meta.Id)
 	// initial version is set
@@ -210,8 +210,8 @@ func TestCreate(t *testing.T) {
 		Description: "B Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr2)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "an entity of type:tenant with the id:t1 already exists")
+	require.Error(t, err)
+	require.EqualError(t, err, "an entity of type:tenant with the id:t1 already exists")
 
 	// create with empty id
 	tcr3 := &v1.Tenant{
@@ -220,7 +220,7 @@ func TestCreate(t *testing.T) {
 		Description: "C Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr3)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr3.GetMeta().GetId())
 	assert.NotEmpty(t, tcr3.GetMeta().GetId())
 	assert.Contains(t, tcr3.GetMeta().GetId(), "-")
@@ -233,13 +233,13 @@ func TestCreate(t *testing.T) {
 		Description: "D Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr3.GetMeta().GetApiversion())
 	assert.NotEmpty(t, tcr3.GetMeta().GetApiversion())
-	assert.Equal(t, tcr3.GetMeta().GetApiversion(), "v1")
+	assert.Equal(t, "v1", tcr3.GetMeta().GetApiversion())
 	assert.NotNil(t, tcr3.GetMeta().GetKind())
 	assert.NotEmpty(t, tcr3.GetMeta().GetKind())
-	assert.Equal(t, tcr3.GetMeta().GetKind(), "Tenant")
+	assert.Equal(t, "Tenant", tcr3.GetMeta().GetKind())
 
 	// create with wrong kind
 	tcr5 := &v1.Tenant{
@@ -248,8 +248,8 @@ func TestCreate(t *testing.T) {
 		Description: "E Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr5)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "create of type:tenant failed, kind is set to:Project but must be:Tenant")
+	require.Error(t, err)
+	require.EqualError(t, err, "create of type:tenant failed, kind is set to:Project but must be:Tenant")
 
 	// create with wrong apiversion
 	tcr6 := &v1.Tenant{
@@ -258,8 +258,8 @@ func TestCreate(t *testing.T) {
 		Description: "F Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr6)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "create of type:tenant failed, apiversion must be set to:v1")
+	require.Error(t, err)
+	require.EqualError(t, err, "create of type:tenant failed, apiversion must be set to:v1")
 }
 
 func TestUpdate(t *testing.T) {
@@ -275,8 +275,8 @@ func TestUpdate(t *testing.T) {
 		Description: "C Tenant",
 	}
 	err = tenantDS.Update(ctx, tcr1)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "update of type:tenant failed, meta is nil")
+	require.Error(t, err)
+	require.EqualError(t, err, "update of type:tenant failed, meta is nil")
 
 	// id is empty
 	tcr1 = &v1.Tenant{
@@ -285,8 +285,8 @@ func TestUpdate(t *testing.T) {
 		Description: "C Tenant",
 	}
 	err = tenantDS.Update(ctx, tcr1)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "entity of type:tenant has no id, cannot update: meta:{}")
+	require.Error(t, err)
+	require.ErrorContains(t, err, "entity of type:tenant has no id, cannot update: meta:{}")
 
 	// tenant with id is not found
 	tcr1 = &v1.Tenant{
@@ -295,11 +295,11 @@ func TestUpdate(t *testing.T) {
 		Description: "C Tenant",
 	}
 	err = tenantDS.Update(ctx, tcr1)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "update - no entity of type:tenant with id:t3 found")
+	require.Error(t, err)
+	require.EqualError(t, err, "update - no entity of type:tenant with id:t3 found")
 	// create tenant
 	err = tenantDS.Create(ctx, tcr1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, t3, tcr1.GetMeta().GetId())
 	assert.Equal(t, "ctenant", tcr1.GetName())
 	assert.Equal(t, "C Tenant", tcr1.GetDescription())
@@ -310,7 +310,7 @@ func TestUpdate(t *testing.T) {
 	// now update existing
 	tcr1.Description = "C Tenant 3"
 	err = tenantDS.Update(ctx, tcr1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, t3, tcr1.GetMeta().GetId())
 	assert.Equal(t, "ctenant", tcr1.GetName())
 	assert.Equal(t, "C Tenant 3", tcr1.GetDescription())
@@ -322,15 +322,15 @@ func TestUpdate(t *testing.T) {
 	// try update with wrong kind
 	tcr1.Meta.Kind = "WrongKind"
 	err = tenantDS.Update(ctx, tcr1)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "update of type:tenant failed, kind is set to:WrongKind but must be:Tenant")
+	require.Error(t, err)
+	require.EqualError(t, err, "update of type:tenant failed, kind is set to:WrongKind but must be:Tenant")
 
 	// try update with wrong kind
 	tcr1.Meta.Kind = "Tenant"
 	tcr1.Meta.Apiversion = "v2"
 	err = tenantDS.Update(ctx, tcr1)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "update of type:tenant failed, apiversion must be set to:v1")
+	require.Error(t, err)
+	require.EqualError(t, err, "update of type:tenant failed, apiversion must be set to:v1")
 
 	checkHistory(ctx, t, t3, time.Now(), "ctenant", "C Tenant 3")
 }
@@ -341,7 +341,7 @@ func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name stri
 	require.NoError(t, err)
 	var tgrhc v1.Tenant
 	err = tenantDS.GetHistoryCreated(ctx, id, &tgrhc)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, name, tgrhc.Name)
 	assert.Equal(t, desc, tgrhc.GetDescription())
 }
@@ -351,7 +351,7 @@ func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, na
 	require.NoError(t, err)
 	var tgrh v1.Tenant
 	err = tenantDS.GetHistory(ctx, id, tm, &tgrh)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, name, tgrh.Name)
 	assert.Equal(t, desc, tgrh.GetDescription())
 }
@@ -364,8 +364,8 @@ func TestGet(t *testing.T) {
 	ctx := context.Background()
 	// unknown id
 	_, err = tenantDS.Get(ctx, "unknown-id")
-	assert.Error(t, err)
-	assert.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -374,14 +374,14 @@ func TestGet(t *testing.T) {
 		Description: "D Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, t4, tcr1.GetMeta().GetId())
 	assert.Equal(t, "dtenant", tcr1.GetName())
 	assert.Equal(t, "D Tenant", tcr1.GetDescription())
 
 	// now get it
 	tgr2, err := tenantDS.Get(ctx, t4)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, t4, tgr2.GetMeta().GetId())
 	assert.Equal(t, "dtenant", tgr2.GetName())
 	assert.Equal(t, "D Tenant", tgr2.GetDescription())
@@ -399,12 +399,12 @@ func TestGetHistory(t *testing.T) {
 	// unknown id
 	var tgr1 v1.Tenant
 	err = tenantDS.GetHistory(ctx, "unknown-id", tsNow, &tgr1)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:unknown-id] map[created_at:2020-04-30 18:00:00 +0000 UTC]] not found")
+	require.Error(t, err)
+	require.EqualError(t, err, "entity of type:tenant with predicate:[map[id:unknown-id] map[created_at:2020-04-30 18:00:00 +0000 UTC]] not found")
 
 	err = tenantDS.GetHistoryCreated(ctx, "unknown-id", &tgr1)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:unknown-id] map[op:C]] not found")
+	require.Error(t, err)
+	require.EqualError(t, err, "entity of type:tenant with predicate:[map[id:unknown-id] map[op:C]] not found")
 
 	// control time.Now()
 	createTS := time.Date(2020, 4, 30, 18, 0, 0, 0, time.UTC)
@@ -413,12 +413,12 @@ func TestGetHistory(t *testing.T) {
 
 	var tgrH v1.Tenant
 	err = tenantDS.GetHistory(ctx, t5, createTS, &tgrH)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[created_at:2020-04-30 18:00:00 +0000 UTC]] not found")
+	require.Error(t, err)
+	require.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[created_at:2020-04-30 18:00:00 +0000 UTC]] not found")
 
 	err = tenantDS.GetHistoryCreated(ctx, t5, &tgrH)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[op:C]] not found")
+	require.Error(t, err)
+	require.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[op:C]] not found")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -427,20 +427,20 @@ func TestGetHistory(t *testing.T) {
 		Description: "D Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, createTS, "dtenant", "D Tenant")
 
 	tcrU, err := tenantDS.Get(ctx, t5)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, createTS, convertToTime(tcrU.Meta.CreatedTime))
 
 	updateTS := time.Date(2020, 4, 30, 20, 0, 0, 0, time.UTC)
 	setNow(updateTS)
 	tcrU.Name = "dtenant updated"
 	err = tenantDS.Update(ctx, tcrU)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, updateTS, convertToTime(tcrU.Meta.UpdatedTime))
 
 	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
@@ -450,7 +450,7 @@ func TestGetHistory(t *testing.T) {
 	setNow(update2TS)
 	tcrU.Name = "dtenant updated 2"
 	err = tenantDS.Update(ctx, tcrU)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, update2TS, convertToTime(tcrU.Meta.UpdatedTime))
 
 	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
@@ -459,7 +459,7 @@ func TestGetHistory(t *testing.T) {
 	deletedTS := time.Date(2020, 4, 30, 22, 0, 0, 0, time.UTC)
 	setNow(deletedTS)
 	err = tenantDS.Delete(ctx, tcr1.Meta.Id)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, deletedTS, "dtenant updated 2", "D Tenant")
@@ -467,8 +467,8 @@ func TestGetHistory(t *testing.T) {
 	// Check complete history
 	// before create
 	err = tenantDS.GetHistory(ctx, t5, time.Date(2019, 1, 1, 8, 0, 0, 0, time.UTC), &tgrH)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[created_at:2019-01-01 08:00:00 +0000 UTC]] not found")
+	require.Error(t, err)
+	require.EqualError(t, err, "entity of type:tenant with predicate:[map[id:t5] map[created_at:2019-01-01 08:00:00 +0000 UTC]] not found")
 
 	checkHistoryCreated(ctx, t, t5, "dtenant", "D Tenant")
 	checkHistory(ctx, t, t5, createTS, "dtenant", "D Tenant")
@@ -492,7 +492,7 @@ func TestFind(t *testing.T) {
 		Description: "F Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, t6, tcr1.GetMeta().GetId())
 	assert.Equal(t, "ftenant", tcr1.GetName())
 	assert.Equal(t, "F Tenant", tcr1.GetDescription())
@@ -501,7 +501,7 @@ func TestFind(t *testing.T) {
 	filter := make(map[string]any)
 	filter["id"] = t6
 	tfr, _, err := tenantDS.Find(ctx, filter, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tfr)
 	assert.Len(t, tfr, 1)
 
@@ -513,18 +513,18 @@ func TestFind(t *testing.T) {
 			Description: fmt.Sprintf("Tenant %d", i),
 		}
 		err = tenantDS.Create(ctx, tcr)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 	// find all
 	filter = make(map[string]any)
 	tfr, _, err = tenantDS.Find(ctx, filter, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tfr)
 
 	// find one
 	filter["id"] = "ftenant-9"
 	t9, _, err := tenantDS.Find(ctx, filter, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, t9)
 	assert.Len(t, t9, 1)
 
@@ -532,7 +532,7 @@ func TestFind(t *testing.T) {
 	filter = make(map[string]any)
 	filter["tenant ->> 'name'"] = "tenant-8"
 	t8, _, err := tenantDS.Find(ctx, filter, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, t8)
 	assert.Len(t, t8, 1)
 
@@ -540,7 +540,7 @@ func TestFind(t *testing.T) {
 	filter = make(map[string]any)
 	filter["tenant ->> 'description'"] = "Tenant 4"
 	t4, _, err := tenantDS.Find(ctx, filter, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, t4)
 	assert.Len(t, t4, 1)
 
@@ -563,25 +563,25 @@ func TestFindWithPaging(t *testing.T) {
 			Name: "paging",
 		}
 		err := tenantDS.Create(ctx, tn)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
 	// First find all with no paging
 	ts, nextpage, err := tenantDS.Find(ctx, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, nextpage)
 	assert.Len(t, ts, 100)
 
 	// Then find the first 60 results
 	ts, nextpage, err = tenantDS.Find(ctx, nil, &v1.Paging{Count: pointer.Pointer(uint64(60))})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, nextpage)
 	assert.Equal(t, uint64(1), *nextpage)
 	assert.Len(t, ts, 60)
 
 	// At least the next 60, but only 40 left and no more pages
 	ts, nextpage, err = tenantDS.Find(ctx, nil, &v1.Paging{Page: nextpage, Count: pointer.Pointer(uint64(60))})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, nextpage)
 	assert.Len(t, ts, 40)
 }
@@ -598,8 +598,8 @@ func TestDelete(t *testing.T) {
 		Meta: &v1.Meta{Id: "unknown-id"},
 	}
 	err = tenantDS.Delete(ctx, tdr1.Meta.Id)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -608,7 +608,7 @@ func TestDelete(t *testing.T) {
 		Description: "E Tenant",
 	}
 	err = tenantDS.Create(ctx, tcr1)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, t9, tcr1.GetMeta().GetId())
 	assert.Equal(t, "etenant", tcr1.GetName())
 	assert.Equal(t, "E Tenant", tcr1.GetDescription())
@@ -618,15 +618,15 @@ func TestDelete(t *testing.T) {
 		Meta: &v1.Meta{Id: t9},
 	}
 	err = tenantDS.Delete(ctx, tdr2.Meta.Id)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	_, err = tenantDS.Get(ctx, t9)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "tenant with id:t9 not found sql: no rows in result set")
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:t9 not found sql: no rows in result set")
 
 	var tgrh v1.Tenant
 	err = tenantDS.GetHistory(ctx, t9, time.Now(), &tgrh)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "etenant", tgrh.Name)
 }
 
@@ -651,7 +651,7 @@ func TestAnnotationsAndLabels(t *testing.T) {
 	}
 
 	err = tenantDS.Create(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	assert.Equal(t, int64(0), tcr.Meta.Version)
 	assert.Equal(t, "A Tenant", tcr.GetName())
@@ -669,14 +669,14 @@ func TestAnnotationsAndLabels(t *testing.T) {
 	// update instance
 	tcr.Name = "updated name"
 	err = tenantDS.Update(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	// incremented version after update
 	assert.Equal(t, int64(1), tcr.Meta.Version)
 
 	// re-read from db
 	tgr, err := tenantDS.Get(ctx, tcr.Meta.GetId())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	// version is incremented
 	assert.Equal(t, int64(1), tgr.Meta.Version)
 	// updated data is reflected
@@ -698,7 +698,7 @@ func TestAnnotationsAndLabels(t *testing.T) {
 	tcr.GetMeta().SetAnnotations(as)
 	tcr.GetMeta().SetLabels(ls)
 	err = tenantDS.Update(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	assert.Equal(t, map[string]string{"key1": "value3", "key2": "value2"}, tcr.GetMeta().GetAnnotations())
 	assert.Equal(t, []string{"color=red", "size=xlarge"}, tcr.GetMeta().GetLabels())
@@ -724,7 +724,7 @@ func createPostgresConnection() (*sqlx.DB, error) {
 
 	ctx := context.Background()
 	req := testcontainers.ContainerRequest{
-		Image:        "postgres:15-alpine",
+		Image:        "postgres:16-alpine",
 		ExposedPorts: []string{"5432/tcp"},
 		Env:          map[string]string{"POSTGRES_PASSWORD": "password"},
 		// TODO: should work, but dont, hence using the loop below to check pg is up an ready for connections.

@@ -6,6 +6,7 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -44,7 +45,7 @@ func TestCreateProject(t *testing.T) {
 	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
 	resp, err := ts.Create(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProject())
 	assert.Equal(t, tcr.Project.GetName(), resp.GetProject().GetName())
@@ -83,7 +84,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	storageMock.On("Find", ctx, filter, mock.AnythingOfType("*v1.Paging")).Return(projects, nil, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
 	resp, err := ts.Create(ctx, tcr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProject())
 	assert.Equal(t, tcr.Project.GetName(), resp.GetProject().GetName())
@@ -114,7 +115,7 @@ func TestUpdateProject(t *testing.T) {
 
 	storageMock.On("Update", ctx, t1).Return(nil)
 	resp, err := ts.Update(ctx, tur)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProject())
 	assert.Equal(t, tur.GetProject().GetName(), resp.GetProject().GetName())
@@ -138,7 +139,7 @@ func TestDeleteProject(t *testing.T) {
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
 	resp, err := ts.Delete(ctx, tdr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProject())
 	assert.Equal(t, tdr.Id, resp.GetProject().GetMeta().GetId())
@@ -162,7 +163,7 @@ func TestGetProject(t *testing.T) {
 
 	storageMock.On("Get", ctx, "p4").Return(t4, nil)
 	resp, err := ts.Get(ctx, tgr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProject())
 	assert.Equal(t, tgr.Id, resp.GetProject().GetMeta().GetId())
@@ -187,7 +188,7 @@ func TestFindProjectByID(t *testing.T) {
 	f1["id"] = "p5"
 	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging")).Return(t5s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
 
@@ -211,7 +212,7 @@ func TestFindProjectByName(t *testing.T) {
 	f2["project ->> 'name'"] = "Sixth"
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
 
@@ -235,6 +236,6 @@ func TestFindProjectByTenant(t *testing.T) {
 	f2["project ->> 'tenant_id'"] = "p1"
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
