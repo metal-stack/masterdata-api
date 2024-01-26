@@ -6,7 +6,6 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/rest/v1"
 	mdmv1 "github.com/metal-stack/masterdata-api/api/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func ToMdmV1Tenant(t *v1.Tenant) *mdmv1.Tenant {
@@ -150,9 +149,7 @@ func ToMdmV1Quota(q *v1.Quota) *mdmv1.Quota {
 	}
 
 	return &mdmv1.Quota{
-		Quota: &wrapperspb.Int32Value{
-			Value: *q.Quota,
-		},
+		Quota: q.Quota,
 	}
 }
 
@@ -178,18 +175,11 @@ func ToMdmV1ProjectFindRequest(r *v1.ProjectFindRequest) *mdmv1.ProjectFindReque
 		return nil
 	}
 
-	mdmv1r := new(mdmv1.ProjectFindRequest)
-	if r.Id != nil {
-		mdmv1r.Id = &wrapperspb.StringValue{Value: *r.Id}
-	}
-	if r.Description != nil {
-		mdmv1r.Description = &wrapperspb.StringValue{Value: *r.Description}
-	}
-	if r.Name != nil {
-		mdmv1r.Name = &wrapperspb.StringValue{Value: *r.Name}
-	}
-	if r.TenantId != nil {
-		mdmv1r.TenantId = &wrapperspb.StringValue{Value: *r.TenantId}
+	mdmv1r := &mdmv1.ProjectFindRequest{
+		Id:          r.Id,
+		Name:        r.Name,
+		Description: r.Description,
+		TenantId:    r.TenantId,
 	}
 
 	return mdmv1r
@@ -200,12 +190,9 @@ func ToMdmV1TenantFindRequest(r *v1.TenantFindRequest) *mdmv1.TenantFindRequest 
 		return nil
 	}
 
-	mdmv1r := new(mdmv1.TenantFindRequest)
-	if r.Id != nil {
-		mdmv1r.Id = &wrapperspb.StringValue{Value: *r.Id}
-	}
-	if r.Name != nil {
-		mdmv1r.Name = &wrapperspb.StringValue{Value: *r.Name}
+	mdmv1r := &mdmv1.TenantFindRequest{
+		Id:   r.Id,
+		Name: r.Name,
 	}
 	if r.Paging != nil {
 		mdmv1r.Paging = &mdmv1.Paging{
@@ -254,15 +241,8 @@ func ToV1Quota(q *mdmv1.Quota) *v1.Quota {
 		return nil
 	}
 	return &v1.Quota{
-		Quota: unwrapInt32(q.Quota),
+		Quota: q.Quota,
 	}
-}
-func unwrapInt32(w *wrapperspb.Int32Value) *int32 {
-	if w == nil {
-		return nil
-	}
-
-	return &w.Value
 }
 
 func mustTimestampToTime(ts *timestamppb.Timestamp) *time.Time {

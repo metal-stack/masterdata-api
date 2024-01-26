@@ -5,10 +5,10 @@ import (
 	"os"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"testing"
 
@@ -139,7 +139,7 @@ func TestFindTenantByID(t *testing.T) {
 	// filter by id
 	f1 := make(map[string]any)
 	tfr := &v1.TenantFindRequest{
-		Id: &wrapperspb.StringValue{Value: "t5"},
+		Id: pointer.Pointer("t5"),
 	}
 
 	f1["id"] = "t5"
@@ -160,7 +160,7 @@ func TestFindTenantByName(t *testing.T) {
 	// filter by name
 	var t6s []*v1.Tenant
 	tfr := &v1.TenantFindRequest{
-		Name: &wrapperspb.StringValue{Value: "Fifth"},
+		Name: pointer.Pointer("Fifth"),
 	}
 
 	f2 := make(map[string]any)
