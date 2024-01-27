@@ -194,6 +194,7 @@ func run() {
 
 	ves := []datastore.Entity{
 		&apiv1.Project{},
+		&apiv1.ProjectMember{},
 		&apiv1.Tenant{},
 	}
 	dbHost := viper.GetString("dbhost")

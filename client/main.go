@@ -138,6 +138,18 @@ func projectExample(c client.Client, log *zap.Logger) {
 		log.Info("found project", zap.Stringer("project", p))
 	}
 
+	pmcr, err := c.ProjectMember().Create(ctx, &v1.ProjectMemberCreateRequest{
+		ProjectMember: &v1.ProjectMember{
+			ProjectId: projectId,
+			TenantId:  "customer-1",
+		},
+	})
+	if err != nil {
+		log.Fatal("could get create find projects endpoint", zap.Error(err))
+	}
+
+	log.Info("projectmember created", zap.Any("member", pmcr.ProjectMember))
+
 	// delete projects
 	for _, p := range pfr.GetProjects() {
 		pdr := v1.ProjectDeleteRequest{
