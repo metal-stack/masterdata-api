@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/metadata"
 	"github.com/metal-stack/security"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -66,9 +66,9 @@ func (a *HMACAuther) Auth(ctx context.Context) (context.Context, error) {
 
 	rqd := security.RequestData{
 		Method:          hmacMethod,
-		AuthzHeader:     metautils.ExtractIncoming(ctx).Get(security.AuthzHeaderKey),
-		TimestampHeader: metautils.ExtractIncoming(ctx).Get(security.TsHeaderKey),
-		SaltHeader:      metautils.ExtractIncoming(ctx).Get(security.SaltHeaderKey),
+		AuthzHeader:     metadata.ExtractIncoming(ctx).Get(security.AuthzHeaderKey),
+		TimestampHeader: metadata.ExtractIncoming(ctx).Get(security.TsHeaderKey),
+		SaltHeader:      metadata.ExtractIncoming(ctx).Get(security.SaltHeaderKey),
 	}
 
 	user, err := a.hmacAuth.UserFromRequestData(rqd)

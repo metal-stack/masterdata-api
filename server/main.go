@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -9,21 +10,28 @@ import (
 	"net/http"
 	_ "net/http/pprof" //nolint:gosec
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 
-	"google.golang.org/grpc/reflection"
-
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 	"github.com/metal-stack/masterdata-api/pkg/health"
-	"github.com/metal-stack/masterdata-api/pkg/interceptors/grpc_internalerror"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	grpcprom "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors"
+	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
+
 	apiv1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"github.com/metal-stack/masterdata-api/pkg/service"
@@ -154,41 +162,55 @@ func run() {
 		MinVersion:   tls.VersionTLS12,
 	})
 
-	// FIXME migrate to grpc_middleware v2
-	// grpcLogDeciderFunc := func(methodFullName string, err error) bool {
-	// 	if err == nil && methodFullName == "/grpc.health.v1.Health/Check" {
-	// 		return false
-	// 	}
-	// 	return true
-	// }
+	srvMetrics := grpcprom.NewServerMetrics(
+		grpcprom.WithServerHandlingTimeHistogram(
+			grpcprom.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+		),
+	)
+	exemplarFromContext := func(ctx context.Context) prometheus.Labels {
+		if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
+			return prometheus.Labels{"traceID": span.TraceID().String()}
+		}
+		return nil
+	}
+	allButHealthZ := func(ctx context.Context, callMeta interceptors.CallMeta) bool {
+		return healthv1.Health_ServiceDesc.ServiceName != callMeta.Service
+	}
 
-	opts := []grpc.ServerOption{
-		// Enable TLS for all incoming connections.
-		grpc.Creds(creds),
-		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
-			grpc_ctxtags.StreamServerInterceptor(),
-			grpc_prometheus.StreamServerInterceptor,
-			// FIXME migrate to grpc_middleware v2
-			// grpc_zap.StreamServerInterceptor(logger, grpc_zap.WithDecider(grpcLogDeciderFunc)),
-			grpc_auth.StreamServerInterceptor(auther.Auth),
-			grpc_internalerror.StreamServerInterceptor(),
-			grpc_recovery.StreamServerInterceptor(),
-		)),
-		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-			grpc_ctxtags.UnaryServerInterceptor(),
-			grpc_prometheus.UnaryServerInterceptor,
-			// FIXME migrate to grpc_middleware v2
-			//grpc_zap.UnaryServerInterceptor(logger, grpc_zap.WithDecider(grpcLogDeciderFunc)),
-			grpc_auth.UnaryServerInterceptor(auther.Auth),
-			grpc_internalerror.UnaryServerInterceptor(),
-			grpc_recovery.UnaryServerInterceptor(),
-		)),
+	// Setup metric for panic recoveries.
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(srvMetrics)
+	panicsTotal := promauto.With(reg).NewCounter(prometheus.CounterOpts{
+		Name: "grpc_req_panics_recovered_total",
+		Help: "Total number of gRPC requests recovered from internal panic.",
+	})
+	grpcPanicRecoveryHandler := func(p any) (err error) {
+		panicsTotal.Inc()
+		logger.Error("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
+		return status.Errorf(codes.Internal, "%s", p)
 	}
 
 	// Set GRPC Interceptors
 	// opts := []grpc.ServerOption{}
 	// grpcServer := grpc.NewServer(opts...)
-	grpcServer := grpc.NewServer(opts...)
+	grpcServer := grpc.NewServer(
+		grpc.Creds(creds),
+		grpc.ChainUnaryInterceptor(
+			// Order matters e.g. tracing interceptor have to create span first for the later exemplars to work.
+			otelgrpc.UnaryServerInterceptor(),
+			srvMetrics.UnaryServerInterceptor(),
+			logging.UnaryServerInterceptor(interceptorLogger(logger)),
+			selector.UnaryServerInterceptor(grpcauth.UnaryServerInterceptor(auther.Auth), selector.MatchFunc(allButHealthZ)),
+			recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
+		),
+		grpc.ChainStreamInterceptor(
+			otelgrpc.StreamServerInterceptor(),
+			srvMetrics.StreamServerInterceptor(grpcprom.WithExemplarFromContext(exemplarFromContext)),
+			logging.StreamServerInterceptor(interceptorLogger(logger)),
+			selector.StreamServerInterceptor(grpcauth.StreamServerInterceptor(auther.Auth), selector.MatchFunc(allButHealthZ)),
+			recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
+		),
+	)
 
 	ves := []datastore.Entity{
 		&apiv1.Project{},
@@ -234,8 +256,6 @@ func run() {
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
 
-	// After all your registrations, make sure all of the Prometheus metrics are initialized.
-	grpc_prometheus.Register(grpcServer)
 	// Register Prometheus metrics handler
 	metricsServer := http.NewServeMux()
 	metricsServer.Handle("/metrics", promhttp.Handler())
@@ -275,4 +295,23 @@ func run() {
 		logger.Error("failed to serve", "error", err)
 		panic(err)
 	}
+}
+
+// interceptorLogger adapts slog logger to interceptor logger.
+// This code is simple enough to be copied and not imported.
+func interceptorLogger(l *slog.Logger) logging.Logger {
+	return logging.LoggerFunc(func(_ context.Context, lvl logging.Level, msg string, fields ...any) {
+		switch lvl {
+		case logging.LevelDebug:
+			l.Debug(msg, fields...)
+		case logging.LevelInfo:
+			l.Info(msg, fields...)
+		case logging.LevelWarn:
+			l.Warn(msg, fields...)
+		case logging.LevelError:
+			l.Error(msg, fields...)
+		default:
+			panic(fmt.Sprintf("unknown level %v", lvl))
+		}
+	})
 }
