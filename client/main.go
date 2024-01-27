@@ -48,7 +48,7 @@ func main() {
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	tenantExample(c, logger)
+	err = tenantExample(c, logger)
 	if err != nil {
 		logger.Error(err.Error())
 	}

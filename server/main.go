@@ -197,14 +197,14 @@ func run() {
 		grpc.Creds(creds),
 		grpc.ChainUnaryInterceptor(
 			// Order matters e.g. tracing interceptor have to create span first for the later exemplars to work.
-			otelgrpc.UnaryServerInterceptor(),
+			otelgrpc.UnaryServerInterceptor(), // nolint:staticcheck
 			srvMetrics.UnaryServerInterceptor(),
 			logging.UnaryServerInterceptor(interceptorLogger(logger)),
 			selector.UnaryServerInterceptor(grpcauth.UnaryServerInterceptor(auther.Auth), selector.MatchFunc(allButHealthZ)),
 			recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler)),
 		),
 		grpc.ChainStreamInterceptor(
-			otelgrpc.StreamServerInterceptor(),
+			otelgrpc.StreamServerInterceptor(), // nolint:staticcheck
 			srvMetrics.StreamServerInterceptor(grpcprom.WithExemplarFromContext(exemplarFromContext)),
 			logging.StreamServerInterceptor(interceptorLogger(logger)),
 			selector.StreamServerInterceptor(grpcauth.StreamServerInterceptor(auther.Auth), selector.MatchFunc(allButHealthZ)),
