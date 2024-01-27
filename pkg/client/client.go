@@ -19,6 +19,7 @@ import (
 // Client defines the client API
 type Client interface {
 	Project() v1.ProjectServiceClient
+	ProjectMember() v1.ProjectMemberServiceClient
 	Tenant() v1.TenantServiceClient
 	Close() error
 }
@@ -111,6 +112,11 @@ func (c GRPCClient) Close() error {
 // Project is the root accessor for project related functions
 func (c GRPCClient) Project() v1.ProjectServiceClient {
 	return v1.NewProjectServiceClient(c.conn)
+}
+
+// ProjectMembe is the root accessor for project member related functions
+func (c GRPCClient) ProjectMember() v1.ProjectMemberServiceClient {
+	return v1.NewProjectMemberServiceClient(c.conn)
 }
 
 // Tenant is the root accessor for tenant related functions

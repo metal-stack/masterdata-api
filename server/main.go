@@ -224,12 +224,17 @@ func run() {
 	if err != nil {
 		logger.Fatal("unable to create project service", zap.Error(err))
 	}
+	projectMemberService, err := service.NewProjectMemberService(db, logger)
+	if err != nil {
+		logger.Fatal("unable to create project member service", zap.Error(err))
+	}
 	tenantService, err := service.NewTenantService(db, logger)
 	if err != nil {
 		logger.Fatal("unable to create tenant service", zap.Error(err))
 	}
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
+	apiv1.RegisterProjectMemberServiceServer(grpcServer, projectMemberService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
 
