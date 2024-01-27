@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -13,8 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 
 	// import for sqlx to use postgres driver
 	_ "github.com/lib/pq"
@@ -47,7 +46,7 @@ type Entity interface {
 
 // datastore is the adapter to talk to the database
 type datastore[E Entity] struct {
-	log              *zap.Logger
+	log              *slog.Logger
 	db               *sqlx.DB
 	sb               squirrel.StatementBuilderType
 	jsonField        string
@@ -64,17 +63,17 @@ const (
 )
 
 // NewPostgresStorage creates a new Storage which uses postgres.
-func NewPostgresDB(logger *zap.Logger, host, port, user, password, dbname, sslmode string, ves ...Entity) (*sqlx.DB, error) {
+func NewPostgresDB(logger *slog.Logger, host, port, user, password, dbname, sslmode string, ves ...Entity) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %w", err)
 	}
 	for _, ve := range ves {
 		jsonField := ve.JSONField()
-		logger.Info("creating schema", zap.String("entity", jsonField))
+		logger.Info("creating schema", "entity", jsonField)
 		_, err := db.Exec(ve.Schema())
 		if err != nil {
-			logger.Fatal("unable to create schema", zap.String("entity", jsonField), zap.Error(err))
+			logger.Error("unable to create schema", "entity", jsonField, "error", err)
 			return nil, err
 		}
 	}
@@ -82,7 +81,7 @@ func NewPostgresDB(logger *zap.Logger, host, port, user, password, dbname, sslmo
 }
 
 // New creates a new Storage which uses the given database abstraction.
-func New[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage[E], error) {
+func New[E Entity](logger *slog.Logger, db *sqlx.DB, e E) (Storage[E], error) {
 	ds := &datastore[E]{
 		log:              logger,
 		db:               db,
@@ -96,7 +95,7 @@ func New[E Entity](logger *zap.Logger, db *sqlx.DB, e E) (Storage[E], error) {
 
 // Create a entity
 func (ds *datastore[E]) Create(ctx context.Context, ve E) error {
-	ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.Any("value", ve))
+	ds.log.Debug("create", "entity", ds.jsonField, "value", ve)
 	meta := ve.GetMeta()
 	if meta == nil {
 		return fmt.Errorf("create of type:%s failed, meta is nil", ds.jsonField)
@@ -132,9 +131,9 @@ func (ds *datastore[E]) Create(ctx context.Context, ve E) error {
 		"RETURNING " + ds.jsonField,
 	)
 
-	if ce := ds.log.Check(zapcore.DebugLevel, ""); ce != nil {
+	if ds.log.Enabled(ctx, slog.LevelDebug) {
 		sql, vals, _ := q.ToSql()
-		ds.log.Debug("create", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("values", vals))
+		ds.log.Debug("create", "entity", ds.jsonField, "sql", sql, "values", vals)
 	}
 
 	tx, err := ds.db.BeginTx(ctx, nil)
@@ -159,7 +158,7 @@ func (ds *datastore[E]) Create(ctx context.Context, ve E) error {
 
 // Update the entity
 func (ds *datastore[E]) Update(ctx context.Context, ve E) error {
-	ds.log.Info("update", zap.String("entity", ds.jsonField))
+	ds.log.Info("update", "entity", ds.jsonField)
 	meta := ve.GetMeta()
 	if meta == nil {
 		return fmt.Errorf("update of type:%s failed, meta is nil", ds.jsonField)
@@ -214,9 +213,9 @@ func (ds *datastore[E]) Update(ctx context.Context, ve E) error {
 			"RETURNING " + ds.jsonField,
 		)
 
-	if ce := ds.log.Check(zapcore.DebugLevel, ""); ce != nil {
+	if ds.log.Enabled(ctx, slog.LevelDebug) {
 		sql, vals, _ := q.ToSql()
-		ds.log.Debug("update", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("values", vals))
+		ds.log.Debug("update", "entity", ds.jsonField, "sql", sql, "values", vals)
 	}
 
 	tx, err := ds.db.BeginTx(ctx, nil)
@@ -242,7 +241,7 @@ func (ds *datastore[E]) Update(ctx context.Context, ve E) error {
 // Get the entity for given id
 // returns NotFoundError if no entity can be found
 func (ds *datastore[E]) Get(ctx context.Context, id string) (E, error) {
-	ds.log.Debug("get", zap.String("entity", ds.jsonField), zap.String("id", id))
+	ds.log.Debug("get", "entity", ds.jsonField, "id", id)
 	var zero E
 	q := ds.sb.Select(
 		ds.jsonField,
@@ -266,7 +265,7 @@ func (ds *datastore[E]) Get(ctx context.Context, id string) (E, error) {
 
 // Delete deletes the entity
 func (ds *datastore[E]) Delete(ctx context.Context, id string) error {
-	ds.log.Debug("delete", zap.String("entity", ds.jsonField), zap.String("id", id))
+	ds.log.Debug("delete", "entity", ds.jsonField, "id", id)
 	ve, err := ds.Get(ctx, id)
 	if err != nil {
 		return err
@@ -309,7 +308,7 @@ func (ds *datastore[E]) Delete(ctx context.Context, id string) error {
 
 // Find returns matching elements from the database
 func (ds *datastore[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
-	ds.log.Debug("find", zap.String("entity", ds.jsonField), zap.Any("filter", filter))
+	ds.log.Debug("find", "entity", ds.jsonField, "filter", filter)
 	q := ds.sb.Select(ds.jsonField).
 		From(ds.tableName)
 
@@ -321,9 +320,9 @@ func (ds *datastore[E]) Find(ctx context.Context, filter map[string]any, paging 
 	// Add paging query if paging is defined
 	q, nextPage := addPaging(q, paging)
 
-	if ce := ds.log.Check(zapcore.DebugLevel, ""); ce != nil {
+	if ds.log.Enabled(ctx, slog.LevelDebug) {
 		sql, vals, _ := q.ToSql()
-		ds.log.Debug("find", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("values", vals))
+		ds.log.Debug("find", "entity", ds.jsonField, "sql", sql, "values", vals)
 	}
 
 	rows, err := q.QueryContext(ctx)
@@ -385,7 +384,7 @@ func (ds *datastore[E]) getHistoryWithPredicate(ctx context.Context, pred any, v
 	q := ds.sb.Select(ds.jsonField).From(ds.historyTableName).Where(pred).OrderByClause("created_at DESC").Limit(1)
 
 	sql, _, _ := q.ToSql()
-	ds.log.Info("get", zap.String("entity", ds.jsonField), zap.String("sql", sql), zap.Any("predicate", pred))
+	ds.log.Info("get", "entity", ds.jsonField, "sql", sql, "predicate", pred)
 	rows, err := q.QueryContext(ctx)
 	if err != nil {
 		return err
@@ -429,7 +428,7 @@ func pbNow() (*timestamppb.Timestamp, time.Time) {
 func (ds *datastore[E]) rollback(tx *sql.Tx) {
 	err := tx.Rollback()
 	if err != nil && !errors.Is(err, sql.ErrTxDone) {
-		ds.log.Error("error rolling back", zap.Error(err))
+		ds.log.Error("error rolling back", "error", err)
 	}
 }
 

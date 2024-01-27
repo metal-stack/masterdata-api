@@ -20,8 +20,6 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
-
-	"go.uber.org/zap"
 )
 
 const defaultFilenameSuffix = "_scnrvalr.go"
@@ -59,7 +57,7 @@ func main() {
 
 	err := g.generate(*packageName, *typeName)
 	if err != nil {
-		log.Fatal("error generating content", zap.Error(err))
+		log.Fatal("error generating content", "error", err)
 	}
 
 	// Format the output.
@@ -73,7 +71,7 @@ func main() {
 	}
 	err = os.WriteFile(outputName, src, 0644)
 	if err != nil {
-		log.Fatal("error writing output", zap.Error(err))
+		log.Fatal("error writing output", "error", err)
 	}
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"time"
 
@@ -13,14 +14,14 @@ import (
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/client"
-	"go.uber.org/zap"
 )
 
 const grpcRequestTimeout = 5 * time.Second
 
 func main() {
+	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})
 
-	logger, _ := zap.NewProduction()
+	logger := slog.New(jsonHandler)
 	logger.Info("Starting Client")
 
 	hmacKey := os.Getenv("HMAC_KEY")
@@ -32,22 +33,30 @@ func main() {
 	defer cancel()
 	c, err := client.NewClient(ctx, "localhost", 50051, "certs/client.pem", "certs/client-key.pem", "certs/ca.pem", hmacKey, true, logger)
 	if err != nil {
-		logger.Fatal(err.Error())
+		logger.Error(err.Error())
+		panic(err)
 	}
 
 	defer func() {
 		err = c.Close()
 		if err != nil {
-			logger.Fatal(err.Error())
+			logger.Error(err.Error())
+			panic(err)
 		}
 	}()
-	projectExample(c, logger)
+	err = projectExample(c, logger)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 	tenantExample(c, logger)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 
 	logger.Info("Success")
 }
 
-func projectExample(c client.Client, log *zap.Logger) {
+func projectExample(c client.Client, log *slog.Logger) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), grpcRequestTimeout)
 	defer cancel()
@@ -76,9 +85,9 @@ func projectExample(c client.Client, log *zap.Logger) {
 	}
 	res, err := c.Project().Create(ctx, pcr)
 	if err != nil {
-		log.Fatal("could not create project", zap.Error(err))
+		return err
 	}
-	log.Info("created project", zap.Stringer("project", res))
+	log.Info("created project", "project", res)
 
 	ts := time.Now()
 
@@ -86,7 +95,7 @@ func projectExample(c client.Client, log *zap.Logger) {
 	projectId := res.Project.Meta.Id
 	prj, err := c.Project().Get(ctx, &v1.ProjectGetRequest{Id: projectId})
 	if err != nil {
-		log.Fatal("created project notfound", zap.String("id", projectId))
+		return err
 	}
 
 	// update
@@ -96,7 +105,7 @@ func projectExample(c client.Client, log *zap.Logger) {
 		Project: prj.Project,
 	})
 	if err != nil {
-		log.Fatal("update project failed", zap.String("id", projectId))
+		return err
 	}
 
 	pbHp := timestamppb.New(ts)
@@ -105,37 +114,37 @@ func projectExample(c client.Client, log *zap.Logger) {
 		At: pbHp,
 	})
 	if err != nil {
-		log.Fatal("get project history failed", zap.String("id", projectId))
+		return err
 	}
 	if phr.Project.Description != "Demo Project" {
-		log.Fatal("get project: unexpected description", zap.String("id", projectId), zap.String("desc", phr.Project.Description))
+		return err
 	}
 
 	// explicit re-get
 	prj2, err := c.Project().Get(ctx, &v1.ProjectGetRequest{Id: projectId})
 	if err != nil {
-		log.Fatal("created project notfound", zap.String("id", projectId))
+		return err
 	}
 	if prj2.GetProject().Meta.Annotations["mykey"] != "myvalue" {
-		log.Fatal("update project failed", zap.String("id", projectId))
+		return err
 	}
 
 	if prures.Project.Meta.Version <= prj.Project.Meta.Version {
-		log.Fatal("update project failed, version not incremented", zap.String("id", projectId))
+		return err
 	}
 
 	_, err = c.Project().Get(ctx, &v1.ProjectGetRequest{Id: "123123"})
 	if !v1.IsNotFound(err) {
-		log.Fatal("expected notfound")
+		return err
 	}
 
 	// find
 	pfr, err := c.Project().Find(ctx, &v1.ProjectFindRequest{})
 	if err != nil {
-		log.Fatal("could get create find projects endpoint", zap.Error(err))
+		return err
 	}
 	for _, p := range pfr.Projects {
-		log.Info("found project", zap.Stringer("project", p))
+		log.Info("found project", "project", p)
 	}
 
 	// delete projects
@@ -145,13 +154,14 @@ func projectExample(c client.Client, log *zap.Logger) {
 		}
 		_, err = c.Project().Delete(ctx, &pdr)
 		if err != nil {
-			log.Fatal("could delete project", zap.Error(err))
+			return err
 		}
-		log.Info("deleted ", zap.Stringer("project", p))
+		log.Info("deleted ", "project", p)
 	}
+	return nil
 }
 
-func tenantExample(c client.Client, log *zap.Logger) {
+func tenantExample(c client.Client, log *slog.Logger) error {
 	tnt := &v1.Tenant{
 		Meta:        nil,
 		Name:        "myTenant",
@@ -192,9 +202,9 @@ func tenantExample(c client.Client, log *zap.Logger) {
 
 	t, err := c.Tenant().Create(ctx, tcr)
 	if err != nil {
-		log.Fatal("could not create tenant", zap.Error(err))
+		return err
 	}
-	log.Info("created tenant", zap.Stringer("tenant", t))
+	log.Info("created tenant", "tenant", t)
 
 	// try to create the same tenant with the returned id another time...
 	tcr.Tenant.Meta = t.Tenant.Meta
@@ -204,10 +214,10 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		if v1.IsConflict(err) {
 			log.Info("got expected grpc code, indicating duplicate key")
 		} else {
-			log.Fatal("could not create tenant, unexpected error", zap.Error(err))
+			return err
 		}
 	} else {
-		log.Fatal("THIS MUST NOT HAPPEN: successfully created tenant with duplicate ID", zap.Stringer("ID", t))
+		return err
 	}
 
 	log.Info("find all tenants")
@@ -216,10 +226,10 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	}
 	tfrs, err := c.Tenant().Find(ctx, tfrq)
 	if err != nil {
-		log.Fatal("could not find tenants", zap.Error(err))
+		return err
 	}
 	for i := range tfrs.Tenants {
-		log.Info("found tenant", zap.Stringer("tenant", tfrs.Tenants[i]))
+		log.Info("found tenant", "tenant", tfrs.Tenants[i])
 	}
 
 	log.Info("get tenant with id")
@@ -228,16 +238,17 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	}
 	tgres, err := c.Tenant().Get(ctx, tgr)
 	if err != nil {
-		log.Fatal("could not get tenant", zap.Error(err))
+		return err
 	}
-	log.Info("got tenant", zap.Stringer("id", tgres))
+	log.Info("got tenant", "id", tgres)
 
 	v1t := mapper.ToV1Tenant(tgres.Tenant)
 	mdm1t := mapper.ToMdmV1Tenant(v1t)
 
 	_, err = c.Tenant().Update(ctx, &v1.TenantUpdateRequest{Tenant: mdm1t})
 	if err != nil {
-		log.Fatal("could not get tenant", zap.Error(err))
+		return err
+
 	}
 
 	log.Info("get tenant with non-existant id")
@@ -246,7 +257,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	}
 	_, err = c.Tenant().Get(ctx, tgrNotFound)
 	if !v1.IsNotFound(err) {
-		log.Fatal("unexpected response with error on tenant that cannot be found!", zap.Error(err))
+		return err
 	}
 
 	// get tenant one more time to have some older version after update to provoke an optimistic lock error
@@ -254,7 +265,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 
 	tgres, err = c.Tenant().Get(ctx, tgr)
 	if err != nil {
-		log.Fatal("could not get tenant", zap.Error(err))
+		return err
 	}
 	tenant := tgres.Tenant
 	tenant.Name = "some other name"
@@ -264,15 +275,15 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	}
 	tures, err := c.Tenant().Update(ctx, tur)
 	if err != nil {
-		log.Fatal("could not update tenant", zap.Error(err))
+		return err
 	}
-	log.Info("updated tenant", zap.Stringer("tenant", tures))
+	log.Info("updated tenant", "tenant", tures)
 
 	tenant2 := tgres2.Tenant
 	tenant2.Name = "update older tenant"
 	_, err = c.Tenant().Update(ctx, tur)
 	if !v1.IsOptimistickLockError(err) {
-		log.Fatal("could not update tenant, expected OptimisticLockError, got error", zap.Error(err))
+		return err
 	}
 
 	log.Info("find tenant with id")
@@ -281,10 +292,10 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	}
 	tfrsi, err := c.Tenant().Find(ctx, tfrqi)
 	if err != nil {
-		log.Fatal("could not find tenants", zap.Error(err))
+		return err
 	}
 	for i := range tfrsi.Tenants {
-		log.Info("found tenant", zap.Stringer("tenant", tfrsi.Tenants[i]))
+		log.Info("found tenant", "tenant", tfrsi.Tenants[i])
 	}
 
 	log.Info("delete tenant with id")
@@ -293,7 +304,7 @@ func tenantExample(c client.Client, log *zap.Logger) {
 	}
 	_, err = c.Tenant().Delete(ctx, tdr)
 	if err != nil {
-		log.Fatal("could not delete tenant", zap.Error(err))
+		return err
 	}
 
 	log.Info("try to delete already deleted tenant")
@@ -311,10 +322,11 @@ func tenantExample(c client.Client, log *zap.Logger) {
 		At: pbHt,
 	})
 	if err != nil {
-		log.Fatal("tenant history not found", zap.Error(err))
+		return err
 	}
 	if thr.Tenant.Name != "some other name" {
-		log.Fatal("get tenant: unexpected name", zap.String("id", tdr.Id), zap.String("name", thr.Tenant.Name))
+		return err
 	}
-	log.Info("found history tenant", zap.Stringer("tenant", thr.Tenant))
+	log.Info("found history tenant", "tenant", thr.Tenant)
+	return nil
 }

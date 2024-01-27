@@ -3,13 +3,13 @@ package datastore
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"testing"
 
 	"github.com/google/uuid"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 
 func init() {
 	db, _ = createPostgresConnection()
-	ds, _ = New(zap.NewNop(), db, &v1.Tenant{})
+	ds, _ = New(slog.Default(), db, &v1.Tenant{})
 }
 
 func BenchmarkGetTenant(b *testing.B) {

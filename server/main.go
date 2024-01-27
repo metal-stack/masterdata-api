@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	_ "net/http/pprof" //nolint:gosec
@@ -20,7 +21,6 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -30,8 +30,6 @@ import (
 	"github.com/metal-stack/v"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
@@ -42,7 +40,7 @@ const (
 )
 
 var (
-	logger *zap.Logger
+	logger *slog.Logger
 )
 
 var rootCmd = &cobra.Command{
@@ -56,7 +54,7 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		logger.Error("failed executing root command", zap.Error(err))
+		logger.Error("failed executing root command", "error", err)
 	}
 }
 
@@ -85,63 +83,59 @@ func init() {
 
 	err := viper.BindPFlags(rootCmd.Flags())
 	if err != nil {
-		logger.Error("unable to construct root command", zap.Error(err))
+		logger.Error("unable to construct root command", "error", err)
 	}
 }
 
 func run() {
 
-	cfg := zap.NewProductionConfig()
-	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	lvl := slog.LevelInfo
 	if viper.IsSet("debug") {
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+		lvl = slog.LevelDebug
 	}
+	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: lvl})
 
-	logger, err := cfg.Build()
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		err := logger.Sync() // flushes buffer, if any
-		if err != nil {
-			fmt.Printf("unable to sync logger buffers:%v", err)
-		}
-	}()
+	logger := slog.New(jsonHandler)
 
 	port := viper.GetInt("port")
 	addr := fmt.Sprintf(":%d", port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		logger.Fatal("failed to listen", zap.Error(err))
+		logger.Error("failed to listen", "error", err)
+		panic(err)
 	}
 
-	logger.Info("starting masterdata-api", zap.Stringer("version", v.V), zap.String("address", addr))
+	logger.Info("starting masterdata-api", "version", v.V.String(), "address", addr)
 
 	hmacKey := viper.GetString("hmackey")
 	if hmacKey == "" {
 		hmacKey = auth.HmacDefaultKey
 	}
-	auther, err := auth.NewHMACAuther(logger, hmacKey, auth.EditUser)
+	auther, err := auth.NewHMACAuther(hmacKey, auth.EditUser)
 	if err != nil {
-		logger.Fatal("failed to create auther", zap.Error(err))
+		logger.Error("failed to create auther", "error", err)
+		panic(err)
 	}
 
 	caFile := viper.GetString("ca")
 	// Get system certificate pool
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
-		logger.Fatal("could not read system certificate pool", zap.Error(err))
+		logger.Error("could not read system certificate pool", "error", err)
+		panic(err)
 	}
 
 	if caFile != "" {
-		logger.Info("using ca", zap.String("ca", caFile))
+		logger.Info("using ca", "ca", caFile)
 		ca, err := os.ReadFile(caFile)
 		if err != nil {
-			logger.Fatal("could not read ca certificate", zap.Error(err))
+			logger.Error("could not read ca certificate", "error", err)
+			panic(err)
 		}
 		// Append the certificates from the CA
 		if ok := certPool.AppendCertsFromPEM(ca); !ok {
-			logger.Fatal("failed to append ca certs", zap.Error(err))
+			logger.Error("failed to append ca certs", "error", err)
+			panic(err)
 		}
 	}
 
@@ -149,7 +143,8 @@ func run() {
 	serverKey := viper.GetString("certkey")
 	cert, err := tls.LoadX509KeyPair(serverCert, serverKey)
 	if err != nil {
-		logger.Fatal("failed to load key pair", zap.Error(err))
+		logger.Error("failed to load key pair", "error", err)
+		panic(err)
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -159,12 +154,13 @@ func run() {
 		MinVersion:   tls.VersionTLS12,
 	})
 
-	grpcLogDeciderFunc := func(methodFullName string, err error) bool {
-		if err == nil && methodFullName == "/grpc.health.v1.Health/Check" {
-			return false
-		}
-		return true
-	}
+	// FIXME migrate to grpc_middleware v2
+	// grpcLogDeciderFunc := func(methodFullName string, err error) bool {
+	// 	if err == nil && methodFullName == "/grpc.health.v1.Health/Check" {
+	// 		return false
+	// 	}
+	// 	return true
+	// }
 
 	opts := []grpc.ServerOption{
 		// Enable TLS for all incoming connections.
@@ -172,7 +168,8 @@ func run() {
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_ctxtags.StreamServerInterceptor(),
 			grpc_prometheus.StreamServerInterceptor,
-			grpc_zap.StreamServerInterceptor(logger, grpc_zap.WithDecider(grpcLogDeciderFunc)),
+			// FIXME migrate to grpc_middleware v2
+			// grpc_zap.StreamServerInterceptor(logger, grpc_zap.WithDecider(grpcLogDeciderFunc)),
 			grpc_auth.StreamServerInterceptor(auther.Auth),
 			grpc_internalerror.StreamServerInterceptor(),
 			grpc_recovery.StreamServerInterceptor(),
@@ -180,7 +177,8 @@ func run() {
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_prometheus.UnaryServerInterceptor,
-			grpc_zap.UnaryServerInterceptor(logger, grpc_zap.WithDecider(grpcLogDeciderFunc)),
+			// FIXME migrate to grpc_middleware v2
+			//grpc_zap.UnaryServerInterceptor(logger, grpc_zap.WithDecider(grpcLogDeciderFunc)),
 			grpc_auth.UnaryServerInterceptor(auther.Auth),
 			grpc_internalerror.UnaryServerInterceptor(),
 			grpc_recovery.UnaryServerInterceptor(),
@@ -205,28 +203,31 @@ func run() {
 
 	db, err := datastore.NewPostgresDB(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode, ves...)
 	if err != nil {
-		logger.Fatal("failed to create postgres connection", zap.Error(err))
+		logger.Error("failed to create postgres connection", "error", err)
+		panic(err)
 	}
 
 	healthServer := health.NewHealthServer()
 
-	err = datastore.Initdb(logger.Sugar(), db, healthServer, "initdb.d")
+	err = datastore.Initdb(logger, db, healthServer, "initdb.d")
 	if err != nil {
-		logger.Error("unable to apply initdb content", zap.Error(err))
+		logger.Error("unable to apply initdb content", "error", err)
 	}
 
-	err = datastore.MigrateDB(logger.Sugar(), db, healthServer)
+	err = datastore.MigrateDB(logger, db, healthServer)
 	if err != nil {
-		logger.Error("unable to apply migrate db", zap.Error(err))
+		logger.Error("unable to apply migrate db", "error", err)
 	}
 
 	projectService, err := service.NewProjectService(db, logger)
 	if err != nil {
-		logger.Fatal("unable to create project service", zap.Error(err))
+		logger.Error("unable to create project service", "error", err)
+		panic(err)
 	}
 	tenantService, err := service.NewTenantService(db, logger)
 	if err != nil {
-		logger.Fatal("unable to create tenant service", zap.Error(err))
+		logger.Error("unable to create tenant service", "error", err)
+		panic(err)
 	}
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
@@ -247,7 +248,7 @@ func run() {
 		}
 		err := server.ListenAndServe()
 		if err != nil {
-			logger.Error("failed to start metrics endpoint", zap.Error(err))
+			logger.Error("failed to start metrics endpoint", "error", err)
 		}
 		os.Exit(1)
 	}()
@@ -263,7 +264,7 @@ func run() {
 		}
 		err := server.ListenAndServe()
 		if err != nil {
-			logger.Error("failed to start pprof endpoint", zap.Error(err))
+			logger.Error("failed to start pprof endpoint", "error", err)
 		}
 		os.Exit(1)
 	}()
@@ -271,6 +272,7 @@ func run() {
 	reflection.Register(grpcServer)
 
 	if err := grpcServer.Serve(lis); err != nil {
-		logger.Fatal("failed to serve", zap.Error(err))
+		logger.Error("failed to serve", "error", err)
+		panic(err)
 	}
 }

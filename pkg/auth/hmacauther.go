@@ -7,7 +7,6 @@ import (
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/metal-stack/security"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -35,12 +34,11 @@ const (
 // This code is potentially re-usable for all grpc-based clients/services
 // that want to use hmac-Authentification.
 type HMACAuther struct {
-	logger   *zap.Logger
 	hmacAuth *security.HMACAuth
 }
 
 // NewHMACAuther creates a new HMACAuther with the given hmac-pre-shared-key and user.
-func NewHMACAuther(logger *zap.Logger, hmacKey string, user security.User) (*HMACAuther, error) {
+func NewHMACAuther(hmacKey string, user security.User) (*HMACAuther, error) {
 
 	var hmacAuth *security.HMACAuth
 	if hmacKey != "" {
@@ -48,7 +46,6 @@ func NewHMACAuther(logger *zap.Logger, hmacKey string, user security.User) (*HMA
 		hmacAuth = &auth
 
 		a := &HMACAuther{
-			logger:   logger,
 			hmacAuth: hmacAuth,
 		}
 
