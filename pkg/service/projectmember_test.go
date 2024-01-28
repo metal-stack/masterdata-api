@@ -6,6 +6,7 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 
@@ -17,65 +18,77 @@ import (
 func TestCreateProjectMember(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.ProjectMember]{}
 	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	projectStorageMock := &mocks.Storage[*v1.Project]{}
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
+		projectStore:       projectStorageMock,
 		log:                zaptest.NewLogger(t),
 	}
 	ctx := context.Background()
 
 	t1 := &v1.Tenant{}
-	p1 := &v1.ProjectMember{
+	p1 := &v1.Project{}
+	pm1 := &v1.ProjectMember{
 		ProjectId: "p1",
 		TenantId:  "t1",
 	}
-	tcr := &v1.ProjectMemberCreateRequest{
-		ProjectMember: p1,
+	pmcr := &v1.ProjectMemberCreateRequest{
+		ProjectMember: pm1,
 	}
-	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
-	storageMock.On("Create", ctx, p1).Return(nil)
-	resp, err := ts.Create(ctx, tcr)
+	tenantStorageMock.On("Get", ctx, pm1.GetTenantId()).Return(t1, nil)
+	projectStorageMock.On("Get", ctx, pm1.GetProjectId()).Return(p1, nil)
+	storageMock.On("Create", ctx, pm1).Return(nil)
+	resp, err := ts.Create(ctx, pmcr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProjectMember())
-	assert.Equal(t, tcr.ProjectMember.ProjectId, resp.GetProjectMember().GetProjectId())
+	assert.Equal(t, pmcr.ProjectMember.ProjectId, resp.GetProjectMember().GetProjectId())
 }
 
 func TestUpdateProjectMember(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.ProjectMember]{}
 	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	projectStorageMock := &mocks.Storage[*v1.Project]{}
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
+		projectStore:       projectStorageMock,
 		log:                zaptest.NewLogger(t),
 	}
 	ctx := context.Background()
 
-	t1 := &v1.ProjectMember{
-		Meta:      &v1.Meta{Id: "p2", Annotations: map[string]string{"key": "value"}},
+	meta := &v1.Meta{Id: "p2", Annotations: map[string]string{"key": "value"}}
+	pm1 := &v1.ProjectMember{
+		Meta:      meta,
 		ProjectId: "p1",
 		TenantId:  "t1",
 	}
-	tur := &v1.ProjectMemberUpdateRequest{
+	meta.Annotations = map[string]string{"key": "value2"}
+	pmur := &v1.ProjectMemberUpdateRequest{
 		ProjectMember: &v1.ProjectMember{
-			Meta: &v1.Meta{Id: "p2", Annotations: map[string]string{"key": "value2"}},
+			Meta:      meta,
+			ProjectId: "p1",
+			TenantId:  "t1",
 		},
 	}
 
-	storageMock.On("Update", ctx, t1).Return(nil)
-	resp, err := ts.Update(ctx, tur)
+	storageMock.On("Update", ctx, pm1).Return(nil)
+	resp, err := ts.Update(ctx, pmur)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProjectMember())
-	assert.Equal(t, tur.GetProjectMember().Meta.Annotations, resp.GetProjectMember().Meta.Annotations)
+	assert.Equal(t, pmur.GetProjectMember().Meta.Annotations, resp.GetProjectMember().Meta.Annotations)
 }
 
 func TestDeleteProjectMember(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.ProjectMember]{}
 	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	projectStorageMock := &mocks.Storage[*v1.Project]{}
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
+		projectStore:       projectStorageMock,
 		log:                zaptest.NewLogger(t),
 	}
 	ctx := context.Background()
@@ -97,9 +110,11 @@ func TestDeleteProjectMember(t *testing.T) {
 func TestGetProjectMember(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.ProjectMember]{}
 	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	projectStorageMock := &mocks.Storage[*v1.Project]{}
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
+		projectStore:       projectStorageMock,
 		log:                zaptest.NewLogger(t),
 	}
 	ctx := context.Background()
@@ -121,9 +136,11 @@ func TestGetProjectMember(t *testing.T) {
 func TestFindProjectMemberByProject(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.ProjectMember]{}
 	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	projectStorageMock := &mocks.Storage[*v1.Project]{}
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
+		projectStore:       projectStorageMock,
 		log:                zaptest.NewLogger(t),
 	}
 	ctx := context.Background()
@@ -136,7 +153,7 @@ func TestFindProjectMemberByProject(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'project_id'"] = pointer.Pointer("p1")
-	storageMock.On("Find", ctx, f2).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -145,9 +162,11 @@ func TestFindProjectMemberByProject(t *testing.T) {
 func TestFindProjectMemberByTenant(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.ProjectMember]{}
 	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	projectStorageMock := &mocks.Storage[*v1.Project]{}
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
+		projectStore:       projectStorageMock,
 		log:                zaptest.NewLogger(t),
 	}
 	ctx := context.Background()
@@ -160,7 +179,7 @@ func TestFindProjectMemberByTenant(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'tenant_id'"] = pointer.Pointer("t1")
-	storageMock.On("Find", ctx, f2).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

@@ -88,10 +88,7 @@ func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 		return nil, err
 	}
 	resp := new(v1.TenantListResponse)
-	for i := range res {
-		t := res[i]
-		resp.Tenants = append(resp.Tenants, t)
-	}
+	resp.Tenants = append(resp.Tenants, res...)
 	resp.NextPage = nextPage
 	return resp, nil
 }

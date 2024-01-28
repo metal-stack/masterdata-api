@@ -15,11 +15,12 @@ import (
 type projectMemberService struct {
 	projectMemberStore datastore.Storage[*v1.ProjectMember]
 	tenantStore        datastore.Storage[*v1.Tenant]
+	projectStore       datastore.Storage[*v1.Project]
 	log                *zap.Logger
 }
 
 func NewProjectMemberService(db *sqlx.DB, l *zap.Logger) (*projectMemberService, error) {
-	ps, err := datastore.New(l, db, &v1.ProjectMember{})
+	pms, err := datastore.New(l, db, &v1.ProjectMember{})
 	if err != nil {
 		return nil, err
 	}
@@ -27,9 +28,14 @@ func NewProjectMemberService(db *sqlx.DB, l *zap.Logger) (*projectMemberService,
 	if err != nil {
 		return nil, err
 	}
+	ps, err := datastore.New(l, db, &v1.Project{})
+	if err != nil {
+		return nil, err
+	}
 	return &projectMemberService{
-		projectMemberStore: NewStorageStatusWrapper(ps),
+		projectMemberStore: NewStorageStatusWrapper(pms),
 		tenantStore:        NewStorageStatusWrapper(ts),
+		projectStore:       NewStorageStatusWrapper(ps),
 		log:                l,
 	}, nil
 }
@@ -40,6 +46,14 @@ func (s *projectMemberService) Create(ctx context.Context, req *v1.ProjectMember
 	_, err := s.tenantStore.Get(ctx, projectMember.GetTenantId())
 	if err != nil && v1.IsNotFound(err) {
 		return nil, status.Error(codes.NotFound, fmt.Sprintf("unable to find tenant:%s for projectMember", projectMember.GetTenantId()))
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.projectStore.Get(ctx, projectMember.GetProjectId())
+	if err != nil && v1.IsNotFound(err) {
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("unable to find project:%s for projectMember", projectMember.GetProjectId()))
 	}
 	if err != nil {
 		return nil, err
@@ -78,7 +92,7 @@ func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFi
 		filter["projectmember ->> 'tenant_id'"] = req.TenantId
 	}
 	for key, value := range req.Annotations {
-		// select * from projectMember where projectMember -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
+		// select * from projectMember where projectMember -> 'meta' -> 'annotations' ->>  'metal-stack.io/role' = 'owner';
 		f := fmt.Sprintf("projectmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
 	}
