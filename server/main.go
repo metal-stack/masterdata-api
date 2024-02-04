@@ -101,7 +101,7 @@ func run() {
 	if viper.IsSet("debug") {
 		lvl = slog.LevelDebug
 	}
-	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: lvl})
+	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: lvl, AddSource: false})
 
 	logger := slog.New(jsonHandler)
 
@@ -255,6 +255,8 @@ func run() {
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
+
+	srvMetrics.InitializeMetrics(grpcServer)
 
 	// Register Prometheus metrics handler
 	metricsServer := http.NewServeMux()

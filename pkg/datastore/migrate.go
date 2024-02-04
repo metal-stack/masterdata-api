@@ -3,6 +3,7 @@ package datastore
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log/slog"
 
 	"github.com/jmoiron/sqlx"
@@ -39,7 +40,7 @@ func MigrateDB(log *slog.Logger, db *sqlx.DB, healthServer *health.Server) error
 			},
 		),
 		migrator.WithLogger(migrator.LoggerFunc(func(msg string, args ...any) {
-			log.Info(msg, args...)
+			log.Info(fmt.Sprintf(msg, args...))
 		})),
 	)
 	if err != nil {
