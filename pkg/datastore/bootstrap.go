@@ -3,6 +3,7 @@ package datastore
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,25 +14,24 @@ import (
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/health"
-	"go.uber.org/zap"
 	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"sigs.k8s.io/yaml"
 )
 
 type bootstrap[E Entity] struct {
-	log *zap.SugaredLogger
+	log *slog.Logger
 	ds  Storage[E]
 }
 
 // Initdb reads all yaml files in given directory and apply their content as initial datasets.
-func Initdb(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server, dir string) error {
+func Initdb(log *slog.Logger, db *sqlx.DB, healthServer *health.Server, dir string) error {
 	start := time.Now()
 	files, err := filepath.Glob(path.Join(dir, "*.yaml"))
 	if err != nil {
 		return err
 	}
 
-	ts, err := New(log.Desugar(), db, &v1.Tenant{})
+	ts, err := New(log, db, &v1.Tenant{})
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func Initdb(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server, di
 		ds:  ts,
 	}
 
-	ps, err := New(log.Desugar(), db, &v1.Project{})
+	ps, err := New(log, db, &v1.Project{})
 	if err != nil {
 		return err
 	}
@@ -49,20 +49,20 @@ func Initdb(log *zap.SugaredLogger, db *sqlx.DB, healthServer *health.Server, di
 		ds:  ps,
 	}
 	for _, f := range files {
-		log.Infow("read initdb for tenants", "file", f)
+		log.Info("read initdb for tenants", "file", f)
 		err = tbs.processConfig(f)
 		if err != nil {
 			return err
 		}
 	}
 	for _, f := range files {
-		log.Infow("read initdb for projects", "file", f)
+		log.Info("read initdb for projects", "file", f)
 		err = pbs.processConfig(f)
 		if err != nil {
 			return err
 		}
 	}
-	log.Infow("done reading initdb files", "took", time.Since(start))
+	log.Info("done reading initdb files", "took", time.Since(start))
 	healthServer.SetServingStatus("initdb", healthv1.HealthCheckResponse_SERVING)
 	return nil
 }
@@ -117,20 +117,20 @@ func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	if err != nil {
 		return err
 	}
-	bs.log.Infow("initdb", "meta", mm.Meta.GetKind())
+	bs.log.Info("initdb", "meta", mm.Meta.GetKind())
 
 	kind := mm.Meta.GetKind()
 	apiversion := mm.Meta.GetApiversion()
 
 	var e E
 	if kind != e.Kind() {
-		bs.log.Infow("skip", "kind from yaml", kind, "required kind", e.Kind())
+		bs.log.Info("skip", "kind from yaml", kind, "required kind", e.Kind())
 		return nil
 	}
 
 	// messy extraction of apiversion from type
 	if e.APIVersion() != apiversion {
-		bs.log.Errorw("initdb apiversion does not match", "given", apiversion, "expected", e.APIVersion())
+		bs.log.Error("initdb apiversion does not match", "given", apiversion, "expected", e.APIVersion())
 		return nil
 	}
 
@@ -152,7 +152,7 @@ func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 		if errors.As(err, &NotFoundError{}) {
 			exists = false
 		} else {
-			bs.log.Errorw("initdb", "error", err)
+			bs.log.Error("initdb", "error", err)
 			return err
 		}
 	}
@@ -161,9 +161,9 @@ func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	if exists {
 		oldVersion := existingEntity.GetMeta().GetVersion()
 		newVersion := e.GetMeta().GetVersion()
-		bs.log.Infow("initdb found existing, update", "kind", newKind, "id", newID, "old version", oldVersion, "new version", newVersion)
+		bs.log.Info("initdb found existing, update", "kind", newKind, "id", newID, "old version", oldVersion, "new version", newVersion)
 		if oldVersion >= newVersion {
-			bs.log.Infow("initdb existing version is equal or higher, skip update", "kind", newKind, "id", newID)
+			bs.log.Info("initdb existing version is equal or higher, skip update", "kind", newKind, "id", newID)
 			return nil
 		}
 
@@ -173,7 +173,7 @@ func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 			return err
 		}
 	} else {
-		bs.log.Infow("initdb create", "kind", newKind, "id", newID)
+		bs.log.Info("initdb create", "kind", newKind, "id", newID)
 		err = bs.ds.Create(ctx, e)
 		if err != nil {
 			return err
