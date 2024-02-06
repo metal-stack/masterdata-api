@@ -17,6 +17,7 @@ import (
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 	"github.com/metal-stack/masterdata-api/pkg/health"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -180,6 +181,7 @@ func run() {
 	// Setup metric for panic recoveries.
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(srvMetrics)
+	reg.MustRegister(collectors.NewGoCollector())
 	panicsTotal := promauto.With(reg).NewCounter(prometheus.CounterOpts{
 		Name: "grpc_req_panics_recovered_total",
 		Help: "Total number of gRPC requests recovered from internal panic.",
@@ -260,7 +262,7 @@ func run() {
 
 	// Register Prometheus metrics handler
 	metricsServer := http.NewServeMux()
-	metricsServer.Handle("/metrics", promhttp.Handler())
+	metricsServer.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 	go func() {
 		logger.Info("starting metrics endpoint of :2112")
 		server := http.Server{
