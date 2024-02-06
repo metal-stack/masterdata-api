@@ -2,13 +2,13 @@ package service
 
 import (
 	"context"
+	"log/slog"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap/zaptest"
 
 	"testing"
 
@@ -23,7 +23,7 @@ func TestCreateProjectMember(t *testing.T) {
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
 		projectStore:       projectStorageMock,
-		log:                zaptest.NewLogger(t),
+		log:                slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -54,7 +54,7 @@ func TestUpdateProjectMember(t *testing.T) {
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
 		projectStore:       projectStorageMock,
-		log:                zaptest.NewLogger(t),
+		log:                slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -89,7 +89,7 @@ func TestDeleteProjectMember(t *testing.T) {
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
 		projectStore:       projectStorageMock,
-		log:                zaptest.NewLogger(t),
+		log:                slog.Default(),
 	}
 	ctx := context.Background()
 	t3 := &v1.ProjectMember{
@@ -115,7 +115,7 @@ func TestGetProjectMember(t *testing.T) {
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
 		projectStore:       projectStorageMock,
-		log:                zaptest.NewLogger(t),
+		log:                slog.Default(),
 	}
 	ctx := context.Background()
 	t4 := &v1.ProjectMember{
@@ -141,7 +141,7 @@ func TestFindProjectMemberByProject(t *testing.T) {
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
 		projectStore:       projectStorageMock,
-		log:                zaptest.NewLogger(t),
+		log:                slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -167,7 +167,7 @@ func TestFindProjectMemberByTenant(t *testing.T) {
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
 		projectStore:       projectStorageMock,
-		log:                zaptest.NewLogger(t),
+		log:                slog.Default(),
 	}
 	ctx := context.Background()
 

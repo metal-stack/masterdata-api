@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/metal-stack/masterdata-api/pkg/auth"
@@ -13,7 +14,6 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"go.uber.org/zap"
 )
 
 // Client defines the client API
@@ -27,12 +27,12 @@ type Client interface {
 // GRPCClient is a Client implementation with grpc transport.
 type GRPCClient struct {
 	conn    *grpc.ClientConn
-	log     *zap.Logger
+	log     *slog.Logger
 	hmacKey string
 }
 
 // NewClient creates a new client for the services for the given address, with the certificate and hmac.
-func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, insecure bool, logger *zap.Logger) (Client, error) {
+func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, insecure bool, logger *slog.Logger) (Client, error) {
 
 	address := fmt.Sprintf("%s:%d", hostname, port)
 
@@ -76,7 +76,7 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 	}
 
 	// Set up the credentials for the connection.
-	perRPCHMACAuthenticator, err := auth.NewHMACAuther(logger, hmacKey, auth.EditUser)
+	perRPCHMACAuthenticator, err := auth.NewHMACAuther(hmacKey, auth.EditUser)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create hmac-authenticator: %w", err)
 	}

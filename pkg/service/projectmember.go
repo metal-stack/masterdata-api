@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -16,10 +16,10 @@ type projectMemberService struct {
 	projectMemberStore datastore.Storage[*v1.ProjectMember]
 	tenantStore        datastore.Storage[*v1.Tenant]
 	projectStore       datastore.Storage[*v1.Project]
-	log                *zap.Logger
+	log                *slog.Logger
 }
 
-func NewProjectMemberService(db *sqlx.DB, l *zap.Logger) (*projectMemberService, error) {
+func NewProjectMemberService(db *sqlx.DB, l *slog.Logger) (*projectMemberService, error) {
 	pms, err := datastore.New(l, db, &v1.ProjectMember{})
 	if err != nil {
 		return nil, err

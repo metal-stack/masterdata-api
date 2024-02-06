@@ -3,19 +3,19 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
-	"go.uber.org/zap"
 )
 
 type tenantService struct {
 	tenantStore datastore.Storage[*v1.Tenant]
-	log         *zap.Logger
+	log         *slog.Logger
 }
 
-func NewTenantService(db *sqlx.DB, l *zap.Logger) (*tenantService, error) {
+func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
 	ts, err := datastore.New(l, db, &v1.Tenant{})
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (s *tenantService) Get(ctx context.Context, req *v1.TenantGetRequest) (*v1.
 func (s *tenantService) GetHistory(ctx context.Context, req *v1.TenantGetHistoryRequest) (*v1.TenantResponse, error) {
 	tenant := &v1.Tenant{}
 	at := req.At.AsTime()
-	s.log.Info("getHistory", zap.String("id", req.Id), zap.Time("at", at))
+	s.log.Info("getHistory", "id", req.Id, "at", at)
 	err := s.tenantStore.GetHistory(ctx, req.Id, at, tenant)
 	if err != nil {
 		return nil, err
