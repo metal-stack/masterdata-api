@@ -121,10 +121,7 @@ func (s *projectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 		return nil, err
 	}
 	resp := new(v1.ProjectListResponse)
-	for i := range res {
-		p := res[i]
-		resp.Projects = append(resp.Projects, p)
-	}
+	resp.Projects = append(resp.Projects, res...)
 	resp.NextPage = nextPage
 	return resp, nil
 }

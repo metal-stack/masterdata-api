@@ -215,6 +215,7 @@ func run() {
 
 	ves := []datastore.Entity{
 		&apiv1.Project{},
+		&apiv1.ProjectMember{},
 		&apiv1.Tenant{},
 	}
 	dbHost := viper.GetString("dbhost")
@@ -247,6 +248,12 @@ func run() {
 		logger.Error("unable to create project service", "error", err)
 		panic(err)
 	}
+	projectMemberService, err := service.NewProjectMemberService(db, logger)
+	if err != nil {
+		logger.Error("unable to create project member service", "error", err)
+		panic(err)
+
+	}
 	tenantService, err := service.NewTenantService(db, logger)
 	if err != nil {
 		logger.Error("unable to create tenant service", "error", err)
@@ -254,6 +261,7 @@ func run() {
 	}
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
+	apiv1.RegisterProjectMemberServiceServer(grpcServer, projectMemberService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
 
