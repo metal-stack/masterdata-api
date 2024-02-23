@@ -114,7 +114,7 @@ func (c GRPCClient) Project() v1.ProjectServiceClient {
 	return v1.NewProjectServiceClient(c.conn)
 }
 
-// ProjectMembe is the root accessor for project member related functions
+// ProjectMember is the root accessor for project member related functions
 func (c GRPCClient) ProjectMember() v1.ProjectMemberServiceClient {
 	return v1.NewProjectMemberServiceClient(c.conn)
 }
