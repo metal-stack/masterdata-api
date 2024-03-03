@@ -217,6 +217,7 @@ func run() {
 		&apiv1.Project{},
 		&apiv1.ProjectMember{},
 		&apiv1.Tenant{},
+		&apiv1.TenantMember{},
 	}
 	dbHost := viper.GetString("dbhost")
 	dbPort := viper.GetString("dbport")
@@ -259,10 +260,16 @@ func run() {
 		logger.Error("unable to create tenant service", "error", err)
 		panic(err)
 	}
+	tenantMemberService, err := service.NewTenantMemberService(db, logger)
+	if err != nil {
+		logger.Error("unable to create tenant member service", "error", err)
+		panic(err)
+	}
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterProjectMemberServiceServer(grpcServer, projectMemberService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
+	apiv1.RegisterTenantMemberServiceServer(grpcServer, tenantMemberService)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
 
 	srvMetrics.InitializeMetrics(grpcServer)
