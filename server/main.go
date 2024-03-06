@@ -143,8 +143,8 @@ func run() {
 		}
 		// Append the certificates from the CA
 		if ok := certPool.AppendCertsFromPEM(ca); !ok {
-			logger.Error("failed to append ca certs", "error", err)
-			panic(err)
+			logger.Error("failed to append ca certs")
+			os.Exit(1)
 		}
 	}
 
