@@ -45,9 +45,9 @@ func (s *tenantMemberService) Create(ctx context.Context, req *v1.TenantMemberCr
 		return nil, err
 	}
 
-	_, err = s.tenantStore.Get(ctx, tenantMember.GetTenantId())
+	_, err = s.tenantStore.Get(ctx, tenantMember.GetMemberId())
 	if err != nil && v1.IsNotFound(err) {
-		return nil, status.Error(codes.NotFound, fmt.Sprintf("unable to find tenant:%s for tenantMember", tenantMember.GetTenantId()))
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("unable to find member:%s for tenantMember", tenantMember.GetMemberId()))
 	}
 	if err != nil {
 		return nil, err

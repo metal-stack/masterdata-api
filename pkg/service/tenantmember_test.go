@@ -26,16 +26,16 @@ func TestCreateTenantMember(t *testing.T) {
 	ctx := context.Background()
 
 	t1 := &v1.Tenant{}
-	p1 := &v1.Tenant{}
+	m1 := &v1.Tenant{}
 	pm1 := &v1.TenantMember{
-		TenantId: "p1",
-		MemberId: "t1",
+		TenantId: "t1",
+		MemberId: "m1",
 	}
 	pmcr := &v1.TenantMemberCreateRequest{
 		TenantMember: pm1,
 	}
 	tenantStorageMock.On("Get", ctx, pm1.GetTenantId()).Return(t1, nil)
-	tenantStorageMock.On("Get", ctx, pm1.GetTenantId()).Return(p1, nil)
+	tenantStorageMock.On("Get", ctx, pm1.GetMemberId()).Return(m1, nil)
 	storageMock.On("Create", ctx, pm1).Return(nil)
 	resp, err := ts.Create(ctx, pmcr)
 	require.NoError(t, err)
