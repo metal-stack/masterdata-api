@@ -8,13 +8,15 @@ type MockClient struct {
 	psc  v1.ProjectServiceClient
 	tsc  v1.TenantServiceClient
 	pmsc v1.ProjectMemberServiceClient
+	tmsc v1.TenantMemberServiceClient
 }
 
-func NewMock(psc v1.ProjectServiceClient, tsc v1.TenantServiceClient, pmsc v1.ProjectMemberServiceClient) *MockClient {
+func NewMock(psc v1.ProjectServiceClient, tsc v1.TenantServiceClient, pmsc v1.ProjectMemberServiceClient, tmsc v1.TenantMemberServiceClient) *MockClient {
 	return &MockClient{
 		psc:  psc,
 		tsc:  tsc,
 		pmsc: pmsc,
+		tmsc: tmsc,
 	}
 }
 
@@ -30,4 +32,7 @@ func (c *MockClient) ProjectMember() v1.ProjectMemberServiceClient {
 
 func (c *MockClient) Tenant() v1.TenantServiceClient {
 	return c.tsc
+}
+func (c *MockClient) TenantMember() v1.TenantMemberServiceClient {
+	return c.tmsc
 }
