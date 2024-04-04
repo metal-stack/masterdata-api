@@ -9,6 +9,6 @@ plugins:
     out: ../api
     opt: paths=source_relative,require_unimplemented_servers=false
   # generate go structs for protocol buffer definition
-  - plugin: buf.build/protocolbuffers/go:v1.32.0
+  - plugin: buf.build/protocolbuffers/go:v1.33.0
     out: ../api
     opt: paths=source_relative
