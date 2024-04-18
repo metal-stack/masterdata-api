@@ -123,11 +123,13 @@ func TestUpdateProject(t *testing.T) {
 
 func TestDeleteProject(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Project]{}
+	projectMemberStorageMock := &mocks.Storage[*v1.ProjectMember]{}
 	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
 	ts := &projectService{
-		projectStore: storageMock,
-		tenantStore:  tenantStorageMock,
-		log:          slog.Default(),
+		projectStore:       storageMock,
+		projectMemberStore: projectMemberStorageMock,
+		tenantStore:        tenantStorageMock,
+		log:                slog.Default(),
 	}
 	ctx := context.Background()
 	t3 := &v1.Project{
@@ -136,8 +138,13 @@ func TestDeleteProject(t *testing.T) {
 	tdr := &v1.ProjectDeleteRequest{
 		Id: "p3",
 	}
+	filter := map[string]any{
+		"projectmember ->> 'project_id'": t3.Meta.Id,
+	}
+	var paging *v1.Paging
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
+	projectMemberStorageMock.On("Find", ctx, filter, paging).Return([]*v1.ProjectMember{}, nil, nil)
 	resp, err := ts.Delete(ctx, tdr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

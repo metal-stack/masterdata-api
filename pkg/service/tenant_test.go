@@ -85,9 +85,11 @@ func TestUpdateTenant(t *testing.T) {
 
 func TestDeleteTenant(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
+	memberStorageMock := &mocks.Storage[*v1.TenantMember]{}
 	ts := &tenantService{
-		tenantStore: storageMock,
-		log:         slog.Default(),
+		tenantStore:       storageMock,
+		tenantMemberStore: memberStorageMock,
+		log:               slog.Default(),
 	}
 	ctx := context.Background()
 	t3 := &v1.Tenant{
@@ -96,8 +98,14 @@ func TestDeleteTenant(t *testing.T) {
 	tdr := &v1.TenantDeleteRequest{
 		Id: "t3",
 	}
+	filter := map[string]any{
+		"tenantmember ->> 'tenant_id'": t3.Meta.Id,
+		"tenantmember ->> 'member_id'": t3.Meta.Id,
+	}
+	var paging *v1.Paging
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
+	memberStorageMock.On("Find", ctx, filter, paging).Return([]*v1.TenantMember{}, nil, nil)
 	resp, err := ts.Delete(ctx, tdr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
