@@ -92,6 +92,9 @@ func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteReques
 		"projectmember ->> 'project_id'": project.Meta.Id,
 	}
 	memberships, _, err := s.projectMemberStore.Find(ctx, filter, nil)
+	if err != nil {
+		return nil, err
+	}
 	for _, m := range memberships {
 		err := s.projectMemberStore.Delete(ctx, m.Meta.Id)
 		if err != nil {
