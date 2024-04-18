@@ -11,8 +11,9 @@ import (
 )
 
 type tenantService struct {
-	tenantStore datastore.Storage[*v1.Tenant]
-	log         *slog.Logger
+	tenantStore       datastore.Storage[*v1.Tenant]
+	tenantMemberStore datastore.Storage[*v1.TenantMember]
+	log               *slog.Logger
 }
 
 func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
@@ -20,9 +21,14 @@ func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
 	if err != nil {
 		return nil, err
 	}
+	tms, err := datastore.New(l, db, &v1.TenantMember{})
+	if err != nil {
+		return nil, err
+	}
 	return &tenantService{
-		tenantStore: NewStorageStatusWrapper(ts),
-		log:         l,
+		tenantStore:       NewStorageStatusWrapper(ts),
+		tenantMemberStore: NewStorageStatusWrapper(tms),
+		log:               l,
 	}, nil
 }
 
@@ -44,7 +50,24 @@ func (s *tenantService) Update(ctx context.Context, req *v1.TenantUpdateRequest)
 func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
 	tenant := req.NewTenant()
 	err := s.tenantStore.Delete(ctx, tenant.Meta.Id)
-	return tenant.NewTenantResponse(), err
+	if err != nil {
+		return nil, err
+	}
+	filter := map[string]any{
+		"tenantmember ->> 'tenant_id'": tenant.Meta.Id,
+		"tenantmember ->> 'member_id'": tenant.Meta.Id,
+	}
+	memberships, _, err := s.tenantMemberStore.Find(ctx, filter, nil)
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range memberships {
+		err := s.tenantMemberStore.Delete(ctx, m.Meta.Id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return tenant.NewTenantResponse(), nil
 }
 
 func (s *tenantService) Get(ctx context.Context, req *v1.TenantGetRequest) (*v1.TenantResponse, error) {

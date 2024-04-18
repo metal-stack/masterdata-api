@@ -19,7 +19,7 @@ type tenantMemberService struct {
 }
 
 func NewTenantMemberService(db *sqlx.DB, l *slog.Logger) (*tenantMemberService, error) {
-	pms, err := datastore.New(l, db, &v1.TenantMember{})
+	tms, err := datastore.New(l, db, &v1.TenantMember{})
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func NewTenantMemberService(db *sqlx.DB, l *slog.Logger) (*tenantMemberService, 
 		return nil, err
 	}
 	return &tenantMemberService{
-		tenantMemberStore: NewStorageStatusWrapper(pms),
+		tenantMemberStore: NewStorageStatusWrapper(tms),
 		tenantStore:       NewStorageStatusWrapper(ts),
 		log:               l,
 	}, nil
