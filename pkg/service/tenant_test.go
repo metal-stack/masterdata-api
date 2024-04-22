@@ -86,13 +86,10 @@ func TestUpdateTenant(t *testing.T) {
 func TestDeleteTenant(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
 	memberStorageMock := &mocks.Storage[*v1.TenantMember]{}
-	projectStorageMock := &mocks.Storage[*v1.ProjectMember]{}
-
 	ts := &tenantService{
-		tenantStore:        storageMock,
-		tenantMemberStore:  memberStorageMock,
-		projectMemberStore: projectStorageMock,
-		log:                slog.Default(),
+		tenantStore:       storageMock,
+		tenantMemberStore: memberStorageMock,
+		log:               slog.Default(),
 	}
 	ctx := context.Background()
 	t3 := &v1.Tenant{
@@ -107,15 +104,11 @@ func TestDeleteTenant(t *testing.T) {
 	mfilter := map[string]any{
 		"tenantmember ->> 'member_id'": t3.Meta.Id,
 	}
-	pfilter := map[string]any{
-		"projectmember ->> 'tenant_id'": t3.Meta.Id,
-	}
 	var paging *v1.Paging
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
 	memberStorageMock.On("Find", ctx, tfilter, paging).Return([]*v1.TenantMember{}, nil, nil)
 	memberStorageMock.On("Find", ctx, mfilter, paging).Return([]*v1.TenantMember{}, nil, nil)
-	projectStorageMock.On("Find", ctx, pfilter, paging).Return([]*v1.ProjectMember{}, nil, nil)
 	resp, err := ts.Delete(ctx, tdr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
