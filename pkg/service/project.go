@@ -92,6 +92,7 @@ func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteReques
 		return nil, err
 	}
 	for _, m := range memberships {
+		// FIXME: collect all membership ids and call s.projectMemberStore.DeleteAll(ctx, ids)
 		err := s.projectMemberStore.Delete(ctx, m.Meta.Id)
 		if err != nil {
 			return nil, err

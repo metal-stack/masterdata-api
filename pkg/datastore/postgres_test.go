@@ -629,6 +629,70 @@ func TestDelete(t *testing.T) {
 	assert.Equal(t, "etenant", tgrh.Name)
 }
 
+func TestDeleteAll(t *testing.T) {
+	const (
+		t11 = "t11"
+		t10 = "t10"
+	)
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
+	require.NoError(t, err)
+	assert.NotNil(t, tenantDS, "Datastore must not be nil")
+	ctx := context.Background()
+
+	// unknown id
+	tdr1 := &v1.Tenant{
+		Meta: &v1.Meta{Id: "unknown-id"},
+	}
+	err = tenantDS.DeleteAll(ctx, tdr1.Meta.Id)
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
+
+	// create a tenant
+	tcr1 := &v1.Tenant{
+		Meta:        &v1.Meta{Id: t11},
+		Name:        "etenant",
+		Description: "E Tenant",
+	}
+	err = tenantDS.Create(ctx, tcr1)
+	require.NoError(t, err)
+	assert.Equal(t, t11, tcr1.GetMeta().GetId())
+	assert.Equal(t, "etenant", tcr1.GetName())
+	assert.Equal(t, "E Tenant", tcr1.GetDescription())
+
+	// create a tenant
+	tcr2 := &v1.Tenant{
+		Meta:        &v1.Meta{Id: t10},
+		Name:        "ftenant",
+		Description: "F Tenant",
+	}
+	err = tenantDS.Create(ctx, tcr2)
+	require.NoError(t, err)
+	assert.Equal(t, t10, tcr2.GetMeta().GetId())
+	assert.Equal(t, "ftenant", tcr2.GetName())
+	assert.Equal(t, "F Tenant", tcr2.GetDescription())
+
+	// now delete them
+	err = tenantDS.DeleteAll(ctx, t10, t11)
+	require.NoError(t, err)
+
+	_, err = tenantDS.Get(ctx, t11)
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:t11 not found sql: no rows in result set")
+
+	_, err = tenantDS.Get(ctx, t10)
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:t10 not found sql: no rows in result set")
+
+	var tgrh v1.Tenant
+	err = tenantDS.GetHistory(ctx, t11, time.Now(), &tgrh)
+	require.NoError(t, err)
+	assert.Equal(t, "etenant", tgrh.Name)
+
+	err = tenantDS.GetHistory(ctx, t10, time.Now(), &tgrh)
+	require.NoError(t, err)
+	assert.Equal(t, "ftenant", tgrh.Name)
+}
+
 func TestAnnotationsAndLabels(t *testing.T) {
 	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
@@ -714,7 +778,7 @@ func setNow(t time.Time) {
 	}
 }
 
-// resetNow resets the overriden Now to time.Now
+// resetNow resets the overridden Now to time.Now
 func resetNow() {
 	Now = time.Now
 }
