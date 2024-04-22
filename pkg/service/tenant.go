@@ -62,6 +62,7 @@ func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest)
 		return nil, err
 	}
 	for _, m := range memberships {
+		// FIXME: collect all membership ids and call s.tenantMemberStore.DeleteAll(ctx, ids)
 		err := s.tenantMemberStore.Delete(ctx, m.Meta.Id)
 		if err != nil {
 			return nil, err
