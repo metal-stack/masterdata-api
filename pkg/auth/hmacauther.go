@@ -32,7 +32,7 @@ const (
 
 // HMACAuther provides means for generation/encoding and decoding/validation for grpc.
 // This code is potentially re-usable for all grpc-based clients/services
-// that want to use hmac-Authentification.
+// that want to use hmac-Authentication.
 type HMACAuther struct {
 	hmacAuth *security.HMACAuth
 }

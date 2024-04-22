@@ -34,7 +34,7 @@ type QuotaSet struct {
 	Cluster *Quota `protobuf:"bytes,1,opt,name=cluster,proto3" json:"cluster,omitempty"`
 	// machine the amount of machines
 	Machine *Quota `protobuf:"bytes,2,opt,name=machine,proto3" json:"machine,omitempty"`
-	// ip the amount of aquired ip´s
+	// ip the amount of acquired ip´s
 	Ip *Quota `protobuf:"bytes,3,opt,name=ip,proto3" json:"ip,omitempty"`
 	// project the amount of projects of a tenant
 	Project *Quota `protobuf:"bytes,4,opt,name=project,proto3" json:"project,omitempty"`
