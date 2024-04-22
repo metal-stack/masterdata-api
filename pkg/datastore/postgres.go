@@ -28,6 +28,7 @@ type Storage[E Entity] interface {
 	Create(ctx context.Context, ve E) error
 	Update(ctx context.Context, ve E) error
 	Delete(ctx context.Context, id string) error
+	DeleteAll(ctx context.Context, ids ...string) error
 	Get(ctx context.Context, id string) (E, error)
 	GetHistory(ctx context.Context, id string, at time.Time, ve E) error
 	GetHistoryCreated(ctx context.Context, id string, ve E) error
@@ -301,6 +302,56 @@ func (ds *datastore[E]) Delete(ctx context.Context, id string) error {
 	err = ds.insertHistory(ve, opDelete, Now(), tx)
 	if err != nil {
 		return err
+	}
+
+	return tx.Commit()
+}
+
+// Delete deletes the entities with the given ids
+func (ds *datastore[E]) DeleteAll(ctx context.Context, ids ...string) error {
+	ds.log.Debug("delete", "entities", ds.jsonField, "ids", ids)
+
+	var ves []E
+	for _, id := range ids {
+		ve, err := ds.Get(ctx, id)
+		if err != nil {
+			return err
+		}
+		ves = append(ves, ve)
+	}
+
+	// delete datasets in table
+	q := ds.sb.Delete(ds.tableName).
+		Where(squirrel.Eq{"id": ids})
+	// in tx
+	tx, err := ds.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer ds.rollback(tx)
+
+	result, err := q.RunWith(tx).ExecContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected != int64(len(ids)) {
+		return NewDataCorruptionError(fmt.Sprintf("data corruption: delete of %s with ids %s affected %d rows", ds.jsonField, ids, rowsAffected))
+	}
+	if rowsAffected < 1 {
+		return NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s affected %d rows", ds.jsonField, ids, rowsAffected))
+	}
+
+	// insert dataset in history table
+	for _, ve := range ves {
+		err = ds.insertHistory(ve, opDelete, Now(), tx)
+		if err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()
