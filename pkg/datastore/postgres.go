@@ -159,7 +159,7 @@ func (ds *datastore[E]) Create(ctx context.Context, ve E) error {
 
 // Update the entity
 func (ds *datastore[E]) Update(ctx context.Context, ve E) error {
-	ds.log.Info("update", "entity", ds.jsonField)
+	ds.log.Debug("update", "entity", ds.jsonField)
 	meta := ve.GetMeta()
 	if meta == nil {
 		return fmt.Errorf("update of type:%s failed, meta is nil", ds.jsonField)
