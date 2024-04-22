@@ -311,6 +311,10 @@ func (ds *datastore[E]) Delete(ctx context.Context, id string) error {
 func (ds *datastore[E]) DeleteAll(ctx context.Context, ids ...string) error {
 	ds.log.Debug("delete", "entities", ds.jsonField, "ids", ids)
 
+	if len(ids) == 0 {
+		return nil
+	}
+
 	var ves []E
 	for _, id := range ids {
 		ve, err := ds.Get(ctx, id)
