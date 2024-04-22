@@ -98,14 +98,17 @@ func TestDeleteTenant(t *testing.T) {
 	tdr := &v1.TenantDeleteRequest{
 		Id: "t3",
 	}
-	filter := map[string]any{
+	tfilter := map[string]any{
 		"tenantmember ->> 'tenant_id'": t3.Meta.Id,
+	}
+	mfilter := map[string]any{
 		"tenantmember ->> 'member_id'": t3.Meta.Id,
 	}
 	var paging *v1.Paging
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
-	memberStorageMock.On("Find", ctx, filter, paging).Return([]*v1.TenantMember{}, nil, nil)
+	memberStorageMock.On("Find", ctx, tfilter, paging).Return([]*v1.TenantMember{}, nil, nil)
+	memberStorageMock.On("Find", ctx, mfilter, paging).Return([]*v1.TenantMember{}, nil, nil)
 	resp, err := ts.Delete(ctx, tdr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

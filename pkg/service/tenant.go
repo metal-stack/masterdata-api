@@ -49,29 +49,30 @@ func (s *tenantService) Update(ctx context.Context, req *v1.TenantUpdateRequest)
 
 func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
 	tenant := req.NewTenant()
-	filter := map[string]any{
+	tenantFilter := map[string]any{
 		"tenantmember ->> 'tenant_id'": tenant.Meta.Id,
 	}
-	memberships, _, err := s.tenantMemberStore.Find(ctx, filter, nil)
-	if err != nil {
-		return nil, err
-	}
-	for _, m := range memberships {
-		// FIXME: collect all membership ids and call s.tenantMemberStore.DeleteAll(ctx, ids)
-		err := s.tenantMemberStore.Delete(ctx, m.Meta.Id)
-		if err != nil {
-			return nil, err
-		}
-	}
-	filter = map[string]any{
+	memberFilter := map[string]any{
 		"tenantmember ->> 'member_id'": tenant.Meta.Id,
 	}
-	memberships, _, err = s.tenantMemberStore.Find(ctx, filter, nil)
+	tenantMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantFilter, nil)
 	if err != nil {
 		return nil, err
 	}
-	for _, m := range memberships {
-		err := s.tenantMemberStore.Delete(ctx, m.Meta.Id)
+	memberMemberships, _, err := s.tenantMemberStore.Find(ctx, memberFilter, nil)
+	if err != nil {
+		return nil, err
+	}
+	var ids []string
+	for _, m := range tenantMemberships {
+		ids = append(ids, m.Meta.Id)
+	}
+	for _, m := range memberMemberships {
+		ids = append(ids, m.Meta.Id)
+	}
+
+	if len(ids) > 0 {
+		err = s.tenantMemberStore.DeleteAll(ctx, ids...)
 		if err != nil {
 			return nil, err
 		}
