@@ -307,7 +307,7 @@ func (ds *datastore[E]) Delete(ctx context.Context, id string) error {
 	return tx.Commit()
 }
 
-// Delete deletes the entities with the given ids
+// DeleteAll deletes the entities with the given ids
 func (ds *datastore[E]) DeleteAll(ctx context.Context, ids ...string) error {
 	ds.log.Debug("delete", "entities", ds.jsonField, "ids", ids)
 
