@@ -84,10 +84,6 @@ func (s *projectService) Update(ctx context.Context, req *v1.ProjectUpdateReques
 }
 func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteRequest) (*v1.ProjectResponse, error) {
 	project := req.NewProject()
-	err := s.projectStore.Delete(ctx, project.Meta.Id)
-	if err != nil {
-		return nil, err
-	}
 	filter := map[string]any{
 		"projectmember ->> 'project_id'": project.Meta.Id,
 	}
@@ -100,6 +96,10 @@ func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteReques
 		if err != nil {
 			return nil, err
 		}
+	}
+	err = s.projectStore.Delete(ctx, project.Meta.Id)
+	if err != nil {
+		return nil, err
 	}
 	return project.NewProjectResponse(), nil
 }

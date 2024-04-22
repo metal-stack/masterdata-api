@@ -49,13 +49,8 @@ func (s *tenantService) Update(ctx context.Context, req *v1.TenantUpdateRequest)
 
 func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
 	tenant := req.NewTenant()
-	err := s.tenantStore.Delete(ctx, tenant.Meta.Id)
-	if err != nil {
-		return nil, err
-	}
 	filter := map[string]any{
 		"tenantmember ->> 'tenant_id'": tenant.Meta.Id,
-		"tenantmember ->> 'member_id'": tenant.Meta.Id,
 	}
 	memberships, _, err := s.tenantMemberStore.Find(ctx, filter, nil)
 	if err != nil {
@@ -66,6 +61,23 @@ func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest)
 		if err != nil {
 			return nil, err
 		}
+	}
+	filter = map[string]any{
+		"tenantmember ->> 'member_id'": tenant.Meta.Id,
+	}
+	memberships, _, err = s.tenantMemberStore.Find(ctx, filter, nil)
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range memberships {
+		err := s.tenantMemberStore.Delete(ctx, m.Meta.Id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = s.tenantStore.Delete(ctx, tenant.Meta.Id)
+	if err != nil {
+		return nil, err
 	}
 	return tenant.NewTenantResponse(), nil
 }
