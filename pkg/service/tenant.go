@@ -11,9 +11,10 @@ import (
 )
 
 type tenantService struct {
-	tenantStore       datastore.Storage[*v1.Tenant]
-	tenantMemberStore datastore.Storage[*v1.TenantMember]
-	log               *slog.Logger
+	tenantStore        datastore.Storage[*v1.Tenant]
+	tenantMemberStore  datastore.Storage[*v1.TenantMember]
+	projectMemberStore datastore.Storage[*v1.ProjectMember]
+	log                *slog.Logger
 }
 
 func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
@@ -25,10 +26,15 @@ func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
 	if err != nil {
 		return nil, err
 	}
+	pms, err := datastore.New(l, db, &v1.ProjectMember{})
+	if err != nil {
+		return nil, err
+	}
 	return &tenantService{
-		tenantStore:       NewStorageStatusWrapper(ts),
-		tenantMemberStore: NewStorageStatusWrapper(tms),
-		log:               l,
+		tenantStore:        NewStorageStatusWrapper(ts),
+		tenantMemberStore:  NewStorageStatusWrapper(tms),
+		projectMemberStore: NewStorageStatusWrapper(pms),
+		log:                l,
 	}, nil
 }
 
@@ -55,6 +61,9 @@ func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest)
 	memberFilter := map[string]any{
 		"tenantmember ->> 'member_id'": tenant.Meta.Id,
 	}
+	projectFilter := map[string]any{
+		"projectmember ->> 'tenant_id'": tenant.Meta.Id,
+	}
 	tenantMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantFilter, nil)
 	if err != nil {
 		return nil, err
@@ -63,7 +72,14 @@ func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest)
 	if err != nil {
 		return nil, err
 	}
-	var ids []string
+	projectMemberships, _, err := s.projectMemberStore.Find(ctx, projectFilter, nil)
+	if err != nil {
+		return nil, err
+	}
+	var (
+		ids   []string
+		pmids []string
+	)
 	for _, m := range tenantMemberships {
 		ids = append(ids, m.Meta.Id)
 	}
@@ -77,6 +93,18 @@ func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest)
 			return nil, err
 		}
 	}
+
+	for _, m := range projectMemberships {
+		pmids = append(ids, m.Meta.Id)
+	}
+
+	if len(pmids) > 0 {
+		err = s.projectMemberStore.DeleteAll(ctx, pmids...)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	err = s.tenantStore.Delete(ctx, tenant.Meta.Id)
 	if err != nil {
 		return nil, err
