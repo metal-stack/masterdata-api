@@ -2,13 +2,13 @@ package service
 
 import (
 	"context"
+	"log/slog"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap/zaptest"
 
 	"testing"
 
@@ -21,7 +21,7 @@ func TestCreateProject(t *testing.T) {
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
-		log:          zaptest.NewLogger(t),
+		log:          slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -57,7 +57,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
-		log:          zaptest.NewLogger(t),
+		log:          slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -96,7 +96,7 @@ func TestUpdateProject(t *testing.T) {
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
-		log:          zaptest.NewLogger(t),
+		log:          slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -127,7 +127,7 @@ func TestDeleteProject(t *testing.T) {
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
-		log:          zaptest.NewLogger(t),
+		log:          slog.Default(),
 	}
 	ctx := context.Background()
 	t3 := &v1.Project{
@@ -151,7 +151,7 @@ func TestGetProject(t *testing.T) {
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
-		log:          zaptest.NewLogger(t),
+		log:          slog.Default(),
 	}
 	ctx := context.Background()
 	t4 := &v1.Project{
@@ -175,7 +175,7 @@ func TestFindProjectByID(t *testing.T) {
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
-		log:          zaptest.NewLogger(t),
+		log:          slog.Default(),
 	}
 	ctx := context.Background()
 	var t5s []*v1.Project
@@ -198,7 +198,7 @@ func TestFindProjectByName(t *testing.T) {
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
-		log:          zaptest.NewLogger(t),
+		log:          slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -222,7 +222,7 @@ func TestFindProjectByTenant(t *testing.T) {
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
-		log:          zaptest.NewLogger(t),
+		log:          slog.Default(),
 	}
 	ctx := context.Background()
 

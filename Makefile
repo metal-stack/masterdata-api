@@ -59,17 +59,17 @@ mocks:
 		--user $$(id -u):$$(id -g) \
 		-w /work \
 		-v ${PWD}:/work \
-		vektra/mockery:v2.38.0 -r --keeptree --dir api/v1 --output api/v1/mocks --all
+		vektra/mockery:v2.42.0 -r --keeptree --dir api/v1 --output api/v1/mocks --all
 
 	docker run --rm \
 		--user $$(id -u):$$(id -g) \
 		-w /work \
 		-v ${PWD}:/work \
-		vektra/mockery:v2.38.0 -r --keeptree --dir pkg/datastore --output pkg/datastore/mocks --all
+		vektra/mockery:v2.42.0 -r --keeptree --dir pkg/datastore --output pkg/datastore/mocks --all
 
 .PHONY: postgres-up
 postgres-up: postgres-rm
-	docker run -d --name masterdatadb -p 5432:5432 -e POSTGRES_PASSWORD="password" -e POSTGRES_USER="masterdata" -e POSTGRES_DB="masterdata" postgres:12-alpine
+	docker run -d --name masterdatadb -p 5432:5432 -e POSTGRES_PASSWORD="password" -e POSTGRES_USER="masterdata" -e POSTGRES_DB="masterdata" postgres:16-alpine
 
 .PHONY: postgres-rm
 postgres-rm:

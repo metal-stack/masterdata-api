@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log/slog"
 	"os"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
@@ -13,18 +14,16 @@ import (
 	"testing"
 
 	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zaptest"
 )
 
-var log *zap.Logger
+var log *slog.Logger
 
 func TestMain(m *testing.M) {
 	code := 0
 	defer func() {
 		os.Exit(code)
 	}()
-	log, _ = zap.NewProduction()
+	log = slog.Default()
 	code = m.Run()
 }
 
@@ -32,7 +31,7 @@ func TestCreateTenant(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
 	ts := &tenantService{
 		tenantStore: storageMock,
-		log:         zaptest.NewLogger(t),
+		log:         slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -64,7 +63,7 @@ func TestUpdateTenant(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
 	ts := &tenantService{
 		tenantStore: storageMock,
-		log:         zaptest.NewLogger(t),
+		log:         slog.Default(),
 	}
 	ctx := context.Background()
 
@@ -88,7 +87,7 @@ func TestDeleteTenant(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
 	ts := &tenantService{
 		tenantStore: storageMock,
-		log:         zaptest.NewLogger(t),
+		log:         slog.Default(),
 	}
 	ctx := context.Background()
 	t3 := &v1.Tenant{
@@ -110,7 +109,7 @@ func TestGetTenant(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
 	ts := &tenantService{
 		tenantStore: storageMock,
-		log:         zaptest.NewLogger(t),
+		log:         slog.Default(),
 	}
 	ctx := context.Background()
 	t4 := &v1.Tenant{
@@ -132,7 +131,7 @@ func TestFindTenantByID(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
 	ts := &tenantService{
 		tenantStore: storageMock,
-		log:         zaptest.NewLogger(t),
+		log:         slog.Default(),
 	}
 	ctx := context.Background()
 	var t5s []*v1.Tenant
@@ -153,7 +152,7 @@ func TestFindTenantByName(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Tenant]{}
 	ts := &tenantService{
 		tenantStore: storageMock,
-		log:         zaptest.NewLogger(t),
+		log:         slog.Default(),
 	}
 	ctx := context.Background()
 

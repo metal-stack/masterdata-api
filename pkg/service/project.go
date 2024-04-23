@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -15,10 +15,10 @@ import (
 type projectService struct {
 	projectStore datastore.Storage[*v1.Project]
 	tenantStore  datastore.Storage[*v1.Tenant]
-	log          *zap.Logger
+	log          *slog.Logger
 }
 
-func NewProjectService(db *sqlx.DB, l *zap.Logger) (*projectService, error) {
+func NewProjectService(db *sqlx.DB, l *slog.Logger) (*projectService, error) {
 	ps, err := datastore.New(l, db, &v1.Project{})
 	if err != nil {
 		return nil, err
@@ -121,10 +121,7 @@ func (s *projectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 		return nil, err
 	}
 	resp := new(v1.ProjectListResponse)
-	for i := range res {
-		p := res[i]
-		resp.Projects = append(resp.Projects, p)
-	}
+	resp.Projects = append(resp.Projects, res...)
 	resp.NextPage = nextPage
 	return resp, nil
 }

@@ -3,6 +3,7 @@ package datastore
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"runtime/debug"
 	"testing"
@@ -17,8 +18,6 @@ import (
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zaptest"
 )
 
 var db *sqlx.DB
@@ -46,7 +45,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCRUD(t *testing.T) {
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -127,7 +126,7 @@ func TestCRUD(t *testing.T) {
 }
 
 func TestUpdateOptimisticLock(t *testing.T) {
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -173,7 +172,7 @@ func TestUpdateOptimisticLock(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	const t1 = "t1"
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -264,7 +263,7 @@ func TestCreate(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	const t3 = "t3"
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -337,7 +336,7 @@ func TestUpdate(t *testing.T) {
 
 //nolint:unparam
 func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name string, desc string) {
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	var tgrhc v1.Tenant
 	err = tenantDS.GetHistoryCreated(ctx, id, &tgrhc)
@@ -347,7 +346,7 @@ func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name stri
 }
 
 func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, name string, desc string) {
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	var tgrh v1.Tenant
 	err = tenantDS.GetHistory(ctx, id, tm, &tgrh)
@@ -358,7 +357,7 @@ func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, na
 
 func TestGet(t *testing.T) {
 	const t4 = "t4"
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -389,7 +388,7 @@ func TestGet(t *testing.T) {
 
 func TestGetHistory(t *testing.T) {
 	const t5 = "t5"
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -480,7 +479,7 @@ func TestGetHistory(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	const t6 = "t6"
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -547,7 +546,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestFindWithPaging(t *testing.T) {
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	// prevent side effects
 	db.MustExec("DELETE from tenants")
 	require.NoError(t, err)
@@ -588,7 +587,7 @@ func TestFindWithPaging(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	const t9 = "t9"
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -631,7 +630,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestAnnotationsAndLabels(t *testing.T) {
-	tenantDS, err := New(zaptest.NewLogger(t), db, &v1.Tenant{})
+	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
 	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
@@ -749,7 +748,7 @@ func createPostgresConnection() (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	log := zap.NewNop()
+	log := slog.Default()
 	var db *sqlx.DB
 	for {
 		var err error
