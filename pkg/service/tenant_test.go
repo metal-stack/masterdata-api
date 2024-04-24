@@ -188,21 +188,18 @@ func TestFindTenantByName(t *testing.T) {
 
 func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 	ctx := context.Background()
-
-	container, c, err := StartPostgres()
-	require.NoError(t, err)
-	defer func() {
-		require.NoError(t, container.Stop(ctx, pointer.Pointer(3*time.Second)))
-	}()
-
 	ves := []datastore.Entity{
 		&v1.Project{},
 		&v1.ProjectMember{},
 		&v1.Tenant{},
 		&v1.TenantMember{},
 	}
-	db, err := datastore.NewPostgresDB(log, c.IP, c.Port, c.User, c.Password, c.DB, "disable", ves...)
+
+	container, db, err := StartPostgres(ves...)
 	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, container.Stop(ctx, pointer.Pointer(3*time.Second)))
+	}()
 	defer func() {
 		require.NoError(t, db.Close())
 	}()
@@ -291,6 +288,89 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 			}
 
 			got, err := s.ProjectsFromMemberships(ctx, tt.req)
+			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+				return
+			}
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func Test_tenantService_TenantsFromMemberships(t *testing.T) {
+	ctx := context.Background()
+	ves := []datastore.Entity{
+		&v1.Project{},
+		&v1.ProjectMember{},
+		&v1.Tenant{},
+		&v1.TenantMember{},
+	}
+
+	container, db, err := StartPostgres(ves...)
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, container.Stop(ctx, pointer.Pointer(3*time.Second)))
+	}()
+	defer func() {
+		require.NoError(t, db.Close())
+	}()
+
+	s := &tenantService{
+		db:  db,
+		log: slog.Default(),
+	}
+
+	var (
+		tenantStore, _       = datastore.New(log, db, &v1.Tenant{})
+		tenantMemberStore, _ = datastore.New(log, db, &v1.TenantMember{})
+	)
+
+	tests := []struct {
+		name    string
+		prepare func()
+		req     *v1.TenantsFromMembershipsRequest
+		want    *v1.TenantsFromMembershipsResponse
+		wantErr error
+	}{
+		{
+			name: "direct membership",
+			req: &v1.TenantsFromMembershipsRequest{
+				TenantId: "a",
+			},
+			prepare: func() {
+				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "b"}})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, MemberId: "a", TenantId: "b"})
+				require.NoError(t, err)
+			},
+			want: &v1.TenantsFromMembershipsResponse{
+				Tenants: []*v1.Tenant{
+					{
+						Meta: &v1.Meta{
+							Kind:       "Tenant",
+							Apiversion: "v1",
+							Id:         "b",
+						},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, ve := range ves {
+				_, err := db.ExecContext(ctx, "TRUNCATE TABLE "+ve.TableName())
+				require.NoError(t, err)
+			}
+
+			if tt.prepare != nil {
+				tt.prepare()
+			}
+
+			got, err := s.TenantsFromMemberships(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return

@@ -185,7 +185,7 @@ func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.Pro
 			for rows.Next() {
 				var (
 					project     *v1.Project
-					raw         string
+					raw         []byte
 					annotations map[string]string
 				)
 
@@ -194,7 +194,7 @@ func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.Pro
 					return err
 				}
 
-				err = json.Unmarshal([]byte(raw), &annotations)
+				err = json.Unmarshal(raw, &annotations)
 				if err != nil {
 					return err
 				}
@@ -236,6 +236,53 @@ func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.Pro
 	return &v1.ProjectsFromMembershipsResponse{Projects: res}, nil
 }
 
-func (s *tenantService) TenantsFromMemberships(context.Context, *v1.TenantsFromMembershipsRequest) (*v1.TenantsFromMembershipsResponse, error) {
-	panic("unimplemented")
+func (s *tenantService) TenantsFromMemberships(ctx context.Context, req *v1.TenantsFromMembershipsRequest) (*v1.TenantsFromMembershipsResponse, error) {
+	var (
+		tm = datastore.Entity(&v1.TenantMember{})
+		t  = datastore.Entity(&v1.Tenant{})
+
+		res []*v1.Tenant
+
+		directTenants = sq.Select(
+			t.JSONField(),
+		).
+			From(tm.TableName()).
+			Join(t.TableName() + " ON " + t.TableName() + ".id = " + tm.JSONField() + "->>'tenant_id'").
+			Where(tm.JSONField() + "->>'member_id' = :tenantId")
+	)
+
+	query, vals, err := directTenants.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	if s.log.Enabled(ctx, slog.LevelDebug) {
+		s.log.Debug("query", "sql", query, "values", vals)
+	}
+
+	rows, err := s.db.NamedQueryContext(ctx, query, map[string]any{"tenantId": req.TenantId})
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			s.log.Error("error closing result rows", "error", err)
+		}
+	}()
+
+	for rows.Next() {
+		var (
+			tenant *v1.Tenant
+		)
+
+		err = rows.Scan(&tenant)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, tenant)
+	}
+
+	return &v1.TenantsFromMembershipsResponse{Tenants: res}, nil
 }

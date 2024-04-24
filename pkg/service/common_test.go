@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/jmoiron/sqlx"
+	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
@@ -13,15 +15,7 @@ var (
 	pgContainer testcontainers.Container
 )
 
-type ConnectionDetails struct {
-	Port     string
-	IP       string
-	User     string
-	Password string
-	DB       string
-}
-
-func StartPostgres() (container testcontainers.Container, c *ConnectionDetails, err error) {
+func StartPostgres(ves ...datastore.Entity) (testcontainers.Container, *sqlx.DB, error) {
 	ctx := context.Background()
 	pgOnce.Do(func() {
 		var err error
@@ -45,20 +39,17 @@ func StartPostgres() (container testcontainers.Container, c *ConnectionDetails, 
 	})
 	ip, err := pgContainer.Host(ctx)
 	if err != nil {
-		return pgContainer, nil, err
+		return nil, nil, err
 	}
 	port, err := pgContainer.MappedPort(ctx, "5432")
 	if err != nil {
-		return pgContainer, nil, err
+		return nil, nil, err
 	}
 
-	c = &ConnectionDetails{
-		IP:       ip,
-		Port:     port.Port(),
-		DB:       "postgres",
-		User:     "postgres",
-		Password: "password",
+	db, err := datastore.NewPostgresDB(log, ip, port.Port(), "postgres", "password", "postgres", "disable", ves...)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return pgContainer, c, err
+	return pgContainer, db, err
 }
