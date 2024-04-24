@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
@@ -135,25 +137,56 @@ func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 
 func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.ProjectsFromMembershipsRequest) (*v1.ProjectsFromMembershipsResponse, error) {
 	pm := datastore.Entity(&v1.ProjectMember{})
+	p := datastore.Entity(&v1.Project{})
 
-	rows, err := s.db.QueryxContext(ctx, "SELECT "+pm.JSONField()+" FROM "+pm.TableName())
+	dm := sq.
+		Select(
+			p.JSONField(),
+			pm.JSONField()+"->'meta'->>'annotations' AS annotations",
+		).
+		From(pm.TableName()).
+		Join(p.TableName() + " ON " + p.TableName() + ".id = " + pm.JSONField() + "->>'project_id'").
+		Where(pm.JSONField() + "->>'tenant_id' = :tenantId")
+
+	query, _, err := dm.ToSql()
 	if err != nil {
 		return nil, err
 	}
 
-	var members []*v1.ProjectMember
-	for rows.Next() {
+	spew.Dump(query)
 
-		member := &v1.ProjectMember{}
-		err = rows.Scan(member)
+	rows, err := s.db.NamedQueryContext(ctx, query, map[string]any{"tenantId": req.TenantId})
+	if err != nil {
+		return nil, err
+	}
+
+	var projects []*v1.ProjectMembershipWithAnnotations
+	for rows.Next() {
+		type annotations map[string]string
+		type res struct {
+			Project     *v1.Project
+			Annotations string
+		}
+		var r res
+		err = rows.Scan(&r.Project, &r.Annotations)
 		if err != nil {
 			return nil, err
 		}
 
-		members = append(members, member)
+		var unmarshalled map[string]string
+		err = json.Unmarshal([]byte(r.Annotations), &unmarshalled)
+		if err != nil {
+			return nil, err
+		}
+
+		projects = append(projects, &v1.ProjectMembershipWithAnnotations{
+			Project:            r.Project,
+			ProjectAnnotations: unmarshalled,
+			TenantAnnotations:  make(map[string]string),
+		})
 	}
 
-	spew.Dump(members)
+	spew.Dump(projects)
 
 	return &v1.ProjectsFromMembershipsResponse{}, nil
 }

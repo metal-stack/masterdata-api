@@ -30,11 +30,17 @@ message TenantsFromMembershipsRequest {
 }
 
 message ProjectsFromMembershipsResponse {
-  repeated Project projects = 1;
+  repeated ProjectMembershipWithAnnotations projects = 1;
 }
 
 message TenantsFromMembershipsResponse {
   repeated Tenant tenants = 1;
+}
+
+message ProjectMembershipWithAnnotations {
+  Project project = 1;
+  map<string, string> project_annotations = 2;
+  map<string, string> tenant_annotations = 3;
 }
 
 message Tenant {

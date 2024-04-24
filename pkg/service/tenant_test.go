@@ -8,13 +8,16 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
 	"github.com/metal-stack/metal-lib/pkg/pointer"
+	"github.com/metal-stack/metal-lib/pkg/testcommon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/runtime/protoimpl"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
@@ -225,14 +228,25 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 	}{
 		{
 			name: "test",
-			req:  &v1.ProjectsFromMembershipsRequest{},
+			req: &v1.ProjectsFromMembershipsRequest{
+				TenantId: "a",
+			},
+			want: &v1.ProjectsFromMembershipsResponse{
+				Projects: []*v1.ProjectMembershipWithAnnotations{{
+					Project: &v1.Project{
+						Meta: &v1.Meta{Id: "1"},
+					},
+					ProjectAnnotations: map[string]string{},
+					TenantAnnotations:  map[string]string{},
+				}},
+			},
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}})
 				require.NoError(t, err)
-
-				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{}, ProjectId: "1", TenantId: "a"})
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
 				require.NoError(t, err)
 			},
+			wantErr: err,
 		},
 	}
 	for _, tt := range tests {
@@ -251,7 +265,7 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			if diff := cmp.Diff(got, tt.want); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
