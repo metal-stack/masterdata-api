@@ -213,32 +213,22 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 	}
 
 	var (
-		projectStore, _ = datastore.New(log, db, &v1.Project{})
-		// tenantStore        datastore.Storage[*v1.Tenant]
-		// tenantMemberStore  datastore.Storage[*v1.TenantMember]
+		projectStore, _       = datastore.New(log, db, &v1.Project{})
+		tenantMemberStore, _  = datastore.New(log, db, &v1.TenantMember{})
 		projectMemberStore, _ = datastore.New(log, db, &v1.ProjectMember{})
 	)
 
 	tests := []struct {
 		name    string
+		prepare func()
 		req     *v1.ProjectsFromMembershipsRequest
 		want    *v1.ProjectsFromMembershipsResponse
-		prepare func()
 		wantErr error
 	}{
 		{
-			name: "test",
+			name: "direct membership",
 			req: &v1.ProjectsFromMembershipsRequest{
 				TenantId: "a",
-			},
-			want: &v1.ProjectsFromMembershipsResponse{
-				Projects: []*v1.ProjectMembershipWithAnnotations{{
-					Project: &v1.Project{
-						Meta: &v1.Meta{Id: "1"},
-					},
-					ProjectAnnotations: map[string]string{},
-					TenantAnnotations:  map[string]string{},
-				}},
 			},
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}})
@@ -246,7 +236,47 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
 				require.NoError(t, err)
 			},
-			wantErr: err,
+			want: &v1.ProjectsFromMembershipsResponse{
+				Projects: []*v1.ProjectMembershipWithAnnotations{{
+					Project: &v1.Project{
+						Meta: &v1.Meta{
+							Kind:       "Project",
+							Apiversion: "v1",
+							Id:         "1",
+						},
+					},
+					ProjectAnnotations: map[string]string{"role": "admin"},
+					TenantAnnotations:  nil,
+				}},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "inherited membership",
+			req: &v1.ProjectsFromMembershipsRequest{
+				TenantId: "a",
+			},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "b"})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "viewer"}}, TenantId: "b", MemberId: "a"})
+				require.NoError(t, err)
+			},
+			want: &v1.ProjectsFromMembershipsResponse{
+				Projects: []*v1.ProjectMembershipWithAnnotations{{
+					Project: &v1.Project{
+						Meta: &v1.Meta{
+							Kind:       "Project",
+							Apiversion: "v1",
+							Id:         "1",
+						},
+						TenantId: "b",
+					},
+					ProjectAnnotations: nil,
+					TenantAnnotations:  map[string]string{"role": "viewer"},
+				}},
+			},
+			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
@@ -265,7 +295,7 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})

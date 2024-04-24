@@ -7,7 +7,6 @@ import (
 	"log/slog"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
@@ -136,59 +135,105 @@ func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 }
 
 func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.ProjectsFromMembershipsRequest) (*v1.ProjectsFromMembershipsResponse, error) {
-	pm := datastore.Entity(&v1.ProjectMember{})
-	p := datastore.Entity(&v1.Project{})
+	var (
+		pm = datastore.Entity(&v1.ProjectMember{})
+		tm = datastore.Entity(&v1.TenantMember{})
+		p  = datastore.Entity(&v1.Project{})
 
-	dm := sq.
-		Select(
+		res       []*v1.ProjectMembershipWithAnnotations
+		resultMap = map[string]*v1.ProjectMembershipWithAnnotations{}
+
+		// all projects with direct memberships
+		directProjects = sq.Select(
 			p.JSONField(),
 			pm.JSONField()+"->'meta'->>'annotations' AS annotations",
 		).
-		From(pm.TableName()).
-		Join(p.TableName() + " ON " + p.TableName() + ".id = " + pm.JSONField() + "->>'project_id'").
-		Where(pm.JSONField() + "->>'tenant_id' = :tenantId")
+			From(pm.TableName()).
+			Join(p.TableName() + " ON " + p.TableName() + ".id = " + pm.JSONField() + "->>'project_id'").
+			Where(pm.JSONField() + "->>'tenant_id' = :tenantId")
 
-	query, _, err := dm.ToSql()
+		// all projects with no direct membership because inherited from tenant membership
+		inheritedProjects = sq.Select(
+			p.JSONField(),
+			tm.JSONField()+"->'meta'->>'annotations' AS annotations",
+		).
+			From(tm.TableName()).
+			Join(p.TableName() + " ON " + p.JSONField() + "->>'tenant_id' = " + tm.JSONField() + "->>'tenant_id'").
+			Where(tm.JSONField() + "->>'member_id' = :tenantId")
+
+		runQuery = func(builder sq.SelectBuilder, callback func(*v1.ProjectMembershipWithAnnotations, map[string]string)) error {
+			query, vals, err := builder.ToSql()
+			if err != nil {
+				return err
+			}
+
+			if s.log.Enabled(ctx, slog.LevelDebug) {
+				s.log.Debug("query", "sql", query, "values", vals)
+			}
+
+			rows, err := s.db.NamedQueryContext(ctx, query, map[string]any{"tenantId": req.TenantId})
+			if err != nil {
+				return err
+			}
+			defer func() {
+				err = rows.Close()
+				if err != nil {
+					s.log.Error("error closing result rows", "error", err)
+				}
+			}()
+
+			for rows.Next() {
+				var (
+					project     *v1.Project
+					raw         string
+					annotations map[string]string
+				)
+
+				err = rows.Scan(&project, &raw)
+				if err != nil {
+					return err
+				}
+
+				err = json.Unmarshal([]byte(raw), &annotations)
+				if err != nil {
+					return err
+				}
+
+				p, ok := resultMap[project.Meta.Id]
+				if !ok {
+					p = &v1.ProjectMembershipWithAnnotations{
+						Project: project,
+					}
+				}
+
+				callback(p, annotations)
+
+				resultMap[project.Meta.Id] = p
+			}
+
+			return nil
+		}
+	)
+
+	err := runQuery(directProjects, func(pmwa *v1.ProjectMembershipWithAnnotations, annotations map[string]string) {
+		pmwa.ProjectAnnotations = annotations
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	spew.Dump(query)
-
-	rows, err := s.db.NamedQueryContext(ctx, query, map[string]any{"tenantId": req.TenantId})
+	err = runQuery(inheritedProjects, func(pmwa *v1.ProjectMembershipWithAnnotations, annotations map[string]string) {
+		pmwa.TenantAnnotations = annotations
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	var projects []*v1.ProjectMembershipWithAnnotations
-	for rows.Next() {
-		type annotations map[string]string
-		type res struct {
-			Project     *v1.Project
-			Annotations string
-		}
-		var r res
-		err = rows.Scan(&r.Project, &r.Annotations)
-		if err != nil {
-			return nil, err
-		}
-
-		var unmarshalled map[string]string
-		err = json.Unmarshal([]byte(r.Annotations), &unmarshalled)
-		if err != nil {
-			return nil, err
-		}
-
-		projects = append(projects, &v1.ProjectMembershipWithAnnotations{
-			Project:            r.Project,
-			ProjectAnnotations: unmarshalled,
-			TenantAnnotations:  make(map[string]string),
-		})
+	for _, p := range resultMap {
+		res = append(res, p)
 	}
 
-	spew.Dump(projects)
-
-	return &v1.ProjectsFromMembershipsResponse{}, nil
+	return &v1.ProjectsFromMembershipsResponse{Projects: res}, nil
 }
 
 func (s *tenantService) TenantsFromMemberships(context.Context, *v1.TenantsFromMembershipsRequest) (*v1.TenantsFromMembershipsResponse, error) {
