@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 )
 
 type tenantService struct {
+	db                *sqlx.DB
 	tenantStore       datastore.Storage[*v1.Tenant]
 	tenantMemberStore datastore.Storage[*v1.TenantMember]
 	log               *slog.Logger
@@ -26,6 +28,7 @@ func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
 		return nil, err
 	}
 	return &tenantService{
+		db:                db,
 		tenantStore:       NewStorageStatusWrapper(ts),
 		tenantMemberStore: NewStorageStatusWrapper(tms),
 		log:               l,
@@ -128,4 +131,33 @@ func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 	resp.Tenants = append(resp.Tenants, res...)
 	resp.NextPage = nextPage
 	return resp, nil
+}
+
+func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.ProjectsFromMembershipsRequest) (*v1.ProjectsFromMembershipsResponse, error) {
+	pm := datastore.Entity(&v1.ProjectMember{})
+
+	rows, err := s.db.QueryxContext(ctx, "SELECT "+pm.JSONField()+" FROM "+pm.TableName())
+	if err != nil {
+		return nil, err
+	}
+
+	var members []*v1.ProjectMember
+	for rows.Next() {
+
+		member := &v1.ProjectMember{}
+		err = rows.Scan(member)
+		if err != nil {
+			return nil, err
+		}
+
+		members = append(members, member)
+	}
+
+	spew.Dump(members)
+
+	return &v1.ProjectsFromMembershipsResponse{}, nil
+}
+
+func (s *tenantService) TenantsFromMemberships(context.Context, *v1.TenantsFromMembershipsRequest) (*v1.TenantsFromMembershipsResponse, error) {
+	panic("unimplemented")
 }

@@ -4,16 +4,18 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/masterdata-api/pkg/datastore"
+	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
+	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-
-	"testing"
-
-	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
 )
 
 var log *slog.Logger
@@ -179,4 +181,79 @@ func TestFindTenantByName(t *testing.T) {
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
+}
+
+func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
+	ctx := context.Background()
+
+	container, c, err := StartPostgres()
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, container.Stop(ctx, pointer.Pointer(3*time.Second)))
+	}()
+
+	ves := []datastore.Entity{
+		&v1.Project{},
+		&v1.ProjectMember{},
+		&v1.Tenant{},
+		&v1.TenantMember{},
+	}
+	db, err := datastore.NewPostgresDB(log, c.IP, c.Port, c.User, c.Password, c.DB, "disable", ves...)
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, db.Close())
+	}()
+
+	s := &tenantService{
+		db:  db,
+		log: slog.Default(),
+	}
+
+	var (
+		projectStore, _ = datastore.New(log, db, &v1.Project{})
+		// tenantStore        datastore.Storage[*v1.Tenant]
+		// tenantMemberStore  datastore.Storage[*v1.TenantMember]
+		projectMemberStore, _ = datastore.New(log, db, &v1.ProjectMember{})
+	)
+
+	tests := []struct {
+		name    string
+		req     *v1.ProjectsFromMembershipsRequest
+		want    *v1.ProjectsFromMembershipsResponse
+		prepare func()
+		wantErr error
+	}{
+		{
+			name: "test",
+			req:  &v1.ProjectsFromMembershipsRequest{},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}})
+				require.NoError(t, err)
+
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{}, ProjectId: "1", TenantId: "a"})
+				require.NoError(t, err)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, ve := range ves {
+				_, err := db.ExecContext(ctx, "TRUNCATE TABLE "+ve.TableName())
+				require.NoError(t, err)
+			}
+
+			if tt.prepare != nil {
+				tt.prepare()
+			}
+
+			got, err := s.ProjectsFromMemberships(ctx, tt.req)
+			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+				return
+			}
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
 }

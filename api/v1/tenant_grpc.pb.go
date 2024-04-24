@@ -19,12 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TenantService_Create_FullMethodName     = "/v1.TenantService/Create"
-	TenantService_Update_FullMethodName     = "/v1.TenantService/Update"
-	TenantService_Delete_FullMethodName     = "/v1.TenantService/Delete"
-	TenantService_Get_FullMethodName        = "/v1.TenantService/Get"
-	TenantService_GetHistory_FullMethodName = "/v1.TenantService/GetHistory"
-	TenantService_Find_FullMethodName       = "/v1.TenantService/Find"
+	TenantService_Create_FullMethodName                  = "/v1.TenantService/Create"
+	TenantService_Update_FullMethodName                  = "/v1.TenantService/Update"
+	TenantService_Delete_FullMethodName                  = "/v1.TenantService/Delete"
+	TenantService_Get_FullMethodName                     = "/v1.TenantService/Get"
+	TenantService_GetHistory_FullMethodName              = "/v1.TenantService/GetHistory"
+	TenantService_Find_FullMethodName                    = "/v1.TenantService/Find"
+	TenantService_ProjectsFromMemberships_FullMethodName = "/v1.TenantService/ProjectsFromMemberships"
+	TenantService_TenantsFromMemberships_FullMethodName  = "/v1.TenantService/TenantsFromMemberships"
 )
 
 // TenantServiceClient is the client API for TenantService service.
@@ -37,6 +39,8 @@ type TenantServiceClient interface {
 	Get(ctx context.Context, in *TenantGetRequest, opts ...grpc.CallOption) (*TenantResponse, error)
 	GetHistory(ctx context.Context, in *TenantGetHistoryRequest, opts ...grpc.CallOption) (*TenantResponse, error)
 	Find(ctx context.Context, in *TenantFindRequest, opts ...grpc.CallOption) (*TenantListResponse, error)
+	ProjectsFromMemberships(ctx context.Context, in *ProjectsFromMembershipsRequest, opts ...grpc.CallOption) (*ProjectsFromMembershipsResponse, error)
+	TenantsFromMemberships(ctx context.Context, in *TenantsFromMembershipsRequest, opts ...grpc.CallOption) (*TenantsFromMembershipsResponse, error)
 }
 
 type tenantServiceClient struct {
@@ -101,6 +105,24 @@ func (c *tenantServiceClient) Find(ctx context.Context, in *TenantFindRequest, o
 	return out, nil
 }
 
+func (c *tenantServiceClient) ProjectsFromMemberships(ctx context.Context, in *ProjectsFromMembershipsRequest, opts ...grpc.CallOption) (*ProjectsFromMembershipsResponse, error) {
+	out := new(ProjectsFromMembershipsResponse)
+	err := c.cc.Invoke(ctx, TenantService_ProjectsFromMemberships_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tenantServiceClient) TenantsFromMemberships(ctx context.Context, in *TenantsFromMembershipsRequest, opts ...grpc.CallOption) (*TenantsFromMembershipsResponse, error) {
+	out := new(TenantsFromMembershipsResponse)
+	err := c.cc.Invoke(ctx, TenantService_TenantsFromMemberships_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TenantServiceServer is the server API for TenantService service.
 // All implementations should embed UnimplementedTenantServiceServer
 // for forward compatibility
@@ -111,6 +133,8 @@ type TenantServiceServer interface {
 	Get(context.Context, *TenantGetRequest) (*TenantResponse, error)
 	GetHistory(context.Context, *TenantGetHistoryRequest) (*TenantResponse, error)
 	Find(context.Context, *TenantFindRequest) (*TenantListResponse, error)
+	ProjectsFromMemberships(context.Context, *ProjectsFromMembershipsRequest) (*ProjectsFromMembershipsResponse, error)
+	TenantsFromMemberships(context.Context, *TenantsFromMembershipsRequest) (*TenantsFromMembershipsResponse, error)
 }
 
 // UnimplementedTenantServiceServer should be embedded to have forward compatible implementations.
@@ -134,6 +158,12 @@ func (UnimplementedTenantServiceServer) GetHistory(context.Context, *TenantGetHi
 }
 func (UnimplementedTenantServiceServer) Find(context.Context, *TenantFindRequest) (*TenantListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Find not implemented")
+}
+func (UnimplementedTenantServiceServer) ProjectsFromMemberships(context.Context, *ProjectsFromMembershipsRequest) (*ProjectsFromMembershipsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProjectsFromMemberships not implemented")
+}
+func (UnimplementedTenantServiceServer) TenantsFromMemberships(context.Context, *TenantsFromMembershipsRequest) (*TenantsFromMembershipsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TenantsFromMemberships not implemented")
 }
 
 // UnsafeTenantServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -255,6 +285,42 @@ func _TenantService_Find_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TenantService_ProjectsFromMemberships_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectsFromMembershipsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantServiceServer).ProjectsFromMemberships(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantService_ProjectsFromMemberships_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantServiceServer).ProjectsFromMemberships(ctx, req.(*ProjectsFromMembershipsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TenantService_TenantsFromMemberships_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TenantsFromMembershipsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TenantServiceServer).TenantsFromMemberships(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TenantService_TenantsFromMemberships_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TenantServiceServer).TenantsFromMemberships(ctx, req.(*TenantsFromMembershipsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TenantService_ServiceDesc is the grpc.ServiceDesc for TenantService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -285,6 +351,14 @@ var TenantService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Find",
 			Handler:    _TenantService_Find_Handler,
+		},
+		{
+			MethodName: "ProjectsFromMemberships",
+			Handler:    _TenantService_ProjectsFromMemberships_Handler,
+		},
+		{
+			MethodName: "TenantsFromMemberships",
+			Handler:    _TenantService_TenantsFromMemberships_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

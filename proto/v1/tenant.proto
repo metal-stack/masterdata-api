@@ -7,6 +7,7 @@ import "google/protobuf/wrappers.proto";
 import "v1/common.proto";
 import "v1/iam.proto";
 import "v1/meta.proto";
+import "v1/project.proto";
 import "v1/quota.proto";
 
 service TenantService {
@@ -16,6 +17,24 @@ service TenantService {
   rpc Get(TenantGetRequest) returns (TenantResponse);
   rpc GetHistory(TenantGetHistoryRequest) returns (TenantResponse);
   rpc Find(TenantFindRequest) returns (TenantListResponse);
+  rpc ProjectsFromMemberships(ProjectsFromMembershipsRequest) returns (ProjectsFromMembershipsResponse);
+  rpc TenantsFromMemberships(TenantsFromMembershipsRequest) returns (TenantsFromMembershipsResponse);
+}
+
+message ProjectsFromMembershipsRequest {
+  string tenant_id = 1;
+}
+
+message TenantsFromMembershipsRequest {
+  string tenant_id = 1;
+}
+
+message ProjectsFromMembershipsResponse {
+  repeated Project projects = 1;
+}
+
+message TenantsFromMembershipsResponse {
+  repeated Tenant tenants = 1;
 }
 
 message Tenant {
