@@ -34,6 +34,10 @@ func (s StorageStatusWrapper[E]) Delete(ctx context.Context, id string) error {
 	return wrapDeleteStatusError(s.storage.Delete(ctx, id))
 }
 
+func (s StorageStatusWrapper[E]) DeleteAll(ctx context.Context, ids ...string) error {
+	return wrapDeleteStatusError(s.storage.DeleteAll(ctx, ids...))
+}
+
 func (s StorageStatusWrapper[E]) Get(ctx context.Context, id string) (E, error) {
 	e, err := s.storage.Get(ctx, id)
 	return e, wrapGetStatusError(err)

@@ -123,26 +123,34 @@ func TestUpdateProject(t *testing.T) {
 
 func TestDeleteProject(t *testing.T) {
 	storageMock := &mocks.Storage[*v1.Project]{}
+	projectMemberStorageMock := &mocks.Storage[*v1.ProjectMember]{}
 	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
-	ts := &projectService{
-		projectStore: storageMock,
-		tenantStore:  tenantStorageMock,
-		log:          slog.Default(),
+	ps := &projectService{
+		projectStore:       storageMock,
+		projectMemberStore: projectMemberStorageMock,
+		tenantStore:        tenantStorageMock,
+		log:                slog.Default(),
 	}
 	ctx := context.Background()
-	t3 := &v1.Project{
+	p3 := &v1.Project{
 		Meta: &v1.Meta{Id: "p3"},
 	}
-	tdr := &v1.ProjectDeleteRequest{
+	pdr := &v1.ProjectDeleteRequest{
 		Id: "p3",
 	}
+	filter := map[string]any{
+		"projectmember ->> 'project_id'": p3.Meta.Id,
+	}
+	var paging *v1.Paging
 
-	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
-	resp, err := ts.Delete(ctx, tdr)
+	projectMemberStorageMock.On("Find", ctx, filter, paging).Return([]*v1.ProjectMember{}, nil, nil)
+	storageMock.On("DeleteAll", ctx, p3.Meta.Id).Return(nil)
+	storageMock.On("Delete", ctx, p3.Meta.Id).Return(nil)
+	resp, err := ps.Delete(ctx, pdr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProject())
-	assert.Equal(t, tdr.Id, resp.GetProject().GetMeta().GetId())
+	assert.Equal(t, pdr.Id, resp.GetProject().GetMeta().GetId())
 }
 
 func TestGetProject(t *testing.T) {

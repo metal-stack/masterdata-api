@@ -11,8 +11,9 @@ import (
 )
 
 type tenantService struct {
-	tenantStore datastore.Storage[*v1.Tenant]
-	log         *slog.Logger
+	tenantStore       datastore.Storage[*v1.Tenant]
+	tenantMemberStore datastore.Storage[*v1.TenantMember]
+	log               *slog.Logger
 }
 
 func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
@@ -20,9 +21,14 @@ func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
 	if err != nil {
 		return nil, err
 	}
+	tms, err := datastore.New(l, db, &v1.TenantMember{})
+	if err != nil {
+		return nil, err
+	}
 	return &tenantService{
-		tenantStore: NewStorageStatusWrapper(ts),
-		log:         l,
+		tenantStore:       NewStorageStatusWrapper(ts),
+		tenantMemberStore: NewStorageStatusWrapper(tms),
+		log:               l,
 	}, nil
 }
 
@@ -43,8 +49,39 @@ func (s *tenantService) Update(ctx context.Context, req *v1.TenantUpdateRequest)
 
 func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
 	tenant := req.NewTenant()
-	err := s.tenantStore.Delete(ctx, tenant.Meta.Id)
-	return tenant.NewTenantResponse(), err
+	tenantFilter := map[string]any{
+		"tenantmember ->> 'tenant_id'": tenant.Meta.Id,
+	}
+	memberFilter := map[string]any{
+		"tenantmember ->> 'member_id'": tenant.Meta.Id,
+	}
+	tenantMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantFilter, nil)
+	if err != nil {
+		return nil, err
+	}
+	memberMemberships, _, err := s.tenantMemberStore.Find(ctx, memberFilter, nil)
+	if err != nil {
+		return nil, err
+	}
+	var ids []string
+	for _, m := range tenantMemberships {
+		ids = append(ids, m.Meta.Id)
+	}
+	for _, m := range memberMemberships {
+		ids = append(ids, m.Meta.Id)
+	}
+
+	if len(ids) > 0 {
+		err = s.tenantMemberStore.DeleteAll(ctx, ids...)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = s.tenantStore.Delete(ctx, tenant.Meta.Id)
+	if err != nil {
+		return nil, err
+	}
+	return tenant.NewTenantResponse(), nil
 }
 
 func (s *tenantService) Get(ctx context.Context, req *v1.TenantGetRequest) (*v1.TenantResponse, error) {

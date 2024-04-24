@@ -54,6 +54,31 @@ func (_m *Storage[E]) Delete(ctx context.Context, id string) error {
 	return r0
 }
 
+// DeleteAll provides a mock function with given fields: ctx, ids
+func (_m *Storage[E]) DeleteAll(ctx context.Context, ids ...string) error {
+	_va := make([]interface{}, len(ids))
+	for _i := range ids {
+		_va[_i] = ids[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteAll")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, ...string) error); ok {
+		r0 = rf(ctx, ids...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Find provides a mock function with given fields: ctx, filter, paging
 func (_m *Storage[E]) Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging) ([]E, *uint64, error) {
 	ret := _m.Called(ctx, filter, paging)

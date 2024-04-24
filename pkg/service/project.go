@@ -13,9 +13,10 @@ import (
 )
 
 type projectService struct {
-	projectStore datastore.Storage[*v1.Project]
-	tenantStore  datastore.Storage[*v1.Tenant]
-	log          *slog.Logger
+	projectStore       datastore.Storage[*v1.Project]
+	projectMemberStore datastore.Storage[*v1.ProjectMember]
+	tenantStore        datastore.Storage[*v1.Tenant]
+	log                *slog.Logger
 }
 
 func NewProjectService(db *sqlx.DB, l *slog.Logger) (*projectService, error) {
@@ -27,10 +28,15 @@ func NewProjectService(db *sqlx.DB, l *slog.Logger) (*projectService, error) {
 	if err != nil {
 		return nil, err
 	}
+	pms, err := datastore.New(l, db, &v1.ProjectMember{})
+	if err != nil {
+		return nil, err
+	}
 	return &projectService{
-		projectStore: NewStorageStatusWrapper(ps),
-		tenantStore:  NewStorageStatusWrapper(ts),
-		log:          l,
+		projectStore:       NewStorageStatusWrapper(ps),
+		projectMemberStore: NewStorageStatusWrapper(pms),
+		tenantStore:        NewStorageStatusWrapper(ts),
+		log:                l,
 	}, nil
 }
 
@@ -78,8 +84,30 @@ func (s *projectService) Update(ctx context.Context, req *v1.ProjectUpdateReques
 }
 func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteRequest) (*v1.ProjectResponse, error) {
 	project := req.NewProject()
-	err := s.projectStore.Delete(ctx, project.Meta.Id)
-	return project.NewProjectResponse(), err
+	filter := map[string]any{
+		"projectmember ->> 'project_id'": project.Meta.Id,
+	}
+	memberships, _, err := s.projectMemberStore.Find(ctx, filter, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+	for _, m := range memberships {
+		ids = append(ids, m.Meta.Id)
+	}
+
+	if len(ids) > 0 {
+		err = s.projectMemberStore.DeleteAll(ctx, ids...)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = s.projectStore.Delete(ctx, project.Meta.Id)
+	if err != nil {
+		return nil, err
+	}
+	return project.NewProjectResponse(), nil
 }
 func (s *projectService) Get(ctx context.Context, req *v1.ProjectGetRequest) (*v1.ProjectResponse, error) {
 	project, err := s.projectStore.Get(ctx, req.Id)
