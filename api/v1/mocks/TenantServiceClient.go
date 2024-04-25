@@ -202,6 +202,80 @@ func (_m *TenantServiceClient) GetHistory(ctx context.Context, in *v1.TenantGetH
 	return r0, r1
 }
 
+// ProjectsFromMemberships provides a mock function with given fields: ctx, in, opts
+func (_m *TenantServiceClient) ProjectsFromMemberships(ctx context.Context, in *v1.ProjectsFromMembershipsRequest, opts ...grpc.CallOption) (*v1.ProjectsFromMembershipsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ProjectsFromMemberships")
+	}
+
+	var r0 *v1.ProjectsFromMembershipsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.ProjectsFromMembershipsRequest, ...grpc.CallOption) (*v1.ProjectsFromMembershipsResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.ProjectsFromMembershipsRequest, ...grpc.CallOption) *v1.ProjectsFromMembershipsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.ProjectsFromMembershipsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.ProjectsFromMembershipsRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// TenantsFromMemberships provides a mock function with given fields: ctx, in, opts
+func (_m *TenantServiceClient) TenantsFromMemberships(ctx context.Context, in *v1.TenantsFromMembershipsRequest, opts ...grpc.CallOption) (*v1.TenantsFromMembershipsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TenantsFromMemberships")
+	}
+
+	var r0 *v1.TenantsFromMembershipsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.TenantsFromMembershipsRequest, ...grpc.CallOption) (*v1.TenantsFromMembershipsResponse, error)); ok {
+		return rf(ctx, in, opts...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.TenantsFromMembershipsRequest, ...grpc.CallOption) *v1.TenantsFromMembershipsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.TenantsFromMembershipsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.TenantsFromMembershipsRequest, ...grpc.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Update provides a mock function with given fields: ctx, in, opts
 func (_m *TenantServiceClient) Update(ctx context.Context, in *v1.TenantUpdateRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
 	_va := make([]interface{}, len(opts))

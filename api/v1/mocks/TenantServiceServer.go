@@ -164,6 +164,66 @@ func (_m *TenantServiceServer) GetHistory(_a0 context.Context, _a1 *v1.TenantGet
 	return r0, r1
 }
 
+// ProjectsFromMemberships provides a mock function with given fields: _a0, _a1
+func (_m *TenantServiceServer) ProjectsFromMemberships(_a0 context.Context, _a1 *v1.ProjectsFromMembershipsRequest) (*v1.ProjectsFromMembershipsResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ProjectsFromMemberships")
+	}
+
+	var r0 *v1.ProjectsFromMembershipsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.ProjectsFromMembershipsRequest) (*v1.ProjectsFromMembershipsResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.ProjectsFromMembershipsRequest) *v1.ProjectsFromMembershipsResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.ProjectsFromMembershipsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.ProjectsFromMembershipsRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// TenantsFromMemberships provides a mock function with given fields: _a0, _a1
+func (_m *TenantServiceServer) TenantsFromMemberships(_a0 context.Context, _a1 *v1.TenantsFromMembershipsRequest) (*v1.TenantsFromMembershipsResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TenantsFromMemberships")
+	}
+
+	var r0 *v1.TenantsFromMembershipsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.TenantsFromMembershipsRequest) (*v1.TenantsFromMembershipsResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.TenantsFromMembershipsRequest) *v1.TenantsFromMembershipsResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.TenantsFromMembershipsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.TenantsFromMembershipsRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Update provides a mock function with given fields: _a0, _a1
 func (_m *TenantServiceServer) Update(_a0 context.Context, _a1 *v1.TenantUpdateRequest) (*v1.TenantResponse, error) {
 	ret := _m.Called(_a0, _a1)
