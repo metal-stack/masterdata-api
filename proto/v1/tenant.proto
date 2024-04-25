@@ -19,6 +19,7 @@ service TenantService {
   rpc Find(TenantFindRequest) returns (TenantListResponse);
   rpc ProjectsFromMemberships(ProjectsFromMembershipsRequest) returns (ProjectsFromMembershipsResponse);
   rpc TenantsFromMemberships(TenantsFromMembershipsRequest) returns (TenantsFromMembershipsResponse);
+  rpc GetAllTenants(GetAllTenantsRequest) returns (GetAllTenantsResponse);
 }
 
 message ProjectsFromMembershipsRequest {
@@ -29,6 +30,15 @@ message ProjectsFromMembershipsRequest {
 message TenantsFromMembershipsRequest {
   string tenant_id = 1;
   optional bool include_inherited = 2;
+}
+
+message GetAllTenantsRequest {
+  string tenant_id = 1;
+  optional bool include_inherited = 2;
+}
+
+message GetAllTenantsResponse {
+  repeated TenantMembershipWithAnnotations tenants = 1;
 }
 
 message ProjectsFromMembershipsResponse {
@@ -44,6 +54,7 @@ message ProjectMembershipWithAnnotations {
   map<string, string> project_annotations = 2;
   map<string, string> tenant_annotations = 3;
 }
+
 message TenantMembershipWithAnnotations {
   Tenant tenant = 1;
   map<string, string> project_annotations = 2;

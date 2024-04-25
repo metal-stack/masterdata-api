@@ -414,3 +414,120 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 		})
 	}
 }
+
+func Test_tenantService_GetAllTenants(t *testing.T) {
+	ctx := context.Background()
+	ves := []datastore.Entity{
+		&v1.Project{},
+		&v1.ProjectMember{},
+		&v1.Tenant{},
+		&v1.TenantMember{},
+	}
+
+	container, db, err := StartPostgres(ctx, ves...)
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, db.Close())
+		require.NoError(t, container.Terminate(ctx))
+	}()
+
+	s := &tenantService{
+		db:  db,
+		log: slog.Default(),
+	}
+
+	var (
+		projectStore, _       = datastore.New(log, db, &v1.Project{})
+		tenantMemberStore, _  = datastore.New(log, db, &v1.TenantMember{})
+		projectMemberStore, _ = datastore.New(log, db, &v1.ProjectMember{})
+		tenantStore, _        = datastore.New(log, db, &v1.Tenant{})
+	)
+
+	tests := []struct {
+		name    string
+		prepare func()
+		req     *v1.GetAllTenantsRequest
+		want    *v1.GetAllTenantsResponse
+		wantErr error
+	}{
+		{
+			name: "direct membership",
+			req: &v1.GetAllTenantsRequest{
+				TenantId:         "acme",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "azure"}})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, MemberId: "azure", TenantId: "acme"})
+				require.NoError(t, err)
+			},
+			want: &v1.GetAllTenantsResponse{
+				Tenants: []*v1.TenantMembershipWithAnnotations{
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "azure",
+							},
+						},
+						TenantAnnotations: map[string]string{"role": "admin"},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "indirect membership",
+			req: &v1.GetAllTenantsRequest{
+				TenantId:         "acme",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "acme"})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "google"}})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "editor"}}, ProjectId: "1", TenantId: "google"})
+				require.NoError(t, err)
+			},
+			want: &v1.GetAllTenantsResponse{
+				Tenants: []*v1.TenantMembershipWithAnnotations{
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "google",
+							},
+						},
+						ProjectAnnotations: map[string]string{"role": "editor"},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, ve := range ves {
+				_, err := db.ExecContext(ctx, "TRUNCATE TABLE "+ve.TableName())
+				require.NoError(t, err)
+			}
+
+			if tt.prepare != nil {
+				tt.prepare()
+			}
+
+			got, err := s.GetAllTenants(ctx, tt.req)
+			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+				return
+			}
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
+}
