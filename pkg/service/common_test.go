@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"sync"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
@@ -11,15 +11,13 @@ import (
 )
 
 var (
-	pgOnce      sync.Once
 	pgContainer testcontainers.Container
 )
 
-func StartPostgres(ves ...datastore.Entity) (testcontainers.Container, *sqlx.DB, error) {
-	ctx := context.Background()
-	pgOnce.Do(func() {
-		var err error
-		req := testcontainers.ContainerRequest{
+func StartPostgres(ctx context.Context, ves ...datastore.Entity) (testcontainers.Container, *sqlx.DB, error) {
+	var err error
+	pgContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: testcontainers.ContainerRequest{
 			Image:        "postgres:16-alpine",
 			ExposedPorts: []string{"5432/tcp"},
 			Env:          map[string]string{"POSTGRES_PASSWORD": "password"},
@@ -28,15 +26,13 @@ func StartPostgres(ves ...datastore.Entity) (testcontainers.Container, *sqlx.DB,
 				wait.ForListeningPort("5432/tcp"),
 			),
 			Cmd: []string{"postgres", "-c", "max_connections=200"},
-		}
-		pgContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-			ContainerRequest: req,
-			Started:          true,
-		})
-		if err != nil {
-			panic(err.Error())
-		}
+		},
+		Started: true,
 	})
+	if err != nil {
+		panic(err.Error())
+	}
+
 	ip, err := pgContainer.Host(ctx)
 	if err != nil {
 		return nil, nil, err
@@ -45,6 +41,8 @@ func StartPostgres(ves ...datastore.Entity) (testcontainers.Container, *sqlx.DB,
 	if err != nil {
 		return nil, nil, err
 	}
+
+	fmt.Println(port.Port())
 
 	db, err := datastore.NewPostgresDB(log, ip, port.Port(), "postgres", "password", "postgres", "disable", ves...)
 	if err != nil {

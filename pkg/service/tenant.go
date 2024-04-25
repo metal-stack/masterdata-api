@@ -222,11 +222,18 @@ func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.Pro
 		return nil, err
 	}
 
-	err = runQuery(inheritedProjects, func(pmwa *v1.ProjectMembershipWithAnnotations, annotations map[string]string) {
-		pmwa.TenantAnnotations = annotations
-	})
-	if err != nil {
-		return nil, err
+	includeInherited := true
+	if req.IncludeInherited != nil {
+		includeInherited = *req.IncludeInherited
+	}
+
+	if includeInherited {
+		err = runQuery(inheritedProjects, func(pmwa *v1.ProjectMembershipWithAnnotations, annotations map[string]string) {
+			pmwa.TenantAnnotations = annotations
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	for _, p := range resultMap {
@@ -238,50 +245,108 @@ func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.Pro
 
 func (s *tenantService) TenantsFromMemberships(ctx context.Context, req *v1.TenantsFromMembershipsRequest) (*v1.TenantsFromMembershipsResponse, error) {
 	var (
+		pm = datastore.Entity(&v1.ProjectMember{})
 		tm = datastore.Entity(&v1.TenantMember{})
+		p  = datastore.Entity(&v1.Project{})
 		t  = datastore.Entity(&v1.Tenant{})
 
-		res []*v1.Tenant
+		res       []*v1.TenantMembershipWithAnnotations
+		resultMap = map[string]*v1.TenantMembershipWithAnnotations{}
 
 		directTenants = sq.Select(
 			t.JSONField(),
+			tm.JSONField()+"->'meta'->>'annotations' AS annotations",
 		).
 			From(tm.TableName()).
 			Join(t.TableName() + " ON " + t.TableName() + ".id = " + tm.JSONField() + "->>'tenant_id'").
 			Where(tm.JSONField() + "->>'member_id' = :tenantId")
+
+		inheritedTenants = sq.Select(
+			t.JSONField(),
+			pm.JSONField()+"->'meta'->>'annotations' AS annotations",
+		).
+			From(pm.TableName()).
+			Join(p.TableName() + " ON " + p.TableName() + ".id = " + pm.JSONField() + "->>'project_id'").
+			Join(t.TableName() + " ON " + t.TableName() + ".id = " + p.JSONField() + "->>'tenant_id'").
+			Where(pm.JSONField() + "->>'tenant_id' = :tenantId")
+
+		runQuery = func(builder sq.SelectBuilder, callback func(*v1.TenantMembershipWithAnnotations, map[string]string)) error {
+			query, vals, err := builder.ToSql()
+			if err != nil {
+				return err
+			}
+
+			if s.log.Enabled(ctx, slog.LevelDebug) {
+				s.log.Debug("query", "sql", query, "values", vals)
+			}
+
+			rows, err := s.db.NamedQueryContext(ctx, query, map[string]any{"tenantId": req.TenantId})
+			if err != nil {
+				return err
+			}
+			defer func() {
+				err = rows.Close()
+				if err != nil {
+					s.log.Error("error closing result rows", "error", err)
+				}
+			}()
+
+			for rows.Next() {
+				var (
+					tenant      *v1.Tenant
+					raw         []byte
+					annotations map[string]string
+				)
+
+				err = rows.Scan(&tenant, &raw)
+				if err != nil {
+					return err
+				}
+
+				err = json.Unmarshal(raw, &annotations)
+				if err != nil {
+					return err
+				}
+
+				t, ok := resultMap[tenant.Meta.Id]
+				if !ok {
+					t = &v1.TenantMembershipWithAnnotations{
+						Tenant: tenant,
+					}
+				}
+
+				callback(t, annotations)
+
+				resultMap[tenant.Meta.Id] = t
+			}
+
+			return nil
+		}
 	)
 
-	query, vals, err := directTenants.ToSql()
+	err := runQuery(directTenants, func(tmwa *v1.TenantMembershipWithAnnotations, annotations map[string]string) {
+		tmwa.TenantAnnotations = annotations
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	if s.log.Enabled(ctx, slog.LevelDebug) {
-		s.log.Debug("query", "sql", query, "values", vals)
+	includeInherited := true
+	if req.IncludeInherited != nil {
+		includeInherited = *req.IncludeInherited
 	}
 
-	rows, err := s.db.NamedQueryContext(ctx, query, map[string]any{"tenantId": req.TenantId})
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			s.log.Error("error closing result rows", "error", err)
-		}
-	}()
-
-	for rows.Next() {
-		var (
-			tenant *v1.Tenant
-		)
-
-		err = rows.Scan(&tenant)
+	if includeInherited {
+		err = runQuery(inheritedTenants, func(tmwa *v1.TenantMembershipWithAnnotations, annotations map[string]string) {
+			tmwa.ProjectAnnotations = annotations
+		})
 		if err != nil {
 			return nil, err
 		}
+	}
 
-		res = append(res, tenant)
+	for _, p := range resultMap {
+		res = append(res, p)
 	}
 
 	return &v1.TenantsFromMembershipsResponse{Tenants: res}, nil

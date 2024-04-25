@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	db, _ = createPostgresConnection()
+	_, db, _ = createPostgresConnection()
 	ds, _ = New(slog.Default(), db, &v1.Tenant{})
 }
 

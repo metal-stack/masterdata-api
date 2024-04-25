@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -195,13 +194,11 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 		&v1.TenantMember{},
 	}
 
-	container, db, err := StartPostgres(ves...)
+	container, db, err := StartPostgres(ctx, ves...)
 	require.NoError(t, err)
 	defer func() {
-		require.NoError(t, container.Stop(ctx, pointer.Pointer(3*time.Second)))
-	}()
-	defer func() {
 		require.NoError(t, db.Close())
+		require.NoError(t, container.Terminate(ctx))
 	}()
 
 	s := &tenantService{
@@ -225,7 +222,8 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 		{
 			name: "direct membership",
 			req: &v1.ProjectsFromMembershipsRequest{
-				TenantId: "a",
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(true),
 			},
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}})
@@ -251,7 +249,8 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 		{
 			name: "inherited membership",
 			req: &v1.ProjectsFromMembershipsRequest{
-				TenantId: "a",
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(true),
 			},
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "b"})
@@ -308,13 +307,11 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 		&v1.TenantMember{},
 	}
 
-	container, db, err := StartPostgres(ves...)
+	container, db, err := StartPostgres(ctx, ves...)
 	require.NoError(t, err)
 	defer func() {
-		require.NoError(t, container.Stop(ctx, pointer.Pointer(3*time.Second)))
-	}()
-	defer func() {
 		require.NoError(t, db.Close())
+		require.NoError(t, container.Terminate(ctx))
 	}()
 
 	s := &tenantService{
@@ -323,8 +320,10 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 	}
 
 	var (
-		tenantStore, _       = datastore.New(log, db, &v1.Tenant{})
-		tenantMemberStore, _ = datastore.New(log, db, &v1.TenantMember{})
+		projectStore, _       = datastore.New(log, db, &v1.Project{})
+		tenantMemberStore, _  = datastore.New(log, db, &v1.TenantMember{})
+		projectMemberStore, _ = datastore.New(log, db, &v1.ProjectMember{})
+		tenantStore, _        = datastore.New(log, db, &v1.Tenant{})
 	)
 
 	tests := []struct {
@@ -337,7 +336,8 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 		{
 			name: "direct membership",
 			req: &v1.TenantsFromMembershipsRequest{
-				TenantId: "a",
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(true),
 			},
 			prepare: func() {
 				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "b"}})
@@ -346,13 +346,46 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 				require.NoError(t, err)
 			},
 			want: &v1.TenantsFromMembershipsResponse{
-				Tenants: []*v1.Tenant{
+				Tenants: []*v1.TenantMembershipWithAnnotations{
 					{
-						Meta: &v1.Meta{
-							Kind:       "Tenant",
-							Apiversion: "v1",
-							Id:         "b",
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "b",
+							},
 						},
+						TenantAnnotations: map[string]string{"role": "admin"},
+					},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "indirect membership",
+			req: &v1.TenantsFromMembershipsRequest{
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "b"})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "b"}})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
+				require.NoError(t, err)
+			},
+			want: &v1.TenantsFromMembershipsResponse{
+				Tenants: []*v1.TenantMembershipWithAnnotations{
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "b",
+							},
+						},
+						ProjectAnnotations: map[string]string{"role": "admin"},
 					},
 				},
 			},
