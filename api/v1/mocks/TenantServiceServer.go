@@ -134,6 +134,36 @@ func (_m *TenantServiceServer) Get(_a0 context.Context, _a1 *v1.TenantGetRequest
 	return r0, r1
 }
 
+// GetAllTenants provides a mock function with given fields: _a0, _a1
+func (_m *TenantServiceServer) GetAllTenants(_a0 context.Context, _a1 *v1.GetAllTenantsRequest) (*v1.GetAllTenantsResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAllTenants")
+	}
+
+	var r0 *v1.GetAllTenantsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.GetAllTenantsRequest) (*v1.GetAllTenantsResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.GetAllTenantsRequest) *v1.GetAllTenantsResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.GetAllTenantsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.GetAllTenantsRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetHistory provides a mock function with given fields: _a0, _a1
 func (_m *TenantServiceServer) GetHistory(_a0 context.Context, _a1 *v1.TenantGetHistoryRequest) (*v1.TenantResponse, error) {
 	ret := _m.Called(_a0, _a1)
