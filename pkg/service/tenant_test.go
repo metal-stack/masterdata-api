@@ -288,7 +288,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 				require.NoError(t, err)
 			},
 			want: &v1.FindParticipatingProjectsResponse{
-				Projects: []*v1.ProjectMembershipWithAnnotations{{
+				Projects: []*v1.ProjectWithMembershipAnnotations{{
 					Project: &v1.Project{
 						Meta: &v1.Meta{
 							Kind:       "Project",
@@ -368,7 +368,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 				require.NoError(t, err)
 			},
 			want: &v1.FindParticipatingProjectsResponse{
-				Projects: []*v1.ProjectMembershipWithAnnotations{
+				Projects: []*v1.ProjectWithMembershipAnnotations{
 					{
 						Project: &v1.Project{
 							Meta: &v1.Meta{
@@ -414,7 +414,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			slices.SortFunc(got.Projects, func(i, j *v1.ProjectMembershipWithAnnotations) int {
+			slices.SortFunc(got.Projects, func(i, j *v1.ProjectWithMembershipAnnotations) int {
 				if i.Project.Meta.Id < j.Project.Meta.Id {
 					return -1
 				} else {
@@ -552,7 +552,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 				require.NoError(t, err)
 			},
 			want: &v1.FindParticipatingTenantsResponse{
-				Tenants: []*v1.TenantMembershipWithAnnotations{
+				Tenants: []*v1.TenantWithMembershipAnnotations{
 					{
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
@@ -594,7 +594,8 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			slices.SortFunc(got.Tenants, func(i, j *v1.TenantMembershipWithAnnotations) int {
+
+			slices.SortFunc(got.Tenants, func(i, j *v1.TenantWithMembershipAnnotations) int {
 				if i.Tenant.Meta.Id < j.Tenant.Meta.Id {
 					return -1
 				} else {
