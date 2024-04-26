@@ -185,7 +185,7 @@ func TestFindTenantByName(t *testing.T) {
 	assert.NotNil(t, resp)
 }
 
-func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
+func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 	ctx := context.Background()
 	ves := []datastore.Entity{
 		&v1.Project{},
@@ -215,13 +215,13 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 	tests := []struct {
 		name    string
 		prepare func()
-		req     *v1.ProjectsFromMembershipsRequest
-		want    *v1.ProjectsFromMembershipsResponse
+		req     *v1.FindParticipatingProjectsRequest
+		want    *v1.FindParticipatingProjectsResponse
 		wantErr error
 	}{
 		{
 			name: "direct membership",
-			req: &v1.ProjectsFromMembershipsRequest{
+			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
 				IncludeInherited: pointer.Pointer(true),
 			},
@@ -231,7 +231,7 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
 				require.NoError(t, err)
 			},
-			want: &v1.ProjectsFromMembershipsResponse{
+			want: &v1.FindParticipatingProjectsResponse{
 				Projects: []*v1.ProjectMembershipWithAnnotations{{
 					Project: &v1.Project{
 						Meta: &v1.Meta{
@@ -248,7 +248,7 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 		},
 		{
 			name: "inherited membership",
-			req: &v1.ProjectsFromMembershipsRequest{
+			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
 				IncludeInherited: pointer.Pointer(true),
 			},
@@ -258,7 +258,7 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "viewer"}}, TenantId: "b", MemberId: "a"})
 				require.NoError(t, err)
 			},
-			want: &v1.ProjectsFromMembershipsResponse{
+			want: &v1.FindParticipatingProjectsResponse{
 				Projects: []*v1.ProjectMembershipWithAnnotations{{
 					Project: &v1.Project{
 						Meta: &v1.Meta{
@@ -286,7 +286,7 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.ProjectsFromMemberships(ctx, tt.req)
+			got, err := s.FindParticipatingProjects(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
@@ -298,7 +298,7 @@ func Test_tenantService_ProjectsFromMemberships(t *testing.T) {
 	}
 }
 
-func Test_tenantService_TenantsFromMemberships(t *testing.T) {
+func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 	ctx := context.Background()
 	ves := []datastore.Entity{
 		&v1.Project{},
@@ -329,13 +329,13 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 	tests := []struct {
 		name    string
 		prepare func()
-		req     *v1.TenantsFromMembershipsRequest
-		want    *v1.TenantsFromMembershipsResponse
+		req     *v1.FindParticipatingTenantsRequest
+		want    *v1.FindParticipatingTenantsResponse
 		wantErr error
 	}{
 		{
 			name: "direct membership",
-			req: &v1.TenantsFromMembershipsRequest{
+			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
 				IncludeInherited: pointer.Pointer(true),
 			},
@@ -345,7 +345,7 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, MemberId: "a", TenantId: "b"})
 				require.NoError(t, err)
 			},
-			want: &v1.TenantsFromMembershipsResponse{
+			want: &v1.FindParticipatingTenantsResponse{
 				Tenants: []*v1.TenantMembershipWithAnnotations{
 					{
 						Tenant: &v1.Tenant{
@@ -363,7 +363,7 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 		},
 		{
 			name: "indirect membership",
-			req: &v1.TenantsFromMembershipsRequest{
+			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
 				IncludeInherited: pointer.Pointer(true),
 			},
@@ -375,7 +375,7 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
 				require.NoError(t, err)
 			},
-			want: &v1.TenantsFromMembershipsResponse{
+			want: &v1.FindParticipatingTenantsResponse{
 				Tenants: []*v1.TenantMembershipWithAnnotations{
 					{
 						Tenant: &v1.Tenant{
@@ -403,7 +403,7 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.TenantsFromMemberships(ctx, tt.req)
+			got, err := s.FindParticipatingTenants(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
@@ -415,7 +415,7 @@ func Test_tenantService_TenantsFromMemberships(t *testing.T) {
 	}
 }
 
-func Test_tenantService_GetAllTenants(t *testing.T) {
+func Test_tenantService_ListTenantMembers(t *testing.T) {
 	ctx := context.Background()
 	ves := []datastore.Entity{
 		&v1.Project{},
@@ -446,13 +446,13 @@ func Test_tenantService_GetAllTenants(t *testing.T) {
 	tests := []struct {
 		name    string
 		prepare func()
-		req     *v1.GetAllTenantsRequest
-		want    *v1.GetAllTenantsResponse
+		req     *v1.ListTenantMembersRequest
+		want    *v1.ListTenantMembersResponse
 		wantErr error
 	}{
 		{
 			name: "direct membership",
-			req: &v1.GetAllTenantsRequest{
+			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
 				IncludeInherited: pointer.Pointer(true),
 			},
@@ -462,7 +462,7 @@ func Test_tenantService_GetAllTenants(t *testing.T) {
 				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, MemberId: "azure", TenantId: "acme"})
 				require.NoError(t, err)
 			},
-			want: &v1.GetAllTenantsResponse{
+			want: &v1.ListTenantMembersResponse{
 				Tenants: []*v1.TenantMembershipWithAnnotations{
 					{
 						Tenant: &v1.Tenant{
@@ -480,7 +480,7 @@ func Test_tenantService_GetAllTenants(t *testing.T) {
 		},
 		{
 			name: "indirect membership",
-			req: &v1.GetAllTenantsRequest{
+			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
 				IncludeInherited: pointer.Pointer(true),
 			},
@@ -492,7 +492,7 @@ func Test_tenantService_GetAllTenants(t *testing.T) {
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "editor"}}, ProjectId: "1", TenantId: "google"})
 				require.NoError(t, err)
 			},
-			want: &v1.GetAllTenantsResponse{
+			want: &v1.ListTenantMembersResponse{
 				Tenants: []*v1.TenantMembershipWithAnnotations{
 					{
 						Tenant: &v1.Tenant{
@@ -520,7 +520,7 @@ func Test_tenantService_GetAllTenants(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.GetAllTenants(ctx, tt.req)
+			got, err := s.ListTenantMembers(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return

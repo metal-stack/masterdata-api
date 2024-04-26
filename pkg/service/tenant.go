@@ -134,7 +134,7 @@ func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 	return resp, nil
 }
 
-func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.ProjectsFromMembershipsRequest) (*v1.ProjectsFromMembershipsResponse, error) {
+func (s *tenantService) FindParticipatingProjects(ctx context.Context, req *v1.FindParticipatingProjectsRequest) (*v1.FindParticipatingProjectsResponse, error) {
 	var (
 		pm = datastore.Entity(&v1.ProjectMember{})
 		tm = datastore.Entity(&v1.TenantMember{})
@@ -240,10 +240,10 @@ func (s *tenantService) ProjectsFromMemberships(ctx context.Context, req *v1.Pro
 		res = append(res, p)
 	}
 
-	return &v1.ProjectsFromMembershipsResponse{Projects: res}, nil
+	return &v1.FindParticipatingProjectsResponse{Projects: res}, nil
 }
 
-func (s *tenantService) TenantsFromMemberships(ctx context.Context, req *v1.TenantsFromMembershipsRequest) (*v1.TenantsFromMembershipsResponse, error) {
+func (s *tenantService) FindParticipatingTenants(ctx context.Context, req *v1.FindParticipatingTenantsRequest) (*v1.FindParticipatingTenantsResponse, error) {
 	var (
 		pm = datastore.Entity(&v1.ProjectMember{})
 		tm = datastore.Entity(&v1.TenantMember{})
@@ -349,10 +349,10 @@ func (s *tenantService) TenantsFromMemberships(ctx context.Context, req *v1.Tena
 		res = append(res, p)
 	}
 
-	return &v1.TenantsFromMembershipsResponse{Tenants: res}, nil
+	return &v1.FindParticipatingTenantsResponse{Tenants: res}, nil
 }
 
-func (s *tenantService) GetAllTenants(ctx context.Context, req *v1.GetAllTenantsRequest) (*v1.GetAllTenantsResponse, error) {
+func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenantMembersRequest) (*v1.ListTenantMembersResponse, error) {
 	var (
 		pm = datastore.Entity(&v1.ProjectMember{})
 		tm = datastore.Entity(&v1.TenantMember{})
@@ -458,5 +458,5 @@ func (s *tenantService) GetAllTenants(ctx context.Context, req *v1.GetAllTenants
 		res = append(res, p)
 	}
 
-	return &v1.GetAllTenantsResponse{Tenants: res}, nil
+	return &v1.ListTenantMembersResponse{Tenants: res}, nil
 }

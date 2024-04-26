@@ -17,35 +17,35 @@ service TenantService {
   rpc Get(TenantGetRequest) returns (TenantResponse);
   rpc GetHistory(TenantGetHistoryRequest) returns (TenantResponse);
   rpc Find(TenantFindRequest) returns (TenantListResponse);
-  rpc ProjectsFromMemberships(ProjectsFromMembershipsRequest) returns (ProjectsFromMembershipsResponse);
-  rpc TenantsFromMemberships(TenantsFromMembershipsRequest) returns (TenantsFromMembershipsResponse);
-  rpc GetAllTenants(GetAllTenantsRequest) returns (GetAllTenantsResponse);
+  rpc ListTenantMembers(ListTenantMembersRequest) returns (ListTenantMembersResponse);
+  rpc FindParticipatingProjects(FindParticipatingProjectsRequest) returns (FindParticipatingProjectsResponse);
+  rpc FindParticipatingTenants(FindParticipatingTenantsRequest) returns (FindParticipatingTenantsResponse);
 }
 
-message ProjectsFromMembershipsRequest {
+message FindParticipatingProjectsRequest {
   string tenant_id = 1;
   optional bool include_inherited = 2;
 }
 
-message TenantsFromMembershipsRequest {
+message FindParticipatingTenantsRequest {
   string tenant_id = 1;
   optional bool include_inherited = 2;
 }
 
-message GetAllTenantsRequest {
+message ListTenantMembersRequest {
   string tenant_id = 1;
   optional bool include_inherited = 2;
 }
 
-message GetAllTenantsResponse {
+message ListTenantMembersResponse {
   repeated TenantMembershipWithAnnotations tenants = 1;
 }
 
-message ProjectsFromMembershipsResponse {
+message FindParticipatingProjectsResponse {
   repeated ProjectMembershipWithAnnotations projects = 1;
 }
 
-message TenantsFromMembershipsResponse {
+message FindParticipatingTenantsResponse {
   repeated TenantMembershipWithAnnotations tenants = 1;
 }
 
