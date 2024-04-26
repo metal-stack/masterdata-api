@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"slices"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -220,7 +221,33 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "direct membership",
+			name: "no memberships",
+			req: &v1.FindParticipatingProjectsRequest{
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+			},
+			want:    &v1.FindParticipatingProjectsResponse{},
+			wantErr: nil,
+		},
+		{
+			name: "ignores foreign memberships",
+			req: &v1.FindParticipatingProjectsRequest{
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "someone else"})
+				require.NoError(t, err)
+			},
+			want:    &v1.FindParticipatingProjectsResponse{},
+			wantErr: nil,
+		},
+		{
+			name: "direct membership including 0 inherited",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
 				IncludeInherited: pointer.Pointer(true),
@@ -229,6 +256,35 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}})
 				require.NoError(t, err)
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
+				require.NoError(t, err)
+			},
+			want: &v1.FindParticipatingProjectsResponse{
+				Projects: []*v1.ProjectMembershipWithAnnotations{{
+					Project: &v1.Project{
+						Meta: &v1.Meta{
+							Kind:       "Project",
+							Apiversion: "v1",
+							Id:         "1",
+						},
+					},
+					ProjectAnnotations: map[string]string{"role": "admin"},
+					TenantAnnotations:  nil,
+				}},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "direct membership excluding inherited",
+			req: &v1.FindParticipatingProjectsRequest{
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(false),
+			},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "editor"}}, MemberId: "b", TenantId: "a"})
 				require.NoError(t, err)
 			},
 			want: &v1.FindParticipatingProjectsResponse{
@@ -274,6 +330,73 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			},
 			wantErr: nil,
 		},
+		{
+			name: "direct and indirect memberships including inherited",
+			req: &v1.FindParticipatingProjectsRequest{
+				TenantId:         "req-tenant",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{
+					Meta:     &v1.Meta{Id: "direct-1"},
+					TenantId: "req-tenant",
+				})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{
+					Meta:      &v1.Meta{Annotations: map[string]string{"role": "owner"}},
+					ProjectId: "direct-1",
+					TenantId:  "req-tenant",
+				})
+				require.NoError(t, err)
+
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{
+					Meta:     &v1.Meta{Annotations: map[string]string{"role": "editor"}},
+					MemberId: "req-tenant",
+					TenantId: "parent",
+				})
+				require.NoError(t, err)
+				err = projectStore.Create(ctx, &v1.Project{
+					Meta:     &v1.Meta{Id: "indirect-2"},
+					TenantId: "parent",
+				})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{
+					Meta:      &v1.Meta{Annotations: map[string]string{"role": "admin"}},
+					ProjectId: "indirect-1",
+					TenantId:  "parent",
+				})
+				require.NoError(t, err)
+			},
+			want: &v1.FindParticipatingProjectsResponse{
+				Projects: []*v1.ProjectMembershipWithAnnotations{
+					{
+						Project: &v1.Project{
+							Meta: &v1.Meta{
+								Kind:       "Project",
+								Apiversion: "v1",
+								Id:         "direct-1",
+							},
+							TenantId: "req-tenant",
+						},
+						ProjectAnnotations: map[string]string{"role": "owner"},
+						TenantAnnotations:  nil,
+					},
+					{
+						Project: &v1.Project{
+							Meta: &v1.Meta{
+								Kind:       "Project",
+								Apiversion: "v1",
+								Id:         "indirect-2",
+							},
+							TenantId: "parent",
+						},
+						ProjectAnnotations: nil,
+						TenantAnnotations:  map[string]string{"role": "editor"},
+					},
+				},
+			},
+			wantErr: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -291,6 +414,13 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
+			slices.SortFunc(got.Projects, func(i, j *v1.ProjectMembershipWithAnnotations) int {
+				if i.Project.Meta.Id < j.Project.Meta.Id {
+					return -1
+				} else {
+					return 1
+				}
+			})
 			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
@@ -391,6 +521,62 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			},
 			wantErr: nil,
 		},
+		{
+			name: "direct and indirect memberships",
+			req: &v1.FindParticipatingTenantsRequest{
+				TenantId:         "req-tnt",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "indirect-tnt"}})
+				require.NoError(t, err)
+				err := projectStore.Create(ctx, &v1.Project{
+					Meta:     &v1.Meta{Id: "indirect"},
+					TenantId: "indirect-tnt",
+				})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{
+					Meta:      &v1.Meta{Annotations: map[string]string{"role": "admin"}},
+					ProjectId: "indirect",
+					TenantId:  "req-tnt",
+				})
+				require.NoError(t, err)
+
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "direct-tnt"}})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{
+					Meta:     &v1.Meta{Annotations: map[string]string{"relation": "direct"}},
+					TenantId: "direct-tnt",
+					MemberId: "req-tnt",
+				})
+				require.NoError(t, err)
+			},
+			want: &v1.FindParticipatingTenantsResponse{
+				Tenants: []*v1.TenantMembershipWithAnnotations{
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "direct-tnt",
+							},
+						},
+						TenantAnnotations: map[string]string{"relation": "direct"},
+					},
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "indirect-tnt",
+							},
+						},
+						ProjectAnnotations: map[string]string{"role": "admin"},
+					},
+				},
+			},
+			wantErr: nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -408,6 +594,13 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
+			slices.SortFunc(got.Tenants, func(i, j *v1.TenantMembershipWithAnnotations) int {
+				if i.Tenant.Meta.Id < j.Tenant.Meta.Id {
+					return -1
+				} else {
+					return 1
+				}
+			})
 			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
