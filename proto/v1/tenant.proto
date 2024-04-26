@@ -38,24 +38,24 @@ message ListTenantMembersRequest {
 }
 
 message ListTenantMembersResponse {
-  repeated TenantMembershipWithAnnotations tenants = 1;
+  repeated TenantWithMembershipAnnotations tenants = 1;
 }
 
 message FindParticipatingProjectsResponse {
-  repeated ProjectMembershipWithAnnotations projects = 1;
+  repeated ProjectWithMembershipAnnotations projects = 1;
 }
 
 message FindParticipatingTenantsResponse {
-  repeated TenantMembershipWithAnnotations tenants = 1;
+  repeated TenantWithMembershipAnnotations tenants = 1;
 }
 
-message ProjectMembershipWithAnnotations {
+message ProjectWithMembershipAnnotations {
   Project project = 1;
   map<string, string> project_annotations = 2;
   map<string, string> tenant_annotations = 3;
 }
 
-message TenantMembershipWithAnnotations {
+message TenantWithMembershipAnnotations {
   Tenant tenant = 1;
   map<string, string> project_annotations = 2;
   map<string, string> tenant_annotations = 3;

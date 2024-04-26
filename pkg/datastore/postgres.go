@@ -507,3 +507,53 @@ func addPaging(q squirrel.SelectBuilder, paging *v1.Paging) (squirrel.SelectBuil
 	q = q.Limit(limit).Offset(offset)
 	return q, &nextpage
 }
+
+type DatastoreQueryRunner struct {
+	log *slog.Logger
+	db  *sqlx.DB
+}
+
+func NewDataStoreQueryRunner(log *slog.Logger, db *sqlx.DB) *DatastoreQueryRunner {
+	return &DatastoreQueryRunner{
+		log: log,
+		db:  db,
+	}
+}
+
+func RunQuery[E any](ctx context.Context, r *DatastoreQueryRunner, builder squirrel.SelectBuilder, input map[string]any, resultFn func(e E) error) error {
+	query, vals, err := builder.ToSql()
+	if err != nil {
+		return err
+	}
+
+	if r.log.Enabled(ctx, slog.LevelDebug) {
+		r.log.Debug("query", "sql", query, "values", vals)
+	}
+
+	rows, err := r.db.NamedQueryContext(ctx, query, input)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			r.log.Error("error closing result rows", "error", err)
+		}
+	}()
+
+	for rows.Next() {
+		var e E
+
+		err := rows.StructScan(&e)
+		if err != nil {
+			return err
+		}
+
+		err = resultFn(e)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
