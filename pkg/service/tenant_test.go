@@ -282,9 +282,13 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}})
 				require.NoError(t, err)
+				err = projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "2"}, TenantId: "b"})
+				require.NoError(t, err)
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
 				require.NoError(t, err)
-				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "editor"}}, MemberId: "b", TenantId: "a"})
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "2", TenantId: "b"})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "editor"}}, MemberId: "a", TenantId: "b"})
 				require.NoError(t, err)
 			},
 			want: &v1.FindParticipatingProjectsResponse{
@@ -348,7 +352,6 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 					TenantId:  "req-tenant",
 				})
 				require.NoError(t, err)
-
 				err = tenantMemberStore.Create(ctx, &v1.TenantMember{
 					Meta:     &v1.Meta{Annotations: map[string]string{"role": "editor"}},
 					MemberId: "req-tenant",
@@ -362,7 +365,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 				require.NoError(t, err)
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{
 					Meta:      &v1.Meta{Annotations: map[string]string{"role": "admin"}},
-					ProjectId: "indirect-1",
+					ProjectId: "indirect-2",
 					TenantId:  "parent",
 				})
 				require.NoError(t, err)
@@ -458,11 +461,40 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		prepare func()
 		req     *v1.FindParticipatingTenantsRequest
+		prepare func()
 		want    *v1.FindParticipatingTenantsResponse
 		wantErr error
 	}{
+		{
+			name: "no memberships",
+			req: &v1.FindParticipatingTenantsRequest{
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {},
+			want:    &v1.FindParticipatingTenantsResponse{},
+			wantErr: nil,
+		},
+		{
+			name: "ignore foreign memberships",
+			req: &v1.FindParticipatingTenantsRequest{
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "a"}})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "b"}})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "c"}})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, MemberId: "c", TenantId: "b"})
+				require.NoError(t, err)
+			},
+			want:    &v1.FindParticipatingTenantsResponse{},
+			wantErr: err,
+		},
 		{
 			name: "direct membership",
 			req: &v1.FindParticipatingTenantsRequest{
@@ -519,6 +551,23 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 					},
 				},
 			},
+			wantErr: nil,
+		},
+		{
+			name: "exclude inherited",
+			req: &v1.FindParticipatingTenantsRequest{
+				TenantId:         "a",
+				IncludeInherited: pointer.Pointer(false),
+			},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "b"})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "b"}})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, ProjectId: "1", TenantId: "a"})
+				require.NoError(t, err)
+			},
+			want:    &v1.FindParticipatingTenantsResponse{},
 			wantErr: nil,
 		},
 		{
@@ -639,11 +688,41 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		prepare func()
 		req     *v1.ListTenantMembersRequest
+		prepare func()
 		want    *v1.ListTenantMembersResponse
 		wantErr error
 	}{
+		{
+			name: "no members",
+			req: &v1.ListTenantMembersRequest{
+				TenantId:         "acme",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+			},
+			want:    &v1.ListTenantMembersResponse{},
+			wantErr: err,
+		},
+		{
+			name: "ignore foreign members",
+			req: &v1.ListTenantMembersRequest{
+				TenantId:         "acme",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "acme"}})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "azure"}})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "google"}})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "admin"}}, MemberId: "azure", TenantId: "google"})
+				require.NoError(t, err)
+			},
+			want:    &v1.ListTenantMembersResponse{},
+			wantErr: err,
+		},
 		{
 			name: "direct membership",
 			req: &v1.ListTenantMembersRequest{
@@ -699,6 +778,23 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 					},
 				},
 			},
+			wantErr: nil,
+		},
+		{
+			name: "exclude inherited",
+			req: &v1.ListTenantMembersRequest{
+				TenantId:         "acme",
+				IncludeInherited: pointer.Pointer(false),
+			},
+			prepare: func() {
+				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "acme"})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "google"}})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "editor"}}, ProjectId: "1", TenantId: "google"})
+				require.NoError(t, err)
+			},
+			want:    &v1.ListTenantMembersResponse{},
 			wantErr: nil,
 		},
 	}
