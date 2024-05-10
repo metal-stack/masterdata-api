@@ -36,11 +36,19 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
-	var err error
-	db, err = createPostgresConnection()
+	var (
+		err error
+		c   testcontainers.Container
+	)
+	c, db, err = createPostgresConnection()
 	if err != nil {
 		panic(err)
 	}
+	defer func() {
+		err = c.Stop(context.Background(), pointer.Pointer(3*time.Second))
+		panic(err)
+	}()
+
 	code = m.Run()
 }
 
@@ -783,7 +791,7 @@ func resetNow() {
 	Now = time.Now
 }
 
-func createPostgresConnection() (*sqlx.DB, error) {
+func createPostgresConnection() (testcontainers.Container, *sqlx.DB, error) {
 
 	ctx := context.Background()
 	req := testcontainers.ContainerRequest{
@@ -800,16 +808,16 @@ func createPostgresConnection() (*sqlx.DB, error) {
 		Started:          true,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	ip, err := postgres.Host(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	port, err := postgres.MappedPort(ctx, "5432/tcp")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	log := slog.Default()
@@ -830,5 +838,5 @@ func createPostgresConnection() (*sqlx.DB, error) {
 			break
 		}
 	}
-	return db, nil
+	return postgres, db, nil
 }

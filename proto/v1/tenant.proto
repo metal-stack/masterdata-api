@@ -7,6 +7,7 @@ import "google/protobuf/wrappers.proto";
 import "v1/common.proto";
 import "v1/iam.proto";
 import "v1/meta.proto";
+import "v1/project.proto";
 import "v1/quota.proto";
 
 service TenantService {
@@ -16,6 +17,48 @@ service TenantService {
   rpc Get(TenantGetRequest) returns (TenantResponse);
   rpc GetHistory(TenantGetHistoryRequest) returns (TenantResponse);
   rpc Find(TenantFindRequest) returns (TenantListResponse);
+  rpc ListTenantMembers(ListTenantMembersRequest) returns (ListTenantMembersResponse);
+  rpc FindParticipatingProjects(FindParticipatingProjectsRequest) returns (FindParticipatingProjectsResponse);
+  rpc FindParticipatingTenants(FindParticipatingTenantsRequest) returns (FindParticipatingTenantsResponse);
+}
+
+message FindParticipatingProjectsRequest {
+  string tenant_id = 1;
+  optional bool include_inherited = 2;
+}
+
+message FindParticipatingTenantsRequest {
+  string tenant_id = 1;
+  optional bool include_inherited = 2;
+}
+
+message ListTenantMembersRequest {
+  string tenant_id = 1;
+  optional bool include_inherited = 2;
+}
+
+message ListTenantMembersResponse {
+  repeated TenantWithMembershipAnnotations tenants = 1;
+}
+
+message FindParticipatingProjectsResponse {
+  repeated ProjectWithMembershipAnnotations projects = 1;
+}
+
+message FindParticipatingTenantsResponse {
+  repeated TenantWithMembershipAnnotations tenants = 1;
+}
+
+message ProjectWithMembershipAnnotations {
+  Project project = 1;
+  map<string, string> project_annotations = 2;
+  map<string, string> tenant_annotations = 3;
+}
+
+message TenantWithMembershipAnnotations {
+  Tenant tenant = 1;
+  map<string, string> project_annotations = 2;
+  map<string, string> tenant_annotations = 3;
 }
 
 message Tenant {

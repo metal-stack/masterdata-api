@@ -104,6 +104,66 @@ func (_m *TenantServiceServer) Find(_a0 context.Context, _a1 *v1.TenantFindReque
 	return r0, r1
 }
 
+// FindParticipatingProjects provides a mock function with given fields: _a0, _a1
+func (_m *TenantServiceServer) FindParticipatingProjects(_a0 context.Context, _a1 *v1.FindParticipatingProjectsRequest) (*v1.FindParticipatingProjectsResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindParticipatingProjects")
+	}
+
+	var r0 *v1.FindParticipatingProjectsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.FindParticipatingProjectsRequest) (*v1.FindParticipatingProjectsResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.FindParticipatingProjectsRequest) *v1.FindParticipatingProjectsResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.FindParticipatingProjectsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.FindParticipatingProjectsRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FindParticipatingTenants provides a mock function with given fields: _a0, _a1
+func (_m *TenantServiceServer) FindParticipatingTenants(_a0 context.Context, _a1 *v1.FindParticipatingTenantsRequest) (*v1.FindParticipatingTenantsResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindParticipatingTenants")
+	}
+
+	var r0 *v1.FindParticipatingTenantsResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.FindParticipatingTenantsRequest) (*v1.FindParticipatingTenantsResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.FindParticipatingTenantsRequest) *v1.FindParticipatingTenantsResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.FindParticipatingTenantsResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.FindParticipatingTenantsRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Get provides a mock function with given fields: _a0, _a1
 func (_m *TenantServiceServer) Get(_a0 context.Context, _a1 *v1.TenantGetRequest) (*v1.TenantResponse, error) {
 	ret := _m.Called(_a0, _a1)
@@ -156,6 +216,36 @@ func (_m *TenantServiceServer) GetHistory(_a0 context.Context, _a1 *v1.TenantGet
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *v1.TenantGetHistoryRequest) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListTenantMembers provides a mock function with given fields: _a0, _a1
+func (_m *TenantServiceServer) ListTenantMembers(_a0 context.Context, _a1 *v1.ListTenantMembersRequest) (*v1.ListTenantMembersResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListTenantMembers")
+	}
+
+	var r0 *v1.ListTenantMembersResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.ListTenantMembersRequest) (*v1.ListTenantMembersResponse, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.ListTenantMembersRequest) *v1.ListTenantMembersResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.ListTenantMembersResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.ListTenantMembersRequest) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
