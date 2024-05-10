@@ -150,7 +150,7 @@ var (
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
 		Where(projectMembers.JSONField() + "->>'tenant_id' = :tenantId")
 
-	queryImplicitProjectParticipations = sq.Select(
+	queryInheritedProjectParticipations = sq.Select(
 		projects.JSONField(),
 		tenantMembers.JSONField()+"->'meta'->>'annotations' AS tenant_membership_annotations",
 	).
@@ -159,6 +159,9 @@ var (
 		Where(tenantMembers.JSONField() + "->>'member_id' = :tenantId")
 )
 
+// FindParticipatingProjects returns all projects in which a member participates.
+// This includes projects in which the member is explicitly participating through a project membership but may also
+// include memberships, which are inherited by the tenant membership.
 func (s *tenantService) FindParticipatingProjects(ctx context.Context, req *v1.FindParticipatingProjectsRequest) (*v1.FindParticipatingProjectsResponse, error) {
 	type result struct {
 		Project                      *v1.Project
@@ -170,8 +173,7 @@ func (s *tenantService) FindParticipatingProjects(ctx context.Context, req *v1.F
 		res       []*v1.ProjectWithMembershipAnnotations
 		resultMap = map[string]*v1.ProjectWithMembershipAnnotations{}
 
-		runner = datastore.NewDataStoreQueryRunner(s.log, s.db)
-		input  = map[string]any{"tenantId": req.TenantId}
+		input = map[string]any{"tenantId": req.TenantId}
 
 		resultFn = func(e result) error {
 			p, ok := resultMap[e.Project.Meta.Id]
@@ -201,7 +203,7 @@ func (s *tenantService) FindParticipatingProjects(ctx context.Context, req *v1.F
 		}
 	)
 
-	err := datastore.RunQuery(ctx, runner, queryDirectProjectParticipations, input, resultFn)
+	err := datastore.RunQuery(ctx, s.log, s.db, queryDirectProjectParticipations, input, resultFn)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +214,7 @@ func (s *tenantService) FindParticipatingProjects(ctx context.Context, req *v1.F
 	}
 
 	if includeInherited {
-		err := datastore.RunQuery(ctx, runner, queryImplicitProjectParticipations, input, resultFn)
+		err := datastore.RunQuery(ctx, s.log, s.db, queryInheritedProjectParticipations, input, resultFn)
 		if err != nil {
 			return nil, err
 		}
@@ -234,7 +236,7 @@ var (
 		Join(tenants.TableName() + " ON " + tenants.TableName() + ".id = " + tenantMembers.JSONField() + "->>'tenant_id'").
 		Where(tenantMembers.JSONField() + "->>'member_id' = :tenantId")
 
-	queryImplicitTenantParticipations = sq.Select(
+	queryInheritedTenantParticipations = sq.Select(
 		tenants.JSONField(),
 		projectMembers.JSONField()+"->'meta'->>'annotations' AS project_membership_annotations",
 	).
@@ -244,6 +246,9 @@ var (
 		Where(projectMembers.JSONField() + "->>'tenant_id' = :tenantId")
 )
 
+// FindParticipatingTenants returns all tenants in which a member participates.
+// This includes tenants in which the member is explicitly participating through a tenant membership but may also
+// include memberships, which are inherited by the project memberships (e.g. through project invites).
 func (s *tenantService) FindParticipatingTenants(ctx context.Context, req *v1.FindParticipatingTenantsRequest) (*v1.FindParticipatingTenantsResponse, error) {
 	type result struct {
 		Tenant                       *v1.Tenant
@@ -252,8 +257,7 @@ func (s *tenantService) FindParticipatingTenants(ctx context.Context, req *v1.Fi
 	}
 
 	var (
-		runner = datastore.NewDataStoreQueryRunner(s.log, s.db)
-		input  = map[string]any{"tenantId": req.TenantId}
+		input = map[string]any{"tenantId": req.TenantId}
 
 		res       []*v1.TenantWithMembershipAnnotations
 		resultMap = map[string]*v1.TenantWithMembershipAnnotations{}
@@ -286,7 +290,7 @@ func (s *tenantService) FindParticipatingTenants(ctx context.Context, req *v1.Fi
 		}
 	)
 
-	err := datastore.RunQuery(ctx, runner, queryDirectTenantParticipations, input, resultFn)
+	err := datastore.RunQuery(ctx, s.log, s.db, queryDirectTenantParticipations, input, resultFn)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +301,7 @@ func (s *tenantService) FindParticipatingTenants(ctx context.Context, req *v1.Fi
 	}
 
 	if includeInherited {
-		err = datastore.RunQuery(ctx, runner, queryImplicitTenantParticipations, input, resultFn)
+		err = datastore.RunQuery(ctx, s.log, s.db, queryInheritedTenantParticipations, input, resultFn)
 		if err != nil {
 			return nil, err
 		}
@@ -319,7 +323,7 @@ var (
 		Join(tenants.TableName() + " ON " + tenants.TableName() + ".id = " + tenantMembers.JSONField() + "->>'member_id'").
 		Where(tenantMembers.JSONField() + "->>'tenant_id' = :tenantId")
 
-	queryImplicitTenantMembers = sq.Select(
+	queryInheritedTenantMembers = sq.Select(
 		tenants.JSONField(),
 	).
 		From(projectMembers.TableName()).
@@ -328,6 +332,9 @@ var (
 		Where(projects.JSONField() + "->>'tenant_id' = :tenantId")
 )
 
+// ListTenantMembers returns all members of a tenant.
+// This includes members which are explicitly participating through a tenant membership but may also
+// include memberships, which are inherited by the project memberships (e.g. through project invites).
 func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenantMembersRequest) (*v1.ListTenantMembersResponse, error) {
 	type result struct {
 		Tenant                      *v1.Tenant
@@ -338,8 +345,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 		res       []*v1.TenantWithMembershipAnnotations
 		resultMap = map[string]*v1.TenantWithMembershipAnnotations{}
 
-		runner = datastore.NewDataStoreQueryRunner(s.log, s.db)
-		input  = map[string]any{"tenantId": req.TenantId}
+		input = map[string]any{"tenantId": req.TenantId}
 
 		resultFn = func(e result) error {
 			t, ok := resultMap[e.Tenant.Meta.Id]
@@ -362,7 +368,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 		}
 	)
 
-	err := datastore.RunQuery(ctx, runner, queryDirectTenantsMembers, input, resultFn)
+	err := datastore.RunQuery(ctx, s.log, s.db, queryDirectTenantsMembers, input, resultFn)
 	if err != nil {
 		return nil, err
 	}
@@ -373,7 +379,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 	}
 
 	if includeInherited {
-		err = datastore.RunQuery(ctx, runner, queryImplicitTenantMembers, input, resultFn)
+		err = datastore.RunQuery(ctx, s.log, s.db, queryInheritedTenantMembers, input, resultFn)
 		if err != nil {
 			return nil, err
 		}
