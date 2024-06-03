@@ -325,7 +325,7 @@ var (
 
 	queryInheritedTenantMembers = sq.Select(
 		tenants.JSONField(),
-		projectMembers.JSONField()+"->'meta'->>'project_id'",
+		projectMembers.JSONField()+"->'meta'->>'project_id' AS project_id",
 	).
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
@@ -340,6 +340,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 	type result struct {
 		Tenant                      *v1.Tenant
 		TenantMembershipAnnotations []byte `db:"tenant_membership_annotations"`
+		ProjectId                   []byte `db:"project_id"`
 	}
 
 	var (
@@ -358,6 +359,13 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 
 			if e.TenantMembershipAnnotations != nil {
 				err := json.Unmarshal(e.TenantMembershipAnnotations, &t.TenantAnnotations)
+				if err != nil {
+					return err
+				}
+			}
+
+			if e.ProjectId != nil {
+				err := json.Unmarshal(e.ProjectId, &t.ProjectAnnotations)
 				if err != nil {
 					return err
 				}
