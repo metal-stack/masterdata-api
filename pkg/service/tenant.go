@@ -325,6 +325,7 @@ var (
 
 	queryInheritedTenantMembers = sq.Select(
 		tenants.JSONField(),
+		projectMembers.JSONField()+"->'meta'->>'project_id'",
 	).
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
