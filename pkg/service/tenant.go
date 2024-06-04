@@ -315,7 +315,7 @@ func (s *tenantService) FindParticipatingTenants(ctx context.Context, req *v1.Fi
 }
 
 var (
-	queryDirectTenantsMembers = sq.Select(
+	queryDirectTenantMembers = sq.Select(
 		tenants.JSONField(),
 		tenantMembers.JSONField()+"->'meta'->>'annotations' AS tenant_membership_annotations",
 	).
@@ -325,7 +325,8 @@ var (
 
 	queryInheritedTenantMembers = sq.Select(
 		tenants.JSONField(),
-		projectMembers.JSONField()+"->'meta'->>'project_id' AS project_id",
+		projects.JSONField(),
+		projectMembers.JSONField()+"->'meta'->>'annotations' AS project_membership_annotations",
 	).
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
@@ -338,9 +339,10 @@ var (
 // include memberships, which are inherited by the project memberships (e.g. through project invites).
 func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenantMembersRequest) (*v1.ListTenantMembersResponse, error) {
 	type result struct {
-		Tenant                      *v1.Tenant
-		TenantMembershipAnnotations []byte `db:"tenant_membership_annotations"`
-		ProjectId                   []byte `db:"project_id"`
+		Tenant                       *v1.Tenant
+		TenantMembershipAnnotations  []byte `db:"tenant_membership_annotations"`
+		ProjectMembershipAnnotations []byte `db:"project_membership_annotations"`
+		Project                      *v1.Project
 	}
 
 	var (
@@ -353,7 +355,8 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 			t, ok := resultMap[e.Tenant.Meta.Id]
 			if !ok {
 				t = &v1.TenantWithMembershipAnnotations{
-					Tenant: e.Tenant,
+					Tenant:  e.Tenant,
+					Project: e.Project,
 				}
 			}
 
@@ -364,20 +367,20 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 				}
 			}
 
-			if e.ProjectId != nil {
-				err := json.Unmarshal(e.ProjectId, &t.ProjectAnnotations)
+			if e.ProjectMembershipAnnotations != nil {
+				err := json.Unmarshal(e.ProjectMembershipAnnotations, &t.ProjectAnnotations)
 				if err != nil {
 					return err
 				}
 			}
 
-			resultMap[e.Tenant.Meta.Id] = t
+			res = append(res, t)
 
 			return nil
 		}
 	)
 
-	err := datastore.RunQuery(ctx, s.log, s.db, queryDirectTenantsMembers, input, resultFn)
+	err := datastore.RunQuery(ctx, s.log, s.db, queryDirectTenantMembers, input, resultFn)
 	if err != nil {
 		return nil, err
 	}
@@ -392,9 +395,6 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 		if err != nil {
 			return nil, err
 		}
-	}
-	for _, t := range resultMap {
-		res = append(res, t)
 	}
 
 	return &v1.ListTenantMembersResponse{Tenants: res}, nil

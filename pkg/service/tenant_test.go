@@ -775,6 +775,15 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 								Id:         "google",
 							},
 						},
+						ProjectAnnotations: map[string]string{"role": "editor"},
+						Project: &v1.Project{
+							Meta: &v1.Meta{
+								Kind:       "Project",
+								Apiversion: "v1",
+								Id:         "1",
+							},
+							TenantId: "acme",
+						},
 					},
 				},
 			},
@@ -795,6 +804,100 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				require.NoError(t, err)
 			},
 			want:    &v1.ListTenantMembersResponse{},
+			wantErr: nil,
+		},
+		{
+			name: "indirecte in multiple projects",
+			req: &v1.ListTenantMembersRequest{
+				TenantId:         "github",
+				IncludeInherited: pointer.Pointer(true),
+			},
+			prepare: func() {
+				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "github"}})
+				require.NoError(t, err)
+				err = tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "azure"}})
+				require.NoError(t, err)
+				err = projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "github"})
+				require.NoError(t, err)
+				err = projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "2"}, TenantId: "github"})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "owner"}}, ProjectId: "1", TenantId: "github"})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "editor"}}, ProjectId: "1", TenantId: "azure"})
+				require.NoError(t, err)
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "viewer"}}, ProjectId: "2", TenantId: "azure"})
+				require.NoError(t, err)
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"role": "editor"}}, MemberId: "github", TenantId: "github"})
+				require.NoError(t, err)
+			},
+			want: &v1.ListTenantMembersResponse{
+				Tenants: []*v1.TenantWithMembershipAnnotations{
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "github",
+							},
+						},
+						TenantAnnotations: map[string]string{"role": "editor"},
+					},
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "github",
+							},
+						},
+						ProjectAnnotations: map[string]string{"role": "owner"},
+						Project: &v1.Project{
+							Meta: &v1.Meta{
+								Kind:       "Project",
+								Apiversion: "v1",
+								Id:         "1",
+							},
+							TenantId: "github",
+						},
+					},
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "azure",
+							},
+						},
+						ProjectAnnotations: map[string]string{"role": "editor"},
+						Project: &v1.Project{
+							Meta: &v1.Meta{
+								Kind:       "Project",
+								Apiversion: "v1",
+								Id:         "1",
+							},
+							TenantId: "github",
+						},
+					},
+					{
+						Tenant: &v1.Tenant{
+							Meta: &v1.Meta{
+								Kind:       "Tenant",
+								Apiversion: "v1",
+								Id:         "azure",
+							},
+						},
+						ProjectAnnotations: map[string]string{"role": "viewer"},
+						Project: &v1.Project{
+							Meta: &v1.Meta{
+								Kind:       "Project",
+								Apiversion: "v1",
+								Id:         "2",
+							},
+							TenantId: "github",
+						},
+					},
+				},
+			},
 			wantErr: nil,
 		},
 	}
