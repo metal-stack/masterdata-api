@@ -775,14 +775,8 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 								Id:         "google",
 							},
 						},
-						ProjectAnnotations: map[string]string{"role": "editor"},
-						Project: &v1.Project{
-							Meta: &v1.Meta{
-								Kind:       "Project",
-								Apiversion: "v1",
-								Id:         "1",
-							},
-							TenantId: "acme",
+						ProjectIds: []string{
+							"1",
 						},
 					},
 				},
@@ -807,7 +801,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "indirecte in multiple projects",
+			name: "indirect membership in multiple projects",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "github",
 				IncludeInherited: pointer.Pointer(true),
@@ -841,23 +835,8 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 							},
 						},
 						TenantAnnotations: map[string]string{"metalstack.cloud/tenant-role": "editor"},
-					},
-					{
-						Tenant: &v1.Tenant{
-							Meta: &v1.Meta{
-								Kind:       "Tenant",
-								Apiversion: "v1",
-								Id:         "github",
-							},
-						},
-						ProjectAnnotations: map[string]string{"metalstack.cloud/project-role": "owner"},
-						Project: &v1.Project{
-							Meta: &v1.Meta{
-								Kind:       "Project",
-								Apiversion: "v1",
-								Id:         "1",
-							},
-							TenantId: "github",
+						ProjectIds: []string{
+							"1",
 						},
 					},
 					{
@@ -868,32 +847,9 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 								Id:         "azure",
 							},
 						},
-						ProjectAnnotations: map[string]string{"metalstack.cloud/project-role": "editor"},
-						Project: &v1.Project{
-							Meta: &v1.Meta{
-								Kind:       "Project",
-								Apiversion: "v1",
-								Id:         "1",
-							},
-							TenantId: "github",
-						},
-					},
-					{
-						Tenant: &v1.Tenant{
-							Meta: &v1.Meta{
-								Kind:       "Tenant",
-								Apiversion: "v1",
-								Id:         "azure",
-							},
-						},
-						ProjectAnnotations: map[string]string{"metalstack.cloud/project-role": "viewer"},
-						Project: &v1.Project{
-							Meta: &v1.Meta{
-								Kind:       "Project",
-								Apiversion: "v1",
-								Id:         "2",
-							},
-							TenantId: "github",
+						ProjectIds: []string{
+							"1",
+							"2",
 						},
 					},
 				},

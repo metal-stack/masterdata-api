@@ -59,7 +59,7 @@ message TenantWithMembershipAnnotations {
   Tenant tenant = 1;
   map<string, string> project_annotations = 2;
   map<string, string> tenant_annotations = 3;
-  Project project = 4;
+  repeated string project_ids = 4;
 }
 
 message Tenant {

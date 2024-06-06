@@ -326,7 +326,6 @@ var (
 	queryInheritedTenantMembers = sq.Select(
 		tenants.JSONField(),
 		projects.JSONField(),
-		projectMembers.JSONField()+"->'meta'->>'annotations' AS project_membership_annotations",
 	).
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
@@ -339,10 +338,9 @@ var (
 // include memberships, which are inherited by the project memberships (e.g. through project invites).
 func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenantMembersRequest) (*v1.ListTenantMembersResponse, error) {
 	type result struct {
-		Tenant                       *v1.Tenant
-		TenantMembershipAnnotations  []byte `db:"tenant_membership_annotations"`
-		ProjectMembershipAnnotations []byte `db:"project_membership_annotations"`
-		Project                      *v1.Project
+		Tenant                      *v1.Tenant
+		TenantMembershipAnnotations []byte `db:"tenant_membership_annotations"`
+		Project                     *v1.Project
 	}
 
 	var (
@@ -355,8 +353,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 			t, ok := resultMap[e.Tenant.Meta.Id]
 			if !ok {
 				t = &v1.TenantWithMembershipAnnotations{
-					Tenant:  e.Tenant,
-					Project: e.Project,
+					Tenant: e.Tenant,
 				}
 			}
 
@@ -367,14 +364,11 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 				}
 			}
 
-			if e.ProjectMembershipAnnotations != nil {
-				err := json.Unmarshal(e.ProjectMembershipAnnotations, &t.ProjectAnnotations)
-				if err != nil {
-					return err
-				}
+			if e.Project != nil {
+				t.ProjectIds = append(t.ProjectIds, e.Project.Meta.Id)
 			}
 
-			res = append(res, t)
+			resultMap[e.Tenant.Meta.Id] = t
 
 			return nil
 		}
@@ -395,6 +389,10 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	for _, t := range resultMap {
+		res = append(res, t)
 	}
 
 	return &v1.ListTenantMembersResponse{Tenants: res}, nil
