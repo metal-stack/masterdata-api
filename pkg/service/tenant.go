@@ -26,21 +26,15 @@ var (
 	tenants        = datastore.Entity(&v1.Tenant{})
 )
 
-func NewTenantService(db *sqlx.DB, l *slog.Logger) (*tenantService, error) {
-	ts, err := datastore.New(l, db, &v1.Tenant{})
-	if err != nil {
-		return nil, err
-	}
-	tms, err := datastore.New(l, db, &v1.TenantMember{})
-	if err != nil {
-		return nil, err
-	}
+func NewTenantService(db *sqlx.DB, l *slog.Logger) *tenantService {
+	ts := datastore.New(l, db, &v1.Tenant{})
+	tms := datastore.New(l, db, &v1.TenantMember{})
 	return &tenantService{
 		db:                db,
 		tenantStore:       NewStorageStatusWrapper(ts),
 		tenantMemberStore: NewStorageStatusWrapper(tms),
 		log:               l,
-	}, nil
+	}
 }
 
 func (s *tenantService) Create(ctx context.Context, req *v1.TenantCreateRequest) (*v1.TenantResponse, error) {

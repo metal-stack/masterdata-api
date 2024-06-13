@@ -82,7 +82,7 @@ func NewPostgresDB(logger *slog.Logger, host, port, user, password, dbname, sslm
 }
 
 // New creates a new Storage which uses the given database abstraction.
-func New[E Entity](logger *slog.Logger, db *sqlx.DB, e E) (Storage[E], error) {
+func New[E Entity](logger *slog.Logger, db *sqlx.DB, e E) Storage[E] {
 	ds := &datastore[E]{
 		log:              logger,
 		db:               db,
@@ -91,7 +91,7 @@ func New[E Entity](logger *slog.Logger, db *sqlx.DB, e E) (Storage[E], error) {
 		tableName:        e.TableName(),
 		historyTableName: fmt.Sprintf("%s_history", e.TableName()),
 	}
-	return ds, nil
+	return ds
 }
 
 // Create a entity

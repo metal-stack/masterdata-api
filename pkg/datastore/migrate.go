@@ -22,10 +22,7 @@ func MigrateDB(log *slog.Logger, db *sqlx.DB, healthServer *health.Server) error
 			&migrator.Migration{
 				Name: "Sample Migration for Tenant",
 				Func: func(tx *sql.Tx) error {
-					ts, err := New(log, db, &v1.Tenant{})
-					if err != nil {
-						return err
-					}
+					ts := New(log, db, &v1.Tenant{})
 
 					tenants, _, err := ts.Find(context.Background(), nil, nil)
 					if err != nil {

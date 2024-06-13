@@ -208,9 +208,9 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 	}
 
 	var (
-		projectStore, _       = datastore.New(log, db, &v1.Project{})
-		tenantMemberStore, _  = datastore.New(log, db, &v1.TenantMember{})
-		projectMemberStore, _ = datastore.New(log, db, &v1.ProjectMember{})
+		projectStore       = datastore.New(log, db, &v1.Project{})
+		tenantMemberStore  = datastore.New(log, db, &v1.TenantMember{})
+		projectMemberStore = datastore.New(log, db, &v1.ProjectMember{})
 	)
 
 	tests := []struct {
@@ -453,10 +453,10 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 	}
 
 	var (
-		projectStore, _       = datastore.New(log, db, &v1.Project{})
-		tenantMemberStore, _  = datastore.New(log, db, &v1.TenantMember{})
-		projectMemberStore, _ = datastore.New(log, db, &v1.ProjectMember{})
-		tenantStore, _        = datastore.New(log, db, &v1.Tenant{})
+		projectStore       = datastore.New(log, db, &v1.Project{})
+		tenantMemberStore  = datastore.New(log, db, &v1.TenantMember{})
+		projectMemberStore = datastore.New(log, db, &v1.ProjectMember{})
+		tenantStore        = datastore.New(log, db, &v1.Tenant{})
 	)
 
 	tests := []struct {
@@ -680,10 +680,10 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 	}
 
 	var (
-		projectStore, _       = datastore.New(log, db, &v1.Project{})
-		tenantMemberStore, _  = datastore.New(log, db, &v1.TenantMember{})
-		projectMemberStore, _ = datastore.New(log, db, &v1.ProjectMember{})
-		tenantStore, _        = datastore.New(log, db, &v1.Tenant{})
+		projectStore       = datastore.New(log, db, &v1.Project{})
+		tenantMemberStore  = datastore.New(log, db, &v1.TenantMember{})
+		projectMemberStore = datastore.New(log, db, &v1.ProjectMember{})
+		tenantStore        = datastore.New(log, db, &v1.Tenant{})
 	)
 
 	tests := []struct {
