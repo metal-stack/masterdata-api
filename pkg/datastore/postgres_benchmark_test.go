@@ -18,7 +18,7 @@ var (
 
 func init() {
 	_, db, _ = createPostgresConnection()
-	ds, _ = New(slog.Default(), db, &v1.Tenant{})
+	ds = New(slog.Default(), db, &v1.Tenant{})
 }
 
 func BenchmarkGetTenant(b *testing.B) {

@@ -31,19 +31,13 @@ func Initdb(log *slog.Logger, db *sqlx.DB, healthServer *health.Server, dir stri
 		return err
 	}
 
-	ts, err := New(log, db, &v1.Tenant{})
-	if err != nil {
-		return err
-	}
+	ts := New(log, db, &v1.Tenant{})
 	tbs := &bootstrap[*v1.Tenant]{
 		log: log,
 		ds:  ts,
 	}
 
-	ps, err := New(log, db, &v1.Project{})
-	if err != nil {
-		return err
-	}
+	ps := New(log, db, &v1.Project{})
 	pbs := &bootstrap[*v1.Project]{
 		log: log,
 		ds:  ps,
