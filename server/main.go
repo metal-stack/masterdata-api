@@ -244,27 +244,10 @@ func run() {
 		logger.Error("unable to apply migrate db", "error", err)
 	}
 
-	projectService, err := service.NewProjectService(db, logger)
-	if err != nil {
-		logger.Error("unable to create project service", "error", err)
-		panic(err)
-	}
-	projectMemberService, err := service.NewProjectMemberService(db, logger)
-	if err != nil {
-		logger.Error("unable to create project member service", "error", err)
-		panic(err)
-
-	}
-	tenantService, err := service.NewTenantService(db, logger)
-	if err != nil {
-		logger.Error("unable to create tenant service", "error", err)
-		panic(err)
-	}
-	tenantMemberService, err := service.NewTenantMemberService(db, logger)
-	if err != nil {
-		logger.Error("unable to create tenant member service", "error", err)
-		panic(err)
-	}
+	projectService := service.NewProjectService(db, logger)
+	projectMemberService := service.NewProjectMemberService(db, logger)
+	tenantService := service.NewTenantService(db, logger)
+	tenantMemberService := service.NewTenantMemberService(db, logger)
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterProjectMemberServiceServer(grpcServer, projectMemberService)

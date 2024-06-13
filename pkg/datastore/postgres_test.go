@@ -36,17 +36,24 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
-	var err error
-	db, err = createPostgresConnection()
+	var (
+		err error
+		c   testcontainers.Container
+	)
+	c, db, err = createPostgresConnection()
 	if err != nil {
 		panic(err)
 	}
+	defer func() {
+		err = c.Stop(context.Background(), pointer.Pointer(3*time.Second))
+		panic(err)
+	}()
+
 	code = m.Run()
 }
 
 func TestCRUD(t *testing.T) {
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	tcr := &v1.Tenant{
@@ -55,7 +62,7 @@ func TestCRUD(t *testing.T) {
 		Description: "A very important Tenant",
 	}
 
-	err = tenantDS.Create(ctx, tcr)
+	err := tenantDS.Create(ctx, tcr)
 	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	// specified id is persisted
@@ -126,8 +133,7 @@ func TestCRUD(t *testing.T) {
 }
 
 func TestUpdateOptimisticLock(t *testing.T) {
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	tcr := &v1.Tenant{
@@ -136,7 +142,7 @@ func TestUpdateOptimisticLock(t *testing.T) {
 		Description: "A very important Tenant",
 	}
 
-	err = tenantDS.Create(ctx, tcr)
+	err := tenantDS.Create(ctx, tcr)
 	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	assert.Equal(t, int64(0), tcr.Meta.Version)
@@ -172,8 +178,7 @@ func TestUpdateOptimisticLock(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	const t1 = "t1"
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -183,7 +188,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	// meta is nil
-	err = tenantDS.Create(ctx, tcr1)
+	err := tenantDS.Create(ctx, tcr1)
 	require.Error(t, err)
 	require.EqualError(t, err, "create of type:tenant failed, meta is nil")
 
@@ -263,8 +268,7 @@ func TestCreate(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	const t3 = "t3"
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -273,7 +277,7 @@ func TestUpdate(t *testing.T) {
 		Name:        "ctenant",
 		Description: "C Tenant",
 	}
-	err = tenantDS.Update(ctx, tcr1)
+	err := tenantDS.Update(ctx, tcr1)
 	require.Error(t, err)
 	require.EqualError(t, err, "update of type:tenant failed, meta is nil")
 
@@ -336,20 +340,18 @@ func TestUpdate(t *testing.T) {
 
 //nolint:unparam
 func checkHistoryCreated(ctx context.Context, t *testing.T, id string, name string, desc string) {
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	var tgrhc v1.Tenant
-	err = tenantDS.GetHistoryCreated(ctx, id, &tgrhc)
+	err := tenantDS.GetHistoryCreated(ctx, id, &tgrhc)
 	require.NoError(t, err)
 	assert.Equal(t, name, tgrhc.Name)
 	assert.Equal(t, desc, tgrhc.GetDescription())
 }
 
 func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, name string, desc string) {
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	var tgrh v1.Tenant
-	err = tenantDS.GetHistory(ctx, id, tm, &tgrh)
+	err := tenantDS.GetHistory(ctx, id, tm, &tgrh)
 	require.NoError(t, err)
 	assert.Equal(t, name, tgrh.Name)
 	assert.Equal(t, desc, tgrh.GetDescription())
@@ -357,12 +359,11 @@ func checkHistory(ctx context.Context, t *testing.T, id string, tm time.Time, na
 
 func TestGet(t *testing.T) {
 	const t4 = "t4"
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	// unknown id
-	_, err = tenantDS.Get(ctx, "unknown-id")
+	_, err := tenantDS.Get(ctx, "unknown-id")
 	require.Error(t, err)
 	require.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
 
@@ -388,8 +389,7 @@ func TestGet(t *testing.T) {
 
 func TestGetHistory(t *testing.T) {
 	const t5 = "t5"
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -397,7 +397,7 @@ func TestGetHistory(t *testing.T) {
 
 	// unknown id
 	var tgr1 v1.Tenant
-	err = tenantDS.GetHistory(ctx, "unknown-id", tsNow, &tgr1)
+	err := tenantDS.GetHistory(ctx, "unknown-id", tsNow, &tgr1)
 	require.Error(t, err)
 	require.EqualError(t, err, "entity of type:tenant with predicate:[map[id:unknown-id] map[created_at:2020-04-30 18:00:00 +0000 UTC]] not found")
 
@@ -479,8 +479,7 @@ func TestGetHistory(t *testing.T) {
 
 func TestFind(t *testing.T) {
 	const t6 = "t6"
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -490,7 +489,7 @@ func TestFind(t *testing.T) {
 		Name:        "ftenant",
 		Description: "F Tenant",
 	}
-	err = tenantDS.Create(ctx, tcr1)
+	err := tenantDS.Create(ctx, tcr1)
 	require.NoError(t, err)
 	assert.Equal(t, t6, tcr1.GetMeta().GetId())
 	assert.Equal(t, "ftenant", tcr1.GetName())
@@ -546,10 +545,9 @@ func TestFind(t *testing.T) {
 }
 
 func TestFindWithPaging(t *testing.T) {
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	// prevent side effects
 	db.MustExec("DELETE from tenants")
-	require.NoError(t, err)
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -587,8 +585,7 @@ func TestFindWithPaging(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	const t9 = "t9"
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
-	require.NoError(t, err)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 
@@ -596,7 +593,7 @@ func TestDelete(t *testing.T) {
 	tdr1 := &v1.Tenant{
 		Meta: &v1.Meta{Id: "unknown-id"},
 	}
-	err = tenantDS.Delete(ctx, tdr1.Meta.Id)
+	err := tenantDS.Delete(ctx, tdr1.Meta.Id)
 	require.Error(t, err)
 	require.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
 
@@ -629,9 +626,71 @@ func TestDelete(t *testing.T) {
 	assert.Equal(t, "etenant", tgrh.Name)
 }
 
-func TestAnnotationsAndLabels(t *testing.T) {
-	tenantDS, err := New(slog.Default(), db, &v1.Tenant{})
+func TestDeleteAll(t *testing.T) {
+	const (
+		t11 = "t11"
+		t10 = "t10"
+	)
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
+	assert.NotNil(t, tenantDS, "Datastore must not be nil")
+	ctx := context.Background()
+
+	// unknown id
+	tdr1 := &v1.Tenant{
+		Meta: &v1.Meta{Id: "unknown-id"},
+	}
+	err := tenantDS.DeleteAll(ctx, tdr1.Meta.Id)
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:unknown-id not found sql: no rows in result set")
+
+	// create a tenant
+	tcr1 := &v1.Tenant{
+		Meta:        &v1.Meta{Id: t11},
+		Name:        "etenant",
+		Description: "E Tenant",
+	}
+	err = tenantDS.Create(ctx, tcr1)
 	require.NoError(t, err)
+	assert.Equal(t, t11, tcr1.GetMeta().GetId())
+	assert.Equal(t, "etenant", tcr1.GetName())
+	assert.Equal(t, "E Tenant", tcr1.GetDescription())
+
+	// create a tenant
+	tcr2 := &v1.Tenant{
+		Meta:        &v1.Meta{Id: t10},
+		Name:        "ftenant",
+		Description: "F Tenant",
+	}
+	err = tenantDS.Create(ctx, tcr2)
+	require.NoError(t, err)
+	assert.Equal(t, t10, tcr2.GetMeta().GetId())
+	assert.Equal(t, "ftenant", tcr2.GetName())
+	assert.Equal(t, "F Tenant", tcr2.GetDescription())
+
+	// now delete them
+	err = tenantDS.DeleteAll(ctx, t10, t11)
+	require.NoError(t, err)
+
+	_, err = tenantDS.Get(ctx, t11)
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:t11 not found sql: no rows in result set")
+
+	_, err = tenantDS.Get(ctx, t10)
+	require.Error(t, err)
+	require.EqualError(t, err, "tenant with id:t10 not found sql: no rows in result set")
+
+	var tgrh v1.Tenant
+	err = tenantDS.GetHistory(ctx, t11, time.Now(), &tgrh)
+	require.NoError(t, err)
+	assert.Equal(t, "etenant", tgrh.Name)
+
+	err = tenantDS.GetHistory(ctx, t10, time.Now(), &tgrh)
+	require.NoError(t, err)
+	assert.Equal(t, "ftenant", tgrh.Name)
+}
+
+func TestAnnotationsAndLabels(t *testing.T) {
+	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
 	ctx := context.Background()
 	tcr := &v1.Tenant{
@@ -649,7 +708,7 @@ func TestAnnotationsAndLabels(t *testing.T) {
 		Description: "A very important Tenant",
 	}
 
-	err = tenantDS.Create(ctx, tcr)
+	err := tenantDS.Create(ctx, tcr)
 	require.NoError(t, err)
 	assert.NotNil(t, tcr)
 	assert.Equal(t, int64(0), tcr.Meta.Version)
@@ -714,12 +773,12 @@ func setNow(t time.Time) {
 	}
 }
 
-// resetNow resets the overriden Now to time.Now
+// resetNow resets the overridden Now to time.Now
 func resetNow() {
 	Now = time.Now
 }
 
-func createPostgresConnection() (*sqlx.DB, error) {
+func createPostgresConnection() (testcontainers.Container, *sqlx.DB, error) {
 
 	ctx := context.Background()
 	req := testcontainers.ContainerRequest{
@@ -736,16 +795,16 @@ func createPostgresConnection() (*sqlx.DB, error) {
 		Started:          true,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	ip, err := postgres.Host(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	port, err := postgres.MappedPort(ctx, "5432/tcp")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	log := slog.Default()
@@ -766,5 +825,5 @@ func createPostgresConnection() (*sqlx.DB, error) {
 			break
 		}
 	}
-	return db, nil
+	return postgres, db, nil
 }

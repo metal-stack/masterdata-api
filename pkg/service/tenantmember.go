@@ -18,20 +18,14 @@ type tenantMemberService struct {
 	log               *slog.Logger
 }
 
-func NewTenantMemberService(db *sqlx.DB, l *slog.Logger) (*tenantMemberService, error) {
-	pms, err := datastore.New(l, db, &v1.TenantMember{})
-	if err != nil {
-		return nil, err
-	}
-	ts, err := datastore.New(l, db, &v1.Tenant{})
-	if err != nil {
-		return nil, err
-	}
+func NewTenantMemberService(db *sqlx.DB, l *slog.Logger) *tenantMemberService {
+	tms := datastore.New(l, db, &v1.TenantMember{})
+	ts := datastore.New(l, db, &v1.Tenant{})
 	return &tenantMemberService{
-		tenantMemberStore: NewStorageStatusWrapper(pms),
+		tenantMemberStore: NewStorageStatusWrapper(tms),
 		tenantStore:       NewStorageStatusWrapper(ts),
 		log:               l,
-	}, nil
+	}
 }
 
 func (s *tenantMemberService) Create(ctx context.Context, req *v1.TenantMemberCreateRequest) (*v1.TenantMemberResponse, error) {

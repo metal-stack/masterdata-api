@@ -11,7 +11,7 @@ message QuotaSet {
   Quota cluster = 1;
   // machine the amount of machines
   Quota machine = 2;
-  // ip the amount of aquired ip´s
+  // ip the amount of acquired ip´s
   Quota ip = 3;
   // project the amount of projects of a tenant
   Quota project = 4;

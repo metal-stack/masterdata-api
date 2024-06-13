@@ -261,7 +261,7 @@ func tenantExample(c client.Client, log *slog.Logger) error {
 
 	}
 
-	log.Info("get tenant with non-existant id")
+	log.Info("get tenant with non-existent id")
 	tgrNotFound := &v1.TenantGetRequest{
 		Id: "1982739817298219873",
 	}
