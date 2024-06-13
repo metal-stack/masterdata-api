@@ -19,25 +19,16 @@ type projectService struct {
 	log                *slog.Logger
 }
 
-func NewProjectService(db *sqlx.DB, l *slog.Logger) (*projectService, error) {
-	ps, err := datastore.New(l, db, &v1.Project{})
-	if err != nil {
-		return nil, err
-	}
-	ts, err := datastore.New(l, db, &v1.Tenant{})
-	if err != nil {
-		return nil, err
-	}
-	pms, err := datastore.New(l, db, &v1.ProjectMember{})
-	if err != nil {
-		return nil, err
-	}
+func NewProjectService(db *sqlx.DB, l *slog.Logger) *projectService {
+	ps := datastore.New(l, db, &v1.Project{})
+	ts := datastore.New(l, db, &v1.Tenant{})
+	pms := datastore.New(l, db, &v1.ProjectMember{})
 	return &projectService{
 		projectStore:       NewStorageStatusWrapper(ps),
 		projectMemberStore: NewStorageStatusWrapper(pms),
 		tenantStore:        NewStorageStatusWrapper(ts),
 		log:                l,
-	}, nil
+	}
 }
 
 func (s *projectService) Create(ctx context.Context, req *v1.ProjectCreateRequest) (*v1.ProjectResponse, error) {
