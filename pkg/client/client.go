@@ -93,10 +93,9 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		grpc.WithTransportCredentials(creds),
 
 		// grpc.WithInsecure(),
-		grpc.WithBlock(),
 	}
 	// Set up a connection to the server.
-	conn, err := grpc.DialContext(ctx, address, opts...)
+	conn, err := grpc.NewClient(address, opts...)
 	if err != nil {
 		return nil, err
 	}
