@@ -817,11 +817,11 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				require.NoError(t, err)
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"metalstack.cloud/project-role": "owner"}}, ProjectId: "1", TenantId: "github"})
 				require.NoError(t, err)
-				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"metalstack.cloud/project-role": "editor"}}, ProjectId: "1", TenantId: "azure"})
+				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"metalstack.cloud/project-role": "owner"}}, ProjectId: "2", TenantId: "github"})
 				require.NoError(t, err)
 				err = projectMemberStore.Create(ctx, &v1.ProjectMember{Meta: &v1.Meta{Annotations: map[string]string{"metalstack.cloud/project-role": "viewer"}}, ProjectId: "2", TenantId: "azure"})
 				require.NoError(t, err)
-				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"metalstack.cloud/tenant-role": "editor"}}, MemberId: "github", TenantId: "github"})
+				err = tenantMemberStore.Create(ctx, &v1.TenantMember{Meta: &v1.Meta{Annotations: map[string]string{"metalstack.cloud/tenant-role": "owner"}}, MemberId: "github", TenantId: "github"})
 				require.NoError(t, err)
 			},
 			want: &v1.ListTenantMembersResponse{
@@ -834,9 +834,10 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 								Id:         "github",
 							},
 						},
-						TenantAnnotations: map[string]string{"metalstack.cloud/tenant-role": "editor"},
+						TenantAnnotations: map[string]string{"metalstack.cloud/tenant-role": "owner"},
 						ProjectIds: []string{
 							"1",
+							"2",
 						},
 					},
 					{
@@ -848,7 +849,6 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 							},
 						},
 						ProjectIds: []string{
-							"1",
 							"2",
 						},
 					},
