@@ -46,7 +46,9 @@ func TestMain(m *testing.M) {
 	}
 	defer func() {
 		err = c.Stop(context.Background(), pointer.Pointer(3*time.Second))
-		panic(err)
+		if err != nil {
+			panic(err)
+		}
 	}()
 
 	code = m.Run()

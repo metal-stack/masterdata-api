@@ -54,7 +54,7 @@ func (s *projectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 		if err != nil {
 			return nil, err
 		}
-		if int32(len(projects)) >= maxProjects {
+		if len(projects) >= int(maxProjects) {
 			return nil, status.Error(
 				codes.FailedPrecondition,
 				fmt.Sprintf("unable to create project, project quota:%d for tenant:%s reached.", maxProjects, project.GetTenantId()))
