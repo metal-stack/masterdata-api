@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	v1 "github.com/metal-stack/masterdata-api/api/rest/v1"
+	"github.com/metal-stack/metal-lib/pkg/pointer"
 )
 
 func TestTenantMapperRoundtrip(t *testing.T) {
@@ -36,30 +37,30 @@ func TestTenantMapperRoundtrip(t *testing.T) {
 				Description: "tnt is a test tenant",
 				DefaultQuotas: &v1.QuotaSet{
 					Cluster: &v1.Quota{
-						Quota: int32p(100),
+						Quota: pointer.Pointer(int32(100)),
 					},
 					Machine: &v1.Quota{
-						Quota: int32p(10),
+						Quota: pointer.Pointer(int32(10)),
 					},
 					Ip: &v1.Quota{
-						Quota: int32p(20),
+						Quota: pointer.Pointer(int32(20)),
 					},
 					Project: &v1.Quota{
-						Quota: int32p(11),
+						Quota: pointer.Pointer(int32(11)),
 					},
 				},
 				Quotas: &v1.QuotaSet{
 					Cluster: &v1.Quota{
-						Quota: int32p(100),
+						Quota: pointer.Pointer(int32(100)),
 					},
 					Machine: &v1.Quota{
-						Quota: int32p(72),
+						Quota: pointer.Pointer(int32(72)),
 					},
 					Ip: &v1.Quota{
-						Quota: int32p(30),
+						Quota: pointer.Pointer(int32(30)),
 					},
 					Project: &v1.Quota{
-						Quota: int32p(7),
+						Quota: pointer.Pointer(int32(7)),
 					},
 				},
 				IAMConfig: &v1.IAMConfig{
@@ -135,11 +136,6 @@ func TestTenantMapperRoundtrip(t *testing.T) {
 			}
 		})
 	}
-}
-
-func int32p(i int) *int32 {
-	i32 := int32(i)
-	return &i32
 }
 
 func mustParseTimeP(ts string) *time.Time {
