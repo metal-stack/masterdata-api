@@ -59,6 +59,7 @@ message TenantWithMembershipAnnotations {
   Tenant tenant = 1;
   map<string, string> project_annotations = 2;
   map<string, string> tenant_annotations = 3;
+  // ProjectIDs contains all project IDs of this tenant for which an explicit project membership exists
   repeated string project_ids = 4;
 }
 
