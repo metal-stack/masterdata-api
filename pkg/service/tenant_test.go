@@ -834,7 +834,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 								Id:         "github",
 							},
 						},
-						TenantAnnotations: map[string]string{"metalstack.cloud/tenant-role": "owner"},
+						TenantAnnotations: map[string]string{"tenant-role": "owner"},
 						ProjectIds: []string{
 							"1",
 							"2",

@@ -399,7 +399,8 @@ type TenantWithMembershipAnnotations struct {
 	Tenant             *Tenant           `protobuf:"bytes,1,opt,name=tenant,proto3" json:"tenant,omitempty"`
 	ProjectAnnotations map[string]string `protobuf:"bytes,2,rep,name=project_annotations,json=projectAnnotations,proto3" json:"project_annotations,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	TenantAnnotations  map[string]string `protobuf:"bytes,3,rep,name=tenant_annotations,json=tenantAnnotations,proto3" json:"tenant_annotations,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	ProjectIds         []string          `protobuf:"bytes,4,rep,name=project_ids,json=projectIds,proto3" json:"project_ids,omitempty"`
+	// ProjectIDs contains all project IDs of this tenant for which an explicit project membership exists
+	ProjectIds []string `protobuf:"bytes,4,rep,name=project_ids,json=projectIds,proto3" json:"project_ids,omitempty"`
 }
 
 func (x *TenantWithMembershipAnnotations) Reset() {
