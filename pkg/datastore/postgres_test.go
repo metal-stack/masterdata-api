@@ -795,6 +795,9 @@ func createPostgresConnection() (testcontainers.Container, *sqlx.DB, error) {
 				WithOccurrence(2).
 				WithStartupTimeout(5*time.Second)),
 	)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	ip, err := postgres.Host(ctx)
 	if err != nil {
