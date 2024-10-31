@@ -59,13 +59,13 @@ mocks:
 		--user $$(id -u):$$(id -g) \
 		-w /work \
 		-v ${PWD}:/work \
-		vektra/mockery:v2.46.1 -r --keeptree --dir api/v1 --output api/v1/mocks --all
+		vektra/mockery:v2.46.3 -r --keeptree --dir api/v1 --output api/v1/mocks --all
 
 	docker run --rm \
 		--user $$(id -u):$$(id -g) \
 		-w /work \
 		-v ${PWD}:/work \
-		vektra/mockery:v2.46.1 -r --keeptree --dir pkg/datastore --output pkg/datastore/mocks --all
+		vektra/mockery:v2.46.3 -r --keeptree --dir pkg/datastore --output pkg/datastore/mocks --all
 
 .PHONY: postgres-up
 postgres-up: postgres-rm
