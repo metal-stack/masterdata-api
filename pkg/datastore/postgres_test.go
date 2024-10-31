@@ -11,6 +11,9 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
+
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/stretchr/testify/require"
@@ -783,22 +786,15 @@ func resetNow() {
 func createPostgresConnection() (testcontainers.Container, *sqlx.DB, error) {
 
 	ctx := context.Background()
-	req := testcontainers.ContainerRequest{
-		Image:        "postgres:16-alpine",
-		ExposedPorts: []string{"5432/tcp"},
-		Env:          map[string]string{"POSTGRES_PASSWORD": "password"},
-		// TODO: should work, but dont, hence using the loop below to check pg is up an ready for connections.
-		// WaitingFor:   wait.ForLog("database system is ready to accept connections"),
-		// WaitingFor: wait.ForListeningPort("5432/tcp"),
-	}
 
-	postgres, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
+	postgres, err := postgres.Run(ctx,
+		"postgres:17-alpine",
+		postgres.WithPassword("password"),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(5*time.Second)),
+	)
 
 	ip, err := postgres.Host(ctx)
 	if err != nil {
