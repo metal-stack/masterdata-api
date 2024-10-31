@@ -309,7 +309,7 @@ func (s *tenantService) FindParticipatingTenants(ctx context.Context, req *v1.Fi
 }
 
 var (
-	queryDirectTenantsMembers = sq.Select(
+	queryDirectTenantMembers = sq.Select(
 		tenants.JSONField(),
 		tenantMembers.JSONField()+"->'meta'->>'annotations' AS tenant_membership_annotations",
 	).
@@ -319,6 +319,7 @@ var (
 
 	queryInheritedTenantMembers = sq.Select(
 		tenants.JSONField(),
+		projects.JSONField(),
 	).
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
@@ -333,6 +334,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 	type result struct {
 		Tenant                      *v1.Tenant
 		TenantMembershipAnnotations []byte `db:"tenant_membership_annotations"`
+		Project                     *v1.Project
 	}
 
 	var (
@@ -356,13 +358,17 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 				}
 			}
 
+			if e.Project != nil {
+				t.ProjectIds = append(t.ProjectIds, e.Project.Meta.Id)
+			}
+
 			resultMap[e.Tenant.Meta.Id] = t
 
 			return nil
 		}
 	)
 
-	err := datastore.RunQuery(ctx, s.log, s.db, queryDirectTenantsMembers, input, resultFn)
+	err := datastore.RunQuery(ctx, s.log, s.db, queryDirectTenantMembers, input, resultFn)
 	if err != nil {
 		return nil, err
 	}
@@ -378,6 +384,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenan
 			return nil, err
 		}
 	}
+
 	for _, t := range resultMap {
 		res = append(res, t)
 	}
