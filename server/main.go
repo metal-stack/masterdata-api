@@ -188,7 +188,7 @@ func run() {
 	})
 	grpcPanicRecoveryHandler := func(p any) (err error) {
 		panicsTotal.Inc()
-		logger.Error("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
+		logger.Error("recovered from panic", "panic", p, "stack", debug.Stack())
 		return status.Errorf(codes.Internal, "%s", p)
 	}
 
