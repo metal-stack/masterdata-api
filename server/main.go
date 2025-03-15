@@ -90,8 +90,6 @@ func init() {
 	rootCmd.Flags().StringP("dbsslmode", "", "disable", "sslmode to talk to the the database")
 	rootCmd.Flags().StringP("hmackey", "", auth.HmacDefaultKey, "preshared hmac key to authenticate.")
 
-	rootCmd.Flags().BoolP("in-memory", "", false, "run a in-memory database")
-
 	err := viper.BindPFlags(rootCmd.Flags())
 	if err != nil {
 		logger.Error("unable to construct root command", "error", err)
