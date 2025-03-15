@@ -6,8 +6,7 @@ RUN apk -U add curl \
     ${GRPC_HEALTH_PROBE_URL}/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 \
  && chmod +x /bin/grpc_health_probe
 
-FROM alpine:3.21
-RUN apk -U add ca-certificates
+FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=health-downloader /bin/grpc_health_probe /bin/grpc_health_probe
 COPY bin/server /masterdata-api
 CMD ["/masterdata-api"]
