@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/auth"
 	"github.com/metal-stack/masterdata-api/pkg/health"
 	"github.com/prometheus/client_golang/prometheus"
@@ -238,10 +237,10 @@ func run() error {
 		logger.Error("unable to apply migrate db", "error", err)
 	}
 
-	ps := datastore.New(logger, db, &v1.Project{})
-	pms := datastore.New(logger, db, &v1.ProjectMember{})
-	ts := datastore.New(logger, db, &v1.Tenant{})
-	tms := datastore.New(logger, db, &v1.TenantMember{})
+	ps := datastore.New(logger, db, &apiv1.Project{})
+	pms := datastore.New(logger, db, &apiv1.ProjectMember{})
+	ts := datastore.New(logger, db, &apiv1.Tenant{})
+	tms := datastore.New(logger, db, &apiv1.TenantMember{})
 
 	projectService := service.NewProjectService(logger, ps, pms, ts)
 	projectMemberService := service.NewProjectMemberService(logger, ps, pms, ts)
