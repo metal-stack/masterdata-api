@@ -56,8 +56,8 @@ var rootCmd = &cobra.Command{
 	Use:     moduleName,
 	Short:   "api to manage masterdata data for metal cloud components",
 	Version: v.V.String(),
-	Run: func(cmd *cobra.Command, args []string) {
-		run()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return run()
 	},
 }
 
@@ -96,7 +96,7 @@ func init() {
 	}
 }
 
-func run() {
+func run() error {
 
 	lvl := slog.LevelInfo
 	if viper.IsSet("debug") {
@@ -110,8 +110,7 @@ func run() {
 	addr := fmt.Sprintf(":%d", port)
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		logger.Error("failed to listen", "error", err)
-		panic(err)
+		return fmt.Errorf("failed to listen: %w", err)
 	}
 
 	logger.Info("starting masterdata-api", "version", v.V.String(), "address", addr)
@@ -122,29 +121,25 @@ func run() {
 	}
 	auther, err := auth.NewHMACAuther(hmacKey, auth.EditUser)
 	if err != nil {
-		logger.Error("failed to create auther", "error", err)
-		panic(err)
+		return fmt.Errorf("failed to create auther: %w", err)
 	}
 
 	caFile := viper.GetString("ca")
 	// Get system certificate pool
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
-		logger.Error("could not read system certificate pool", "error", err)
-		panic(err)
+		return fmt.Errorf("could not read system certificate pool: %w", err)
 	}
 
 	if caFile != "" {
 		logger.Info("using ca", "ca", caFile)
 		ca, err := os.ReadFile(caFile)
 		if err != nil {
-			logger.Error("could not read ca certificate", "error", err)
-			panic(err)
+			return fmt.Errorf("could not read ca certificate: %w", err)
 		}
 		// Append the certificates from the CA
 		if ok := certPool.AppendCertsFromPEM(ca); !ok {
-			logger.Error("failed to append ca certs")
-			os.Exit(1)
+			return fmt.Errorf("failed to append ca certs: %w", err)
 		}
 	}
 
@@ -152,8 +147,7 @@ func run() {
 	serverKey := viper.GetString("certkey")
 	cert, err := tls.LoadX509KeyPair(serverCert, serverKey)
 	if err != nil {
-		logger.Error("failed to load key pair", "error", err)
-		panic(err)
+		return fmt.Errorf("failed to load key pair: %w", err)
 	}
 
 	creds := credentials.NewTLS(&tls.Config{
@@ -228,8 +222,7 @@ func run() {
 
 	db, err := datastore.NewPostgresDB(logger, dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode, ves...)
 	if err != nil {
-		logger.Error("failed to create postgres connection", "error", err)
-		panic(err)
+		return fmt.Errorf("failed to create postgres connection: %w", err)
 	}
 
 	healthServer := health.NewHealthServer()
@@ -293,9 +286,9 @@ func run() {
 	reflection.Register(grpcServer)
 
 	if err := grpcServer.Serve(lis); err != nil {
-		logger.Error("failed to serve", "error", err)
-		panic(err)
+		return fmt.Errorf("failed to serve: %w", err)
 	}
+	return nil
 }
 
 // interceptorLogger adapts slog logger to interceptor logger.
