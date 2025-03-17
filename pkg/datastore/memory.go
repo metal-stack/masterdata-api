@@ -65,7 +65,8 @@ func (m *memoryDatastore[E]) Delete(ctx context.Context, id string) error {
 
 // DeleteAll implements Storage.
 func (m *memoryDatastore[E]) DeleteAll(ctx context.Context, ids ...string) error {
-	panic("unimplemented")
+	m.entities = make(map[string]E)
+	return nil
 }
 
 // Find implements Storage.
