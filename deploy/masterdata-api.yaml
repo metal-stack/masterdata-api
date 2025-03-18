@@ -170,7 +170,7 @@ spec:
     spec:
       containers:
       - name: masterdata-db
-        image: postgres:12-alpine
+        image: postgres:17-alpine
         env:
         - name: POSTGRES_PASSWORD
           value: password
