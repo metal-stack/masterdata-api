@@ -13,10 +13,10 @@ import (
 )
 
 type tenantService struct {
-	db                *sqlx.DB
+	log               *slog.Logger
 	tenantStore       datastore.Storage[*v1.Tenant]
 	tenantMemberStore datastore.Storage[*v1.TenantMember]
-	log               *slog.Logger
+	db                *sqlx.DB
 }
 
 var (
@@ -26,13 +26,11 @@ var (
 	tenants        = datastore.Entity(&v1.Tenant{})
 )
 
-func NewTenantService(db *sqlx.DB, l *slog.Logger) *tenantService {
-	ts := datastore.New(l, db, &v1.Tenant{})
-	tms := datastore.New(l, db, &v1.TenantMember{})
+func NewTenantService(db *sqlx.DB, l *slog.Logger, tds TenantDataStore, tmds TenantMemberDataStore) *tenantService {
 	return &tenantService{
 		db:                db,
-		tenantStore:       NewStorageStatusWrapper(ts),
-		tenantMemberStore: NewStorageStatusWrapper(tms),
+		tenantStore:       NewStorageStatusWrapper(tds),
+		tenantMemberStore: NewStorageStatusWrapper(tmds),
 		log:               l,
 	}
 }

@@ -12,6 +12,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type (
+	ProjectDataStore       datastore.Storage[*v1.Project]
+	ProjectMemberDataStore datastore.Storage[*v1.ProjectMember]
+	TenantDataStore        datastore.Storage[*v1.Tenant]
+	TenantMemberDataStore  datastore.Storage[*v1.TenantMember]
+)
+
 type StorageStatusWrapper[E datastore.Entity] struct {
 	storage datastore.Storage[E]
 }

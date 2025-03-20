@@ -63,20 +63,28 @@ const (
 	opDelete Op = "D"
 )
 
-// NewPostgresStorage creates a new Storage which uses postgres.
-func NewPostgresDB(logger *slog.Logger, host, port, user, password, dbname, sslmode string, ves ...Entity) (*sqlx.DB, error) {
-	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
-	if err != nil {
-		return nil, fmt.Errorf("unable to connect to database: %w", err)
-	}
+func InitTables(logger *slog.Logger, db *sqlx.DB, ves ...Entity) error {
 	for _, ve := range ves {
 		jsonField := ve.JSONField()
 		logger.Info("creating schema", "entity", jsonField)
 		_, err := db.Exec(ve.Schema())
 		if err != nil {
 			logger.Error("unable to create schema", "entity", jsonField, "error", err)
-			return nil, err
+			return err
 		}
+	}
+	return nil
+}
+
+// NewPostgresStorage creates a new Storage which uses postgres.
+func NewPostgresDB(logger *slog.Logger, host, port, user, password, dbname, sslmode string, ves ...Entity) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to database: %w", err)
+	}
+	err = InitTables(logger, db, ves...)
+	if err != nil {
+		return nil, err
 	}
 	return db, nil
 }

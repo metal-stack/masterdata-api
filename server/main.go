@@ -237,10 +237,16 @@ func run() error {
 		logger.Error("unable to apply migrate db", "error", err)
 	}
 
-	projectService := service.NewProjectService(db, logger)
-	projectMemberService := service.NewProjectMemberService(db, logger)
-	tenantService := service.NewTenantService(db, logger)
-	tenantMemberService := service.NewTenantMemberService(db, logger)
+	ps := datastore.New(logger, db, &apiv1.Project{})
+	pms := datastore.New(logger, db, &apiv1.ProjectMember{})
+	ts := datastore.New(logger, db, &apiv1.Tenant{})
+	tms := datastore.New(logger, db, &apiv1.TenantMember{})
+
+	projectService := service.NewProjectService(logger, ps, pms, ts)
+	projectMemberService := service.NewProjectMemberService(logger, ps, pms, ts)
+	// FIXME db should not be required here
+	tenantService := service.NewTenantService(db, logger, ts, tms)
+	tenantMemberService := service.NewTenantMemberService(logger, ts, tms)
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterProjectMemberServiceServer(grpcServer, projectMemberService)

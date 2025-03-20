@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
@@ -18,12 +17,10 @@ type tenantMemberService struct {
 	log               *slog.Logger
 }
 
-func NewTenantMemberService(db *sqlx.DB, l *slog.Logger) *tenantMemberService {
-	tms := datastore.New(l, db, &v1.TenantMember{})
-	ts := datastore.New(l, db, &v1.Tenant{})
+func NewTenantMemberService(l *slog.Logger, tds TenantDataStore, tmds TenantMemberDataStore) *tenantMemberService {
 	return &tenantMemberService{
-		tenantMemberStore: NewStorageStatusWrapper(tms),
-		tenantStore:       NewStorageStatusWrapper(ts),
+		tenantMemberStore: NewStorageStatusWrapper(tmds),
+		tenantStore:       NewStorageStatusWrapper(tds),
 		log:               l,
 	}
 }

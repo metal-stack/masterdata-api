@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/jmoiron/sqlx"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
@@ -19,14 +18,11 @@ type projectMemberService struct {
 	log                *slog.Logger
 }
 
-func NewProjectMemberService(db *sqlx.DB, l *slog.Logger) *projectMemberService {
-	pms := datastore.New(l, db, &v1.ProjectMember{})
-	ts := datastore.New(l, db, &v1.Tenant{})
-	ps := datastore.New(l, db, &v1.Project{})
+func NewProjectMemberService(l *slog.Logger, pds ProjectDataStore, pmds ProjectMemberDataStore, tds TenantDataStore) *projectMemberService {
 	return &projectMemberService{
-		projectMemberStore: NewStorageStatusWrapper(pms),
-		tenantStore:        NewStorageStatusWrapper(ts),
-		projectStore:       NewStorageStatusWrapper(ps),
+		projectMemberStore: NewStorageStatusWrapper(pmds),
+		tenantStore:        NewStorageStatusWrapper(tds),
+		projectStore:       NewStorageStatusWrapper(pds),
 		log:                l,
 	}
 }
