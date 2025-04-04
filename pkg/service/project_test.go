@@ -113,6 +113,8 @@ func TestUpdateProject(t *testing.T) {
 		},
 	}
 
+	storageMock.On("Get", ctx, t1.Meta.Id).Return(t1, nil)
+
 	storageMock.On("Update", ctx, t1).Return(nil)
 	resp, err := ts.Update(ctx, tur)
 	require.NoError(t, err)
