@@ -56,7 +56,7 @@ func (m *memoryDatastore[E]) Delete(ctx context.Context, id string) error {
 
 	_, ok := m.entities[id]
 	if !ok {
-		return NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s", m.entity, id))
+		return NewNotFoundError(fmt.Sprintf("delete of %s with id %s", m.entity, id))
 	}
 	delete(m.entities, id)
 
@@ -94,7 +94,7 @@ func (m *memoryDatastore[E]) Get(ctx context.Context, id string) (E, error) {
 
 	e, ok := m.entities[id]
 	if !ok {
-		return zero, NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s", m.entity, id))
+		return zero, NewNotFoundError(fmt.Sprintf("get of %s with id %s", m.entity, id))
 	}
 
 	return e, nil
@@ -123,7 +123,7 @@ func (m *memoryDatastore[E]) Update(ctx context.Context, ve E) error {
 
 	_, ok := m.entities[id]
 	if !ok {
-		return NewNotFoundError(fmt.Sprintf("not found: delete of %s with id %s", m.entity, id))
+		return NewNotFoundError(fmt.Sprintf("update of %s with id %s", m.entity, id))
 	}
 
 	m.entities[id] = ve
