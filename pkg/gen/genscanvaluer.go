@@ -6,7 +6,7 @@
 Generates methods necessary to fulfil the Scanner and Valuer Interface.
 
 Example Usage for Type "Tenant" in package "v1"
-//go:generate go run ../../pkg/gen/gensv.go -package v1 -type Tenant
+//go:generate go run ../../pkg/gen/genscanvaluer.go -package v1 -type Tenant
 */
 package main
 
