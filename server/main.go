@@ -247,11 +247,13 @@ func run() error {
 	// FIXME db should not be required here
 	tenantService := service.NewTenantService(db, logger, ts, tms)
 	tenantMemberService := service.NewTenantMemberService(logger, ts, tms)
+	versionService := service.NewVersionService()
 
 	apiv1.RegisterProjectServiceServer(grpcServer, projectService)
 	apiv1.RegisterProjectMemberServiceServer(grpcServer, projectMemberService)
 	apiv1.RegisterTenantServiceServer(grpcServer, tenantService)
 	apiv1.RegisterTenantMemberServiceServer(grpcServer, tenantMemberService)
+	apiv1.RegisterVersionServiceServer(grpcServer, versionService)
 	healthv1.RegisterHealthServer(grpcServer, healthServer)
 
 	srvMetrics.InitializeMetrics(grpcServer)

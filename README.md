@@ -15,6 +15,7 @@ This Microservice provides the source of truth for master data.
     * limit max clusters
 * tenant members
 * tenant project members
+* version
 
 ## Design
 
