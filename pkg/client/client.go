@@ -128,3 +128,7 @@ func (c GRPCClient) Tenant() v1.TenantServiceClient {
 func (c GRPCClient) TenantMember() v1.TenantMemberServiceClient {
 	return v1.NewTenantMemberServiceClient(c.conn)
 }
+
+func (c GRPCClient) Version() v1.VersionServiceClient {
+	return v1.NewVersionServiceClient(c.conn)
+}
