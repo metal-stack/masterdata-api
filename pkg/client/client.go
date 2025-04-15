@@ -22,6 +22,7 @@ type Client interface {
 	ProjectMember() v1.ProjectMemberServiceClient
 	Tenant() v1.TenantServiceClient
 	TenantMember() v1.TenantMemberServiceClient
+	Version() v1.VersionServiceClient
 	Close() error
 }
 
