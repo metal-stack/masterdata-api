@@ -20,6 +20,7 @@ require (
 	github.com/spf13/viper v1.20.0
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.35.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.35.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.60.0
 	go.opentelemetry.io/otel/trace v1.35.0
 	google.golang.org/grpc v1.71.0
