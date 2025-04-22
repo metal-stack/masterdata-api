@@ -65,8 +65,15 @@ func (s *projectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 	return project.NewProjectResponse(), err
 }
 func (s *projectService) Update(ctx context.Context, req *v1.ProjectUpdateRequest) (*v1.ProjectResponse, error) {
+	old, err := s.projectStore.Get(ctx, req.Project.Meta.Id)
+	if err != nil {
+		return nil, err
+	}
 	project := req.Project
-	err := s.projectStore.Update(ctx, project)
+	if old.TenantId != project.TenantId {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("update tenant of project:%s is not allowed", project.Meta.Id))
+	}
+	err = s.projectStore.Update(ctx, project)
 	return project.NewProjectResponse(), err
 }
 func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteRequest) (*v1.ProjectResponse, error) {
