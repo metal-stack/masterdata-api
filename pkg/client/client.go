@@ -22,6 +22,7 @@ type Client interface {
 	ProjectMember() v1.ProjectMemberServiceClient
 	Tenant() v1.TenantServiceClient
 	TenantMember() v1.TenantMemberServiceClient
+	Version() v1.VersionServiceClient
 	Close() error
 }
 
@@ -127,4 +128,8 @@ func (c GRPCClient) Tenant() v1.TenantServiceClient {
 // Tenant is the root accessor for tenant related functions
 func (c GRPCClient) TenantMember() v1.TenantMemberServiceClient {
 	return v1.NewTenantMemberServiceClient(c.conn)
+}
+
+func (c GRPCClient) Version() v1.VersionServiceClient {
+	return v1.NewVersionServiceClient(c.conn)
 }
