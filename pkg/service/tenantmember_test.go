@@ -144,7 +144,7 @@ func TestFindTenantMemberByTenant(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["tenantmember ->> 'tenant_id'"] = pointer.Pointer("p1")
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -168,7 +168,7 @@ func TestFindTenantMemberByMember(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["tenantmember ->> 'member_id'"] = pointer.Pointer("t1")
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

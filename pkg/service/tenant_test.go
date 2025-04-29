@@ -159,7 +159,7 @@ func TestFindTenantByID(t *testing.T) {
 	}
 
 	f1["id"] = "t5"
-	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging")).Return(t5s, nil, nil)
+	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*apiv1.Paging")).Return(t5s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -181,7 +181,7 @@ func TestFindTenantByName(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["tenant ->> 'name'"] = "Fifth"
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -264,7 +264,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 					Project: &v1.Project{
 						Meta: &v1.Meta{
 							Kind:       "Project",
-							Apiversion: "v1",
+							Apiversion: "apiv1",
 							Id:         "1",
 						},
 					},
@@ -297,7 +297,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 					Project: &v1.Project{
 						Meta: &v1.Meta{
 							Kind:       "Project",
-							Apiversion: "v1",
+							Apiversion: "apiv1",
 							Id:         "1",
 						},
 					},
@@ -324,7 +324,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 					Project: &v1.Project{
 						Meta: &v1.Meta{
 							Kind:       "Project",
-							Apiversion: "v1",
+							Apiversion: "apiv1",
 							Id:         "1",
 						},
 						TenantId: "b",
@@ -377,7 +377,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 						Project: &v1.Project{
 							Meta: &v1.Meta{
 								Kind:       "Project",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "direct-1",
 							},
 							TenantId: "req-tenant",
@@ -389,7 +389,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 						Project: &v1.Project{
 							Meta: &v1.Meta{
 								Kind:       "Project",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "indirect-2",
 							},
 							TenantId: "parent",
@@ -425,7 +425,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 					return 1
 				}
 			})
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -514,7 +514,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "b",
 							},
 						},
@@ -544,7 +544,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "b",
 							},
 						},
@@ -607,7 +607,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "direct-tnt",
 							},
 						},
@@ -617,7 +617,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "indirect-tnt",
 							},
 						},
@@ -652,7 +652,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 					return 1
 				}
 			})
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -742,7 +742,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "azure",
 							},
 						},
@@ -772,7 +772,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "google",
 							},
 						},
@@ -831,7 +831,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "github",
 							},
 						},
@@ -845,7 +845,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "v1",
+								Apiversion: "apiv1",
 								Id:         "azure",
 							},
 						},
@@ -874,7 +874,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})

@@ -82,7 +82,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	var projects []*v1.Project
 	// see: https://github.com/stretchr/testify/blob/master/mock/mock.go#L149-L162
 	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
-	storageMock.On("Find", ctx, filter, mock.AnythingOfType("*v1.Paging")).Return(projects, nil, nil)
+	storageMock.On("Find", ctx, filter, mock.AnythingOfType("*apiv1.Paging")).Return(projects, nil, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
 	resp, err := ts.Create(ctx, connect.NewRequest(tcr))
 	require.NoError(t, err)
@@ -197,7 +197,7 @@ func TestFindProjectByID(t *testing.T) {
 	}
 
 	f1["id"] = pointer.Pointer("p5")
-	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging")).Return(t5s, nil, nil)
+	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*apiv1.Paging")).Return(t5s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -221,7 +221,7 @@ func TestFindProjectByName(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["project ->> 'name'"] = pointer.Pointer("Sixth")
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -245,7 +245,7 @@ func TestFindProjectByTenant(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["project ->> 'tenant_id'"] = pointer.Pointer("p1")
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
