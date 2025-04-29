@@ -3,7 +3,8 @@
 package mocks
 
 import (
-	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	apiv1 "github.com/metal-stack/masterdata-api/api/v1"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -31,19 +32,19 @@ func (_m *Entity) APIVersion() string {
 }
 
 // GetMeta provides a mock function with no fields
-func (_m *Entity) GetMeta() *v1.Meta {
+func (_m *Entity) GetMeta() *apiv1.Meta {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetMeta")
 	}
 
-	var r0 *v1.Meta
-	if rf, ok := ret.Get(0).(func() *v1.Meta); ok {
+	var r0 *apiv1.Meta
+	if rf, ok := ret.Get(0).(func() *apiv1.Meta); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.Meta)
+			r0 = ret.Get(0).(*apiv1.Meta)
 		}
 	}
 

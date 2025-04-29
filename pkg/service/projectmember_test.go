@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
@@ -39,11 +40,11 @@ func TestCreateProjectMember(t *testing.T) {
 	tenantStorageMock.On("Get", ctx, pm1.GetTenantId()).Return(t1, nil)
 	projectStorageMock.On("Get", ctx, pm1.GetProjectId()).Return(p1, nil)
 	storageMock.On("Create", ctx, pm1).Return(nil)
-	resp, err := ts.Create(ctx, pmcr)
+	resp, err := ts.Create(ctx, connect.NewRequest(pmcr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProjectMember())
-	assert.Equal(t, pmcr.ProjectMember.ProjectId, resp.GetProjectMember().GetProjectId())
+	assert.NotNil(t, resp.Msg.ProjectMember)
+	assert.Equal(t, pmcr.ProjectMember.ProjectId, resp.Msg.ProjectMember.GetProjectId())
 }
 
 func TestUpdateProjectMember(t *testing.T) {
@@ -74,11 +75,11 @@ func TestUpdateProjectMember(t *testing.T) {
 	}
 
 	storageMock.On("Update", ctx, pm1).Return(nil)
-	resp, err := ts.Update(ctx, pmur)
+	resp, err := ts.Update(ctx, connect.NewRequest(pmur))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProjectMember())
-	assert.Equal(t, pmur.GetProjectMember().Meta.Annotations, resp.GetProjectMember().Meta.Annotations)
+	assert.NotNil(t, resp.Msg.ProjectMember)
+	assert.Equal(t, pmur.ProjectMember.Meta.Annotations, resp.Msg.ProjectMember.Meta.Annotations)
 }
 
 func TestDeleteProjectMember(t *testing.T) {
@@ -100,11 +101,11 @@ func TestDeleteProjectMember(t *testing.T) {
 	}
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
-	resp, err := ts.Delete(ctx, tdr)
+	resp, err := ts.Delete(ctx, connect.NewRequest(tdr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProjectMember())
-	assert.Equal(t, tdr.Id, resp.GetProjectMember().GetMeta().GetId())
+	assert.NotNil(t, resp.Msg.ProjectMember)
+	assert.Equal(t, tdr.Id, resp.Msg.ProjectMember.GetMeta().GetId())
 }
 
 func TestGetProjectMember(t *testing.T) {
@@ -126,11 +127,11 @@ func TestGetProjectMember(t *testing.T) {
 	}
 
 	storageMock.On("Get", ctx, "p4").Return(t4, nil)
-	resp, err := ts.Get(ctx, tgr)
+	resp, err := ts.Get(ctx, connect.NewRequest(tgr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProjectMember())
-	assert.Equal(t, tgr.Id, resp.GetProjectMember().GetMeta().GetId())
+	assert.NotNil(t, resp.Msg.ProjectMember)
+	assert.Equal(t, tgr.Id, resp.Msg.ProjectMember.GetMeta().GetId())
 }
 
 func TestFindProjectMemberByProject(t *testing.T) {
@@ -154,7 +155,7 @@ func TestFindProjectMemberByProject(t *testing.T) {
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'project_id'"] = pointer.Pointer("p1")
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
@@ -180,7 +181,7 @@ func TestFindProjectMemberByTenant(t *testing.T) {
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'tenant_id'"] = pointer.Pointer("t1")
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }

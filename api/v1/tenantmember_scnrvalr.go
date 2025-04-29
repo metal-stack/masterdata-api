@@ -2,7 +2,7 @@
 // DO NOT EDIT MANUALLY.
 // Regenerate with "go generate" or "make generate"
 
-package v1
+package apiv1
 
 import (
 	"database/sql/driver"
@@ -40,7 +40,7 @@ func (t *TenantMember) Kind() string {
 }
 
 func (t *TenantMember) APIVersion() string {
-	return "v1"
+	return "apiv1"
 }
 
 // Value make the TenantMember struct implement the driver.Valuer interface. This method

@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: v1/tenant.proto
+// source: api/v1/tenant.proto
 
-package v1
+package apiv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -32,7 +32,7 @@ type FindParticipatingProjectsRequest struct {
 
 func (x *FindParticipatingProjectsRequest) Reset() {
 	*x = FindParticipatingProjectsRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[0]
+	mi := &file_api_v1_tenant_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +44,7 @@ func (x *FindParticipatingProjectsRequest) String() string {
 func (*FindParticipatingProjectsRequest) ProtoMessage() {}
 
 func (x *FindParticipatingProjectsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[0]
+	mi := &file_api_v1_tenant_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +57,7 @@ func (x *FindParticipatingProjectsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindParticipatingProjectsRequest.ProtoReflect.Descriptor instead.
 func (*FindParticipatingProjectsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{0}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *FindParticipatingProjectsRequest) GetTenantId() string {
@@ -84,7 +84,7 @@ type FindParticipatingTenantsRequest struct {
 
 func (x *FindParticipatingTenantsRequest) Reset() {
 	*x = FindParticipatingTenantsRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[1]
+	mi := &file_api_v1_tenant_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -96,7 +96,7 @@ func (x *FindParticipatingTenantsRequest) String() string {
 func (*FindParticipatingTenantsRequest) ProtoMessage() {}
 
 func (x *FindParticipatingTenantsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[1]
+	mi := &file_api_v1_tenant_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -109,7 +109,7 @@ func (x *FindParticipatingTenantsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindParticipatingTenantsRequest.ProtoReflect.Descriptor instead.
 func (*FindParticipatingTenantsRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{1}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *FindParticipatingTenantsRequest) GetTenantId() string {
@@ -136,7 +136,7 @@ type ListTenantMembersRequest struct {
 
 func (x *ListTenantMembersRequest) Reset() {
 	*x = ListTenantMembersRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[2]
+	mi := &file_api_v1_tenant_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -148,7 +148,7 @@ func (x *ListTenantMembersRequest) String() string {
 func (*ListTenantMembersRequest) ProtoMessage() {}
 
 func (x *ListTenantMembersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[2]
+	mi := &file_api_v1_tenant_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -161,7 +161,7 @@ func (x *ListTenantMembersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTenantMembersRequest.ProtoReflect.Descriptor instead.
 func (*ListTenantMembersRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{2}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListTenantMembersRequest) GetTenantId() string {
@@ -187,7 +187,7 @@ type ListTenantMembersResponse struct {
 
 func (x *ListTenantMembersResponse) Reset() {
 	*x = ListTenantMembersResponse{}
-	mi := &file_v1_tenant_proto_msgTypes[3]
+	mi := &file_api_v1_tenant_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -199,7 +199,7 @@ func (x *ListTenantMembersResponse) String() string {
 func (*ListTenantMembersResponse) ProtoMessage() {}
 
 func (x *ListTenantMembersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[3]
+	mi := &file_api_v1_tenant_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -212,7 +212,7 @@ func (x *ListTenantMembersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTenantMembersResponse.ProtoReflect.Descriptor instead.
 func (*ListTenantMembersResponse) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{3}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListTenantMembersResponse) GetTenants() []*TenantWithMembershipAnnotations {
@@ -231,7 +231,7 @@ type FindParticipatingProjectsResponse struct {
 
 func (x *FindParticipatingProjectsResponse) Reset() {
 	*x = FindParticipatingProjectsResponse{}
-	mi := &file_v1_tenant_proto_msgTypes[4]
+	mi := &file_api_v1_tenant_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -243,7 +243,7 @@ func (x *FindParticipatingProjectsResponse) String() string {
 func (*FindParticipatingProjectsResponse) ProtoMessage() {}
 
 func (x *FindParticipatingProjectsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[4]
+	mi := &file_api_v1_tenant_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -256,7 +256,7 @@ func (x *FindParticipatingProjectsResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use FindParticipatingProjectsResponse.ProtoReflect.Descriptor instead.
 func (*FindParticipatingProjectsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{4}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *FindParticipatingProjectsResponse) GetProjects() []*ProjectWithMembershipAnnotations {
@@ -275,7 +275,7 @@ type FindParticipatingTenantsResponse struct {
 
 func (x *FindParticipatingTenantsResponse) Reset() {
 	*x = FindParticipatingTenantsResponse{}
-	mi := &file_v1_tenant_proto_msgTypes[5]
+	mi := &file_api_v1_tenant_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -287,7 +287,7 @@ func (x *FindParticipatingTenantsResponse) String() string {
 func (*FindParticipatingTenantsResponse) ProtoMessage() {}
 
 func (x *FindParticipatingTenantsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[5]
+	mi := &file_api_v1_tenant_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -300,7 +300,7 @@ func (x *FindParticipatingTenantsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindParticipatingTenantsResponse.ProtoReflect.Descriptor instead.
 func (*FindParticipatingTenantsResponse) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{5}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *FindParticipatingTenantsResponse) GetTenants() []*TenantWithMembershipAnnotations {
@@ -321,7 +321,7 @@ type ProjectWithMembershipAnnotations struct {
 
 func (x *ProjectWithMembershipAnnotations) Reset() {
 	*x = ProjectWithMembershipAnnotations{}
-	mi := &file_v1_tenant_proto_msgTypes[6]
+	mi := &file_api_v1_tenant_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -333,7 +333,7 @@ func (x *ProjectWithMembershipAnnotations) String() string {
 func (*ProjectWithMembershipAnnotations) ProtoMessage() {}
 
 func (x *ProjectWithMembershipAnnotations) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[6]
+	mi := &file_api_v1_tenant_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -346,7 +346,7 @@ func (x *ProjectWithMembershipAnnotations) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectWithMembershipAnnotations.ProtoReflect.Descriptor instead.
 func (*ProjectWithMembershipAnnotations) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{6}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ProjectWithMembershipAnnotations) GetProject() *Project {
@@ -383,7 +383,7 @@ type TenantWithMembershipAnnotations struct {
 
 func (x *TenantWithMembershipAnnotations) Reset() {
 	*x = TenantWithMembershipAnnotations{}
-	mi := &file_v1_tenant_proto_msgTypes[7]
+	mi := &file_api_v1_tenant_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -395,7 +395,7 @@ func (x *TenantWithMembershipAnnotations) String() string {
 func (*TenantWithMembershipAnnotations) ProtoMessage() {}
 
 func (x *TenantWithMembershipAnnotations) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[7]
+	mi := &file_api_v1_tenant_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -408,7 +408,7 @@ func (x *TenantWithMembershipAnnotations) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantWithMembershipAnnotations.ProtoReflect.Descriptor instead.
 func (*TenantWithMembershipAnnotations) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{7}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *TenantWithMembershipAnnotations) GetTenant() *Tenant {
@@ -453,7 +453,7 @@ type Tenant struct {
 
 func (x *Tenant) Reset() {
 	*x = Tenant{}
-	mi := &file_v1_tenant_proto_msgTypes[8]
+	mi := &file_api_v1_tenant_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -465,7 +465,7 @@ func (x *Tenant) String() string {
 func (*Tenant) ProtoMessage() {}
 
 func (x *Tenant) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[8]
+	mi := &file_api_v1_tenant_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -478,7 +478,7 @@ func (x *Tenant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Tenant.ProtoReflect.Descriptor instead.
 func (*Tenant) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{8}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Tenant) GetMeta() *Meta {
@@ -532,7 +532,7 @@ type TenantCreateRequest struct {
 
 func (x *TenantCreateRequest) Reset() {
 	*x = TenantCreateRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[9]
+	mi := &file_api_v1_tenant_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -544,7 +544,7 @@ func (x *TenantCreateRequest) String() string {
 func (*TenantCreateRequest) ProtoMessage() {}
 
 func (x *TenantCreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[9]
+	mi := &file_api_v1_tenant_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,7 +557,7 @@ func (x *TenantCreateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantCreateRequest.ProtoReflect.Descriptor instead.
 func (*TenantCreateRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{9}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *TenantCreateRequest) GetTenant() *Tenant {
@@ -576,7 +576,7 @@ type TenantUpdateRequest struct {
 
 func (x *TenantUpdateRequest) Reset() {
 	*x = TenantUpdateRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[10]
+	mi := &file_api_v1_tenant_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -588,7 +588,7 @@ func (x *TenantUpdateRequest) String() string {
 func (*TenantUpdateRequest) ProtoMessage() {}
 
 func (x *TenantUpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[10]
+	mi := &file_api_v1_tenant_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -601,7 +601,7 @@ func (x *TenantUpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantUpdateRequest.ProtoReflect.Descriptor instead.
 func (*TenantUpdateRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{10}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *TenantUpdateRequest) GetTenant() *Tenant {
@@ -620,7 +620,7 @@ type TenantDeleteRequest struct {
 
 func (x *TenantDeleteRequest) Reset() {
 	*x = TenantDeleteRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[11]
+	mi := &file_api_v1_tenant_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -632,7 +632,7 @@ func (x *TenantDeleteRequest) String() string {
 func (*TenantDeleteRequest) ProtoMessage() {}
 
 func (x *TenantDeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[11]
+	mi := &file_api_v1_tenant_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -645,7 +645,7 @@ func (x *TenantDeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantDeleteRequest.ProtoReflect.Descriptor instead.
 func (*TenantDeleteRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{11}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *TenantDeleteRequest) GetId() string {
@@ -664,7 +664,7 @@ type TenantGetRequest struct {
 
 func (x *TenantGetRequest) Reset() {
 	*x = TenantGetRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[12]
+	mi := &file_api_v1_tenant_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -676,7 +676,7 @@ func (x *TenantGetRequest) String() string {
 func (*TenantGetRequest) ProtoMessage() {}
 
 func (x *TenantGetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[12]
+	mi := &file_api_v1_tenant_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -689,7 +689,7 @@ func (x *TenantGetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantGetRequest.ProtoReflect.Descriptor instead.
 func (*TenantGetRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{12}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *TenantGetRequest) GetId() string {
@@ -709,7 +709,7 @@ type TenantGetHistoryRequest struct {
 
 func (x *TenantGetHistoryRequest) Reset() {
 	*x = TenantGetHistoryRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[13]
+	mi := &file_api_v1_tenant_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -721,7 +721,7 @@ func (x *TenantGetHistoryRequest) String() string {
 func (*TenantGetHistoryRequest) ProtoMessage() {}
 
 func (x *TenantGetHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[13]
+	mi := &file_api_v1_tenant_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -734,7 +734,7 @@ func (x *TenantGetHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantGetHistoryRequest.ProtoReflect.Descriptor instead.
 func (*TenantGetHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{13}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *TenantGetHistoryRequest) GetId() string {
@@ -763,7 +763,7 @@ type TenantFindRequest struct {
 
 func (x *TenantFindRequest) Reset() {
 	*x = TenantFindRequest{}
-	mi := &file_v1_tenant_proto_msgTypes[14]
+	mi := &file_api_v1_tenant_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -775,7 +775,7 @@ func (x *TenantFindRequest) String() string {
 func (*TenantFindRequest) ProtoMessage() {}
 
 func (x *TenantFindRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[14]
+	mi := &file_api_v1_tenant_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -788,7 +788,7 @@ func (x *TenantFindRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantFindRequest.ProtoReflect.Descriptor instead.
 func (*TenantFindRequest) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{14}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *TenantFindRequest) GetId() string {
@@ -828,7 +828,7 @@ type TenantResponse struct {
 
 func (x *TenantResponse) Reset() {
 	*x = TenantResponse{}
-	mi := &file_v1_tenant_proto_msgTypes[15]
+	mi := &file_api_v1_tenant_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -840,7 +840,7 @@ func (x *TenantResponse) String() string {
 func (*TenantResponse) ProtoMessage() {}
 
 func (x *TenantResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[15]
+	mi := &file_api_v1_tenant_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -853,7 +853,7 @@ func (x *TenantResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantResponse.ProtoReflect.Descriptor instead.
 func (*TenantResponse) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{15}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *TenantResponse) GetTenant() *Tenant {
@@ -874,7 +874,7 @@ type TenantListResponse struct {
 
 func (x *TenantListResponse) Reset() {
 	*x = TenantListResponse{}
-	mi := &file_v1_tenant_proto_msgTypes[16]
+	mi := &file_api_v1_tenant_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -886,7 +886,7 @@ func (x *TenantListResponse) String() string {
 func (*TenantListResponse) ProtoMessage() {}
 
 func (x *TenantListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[16]
+	mi := &file_api_v1_tenant_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -899,7 +899,7 @@ func (x *TenantListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantListResponse.ProtoReflect.Descriptor instead.
 func (*TenantListResponse) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{16}
+	return file_api_v1_tenant_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *TenantListResponse) GetTenants() []*Tenant {
@@ -916,11 +916,11 @@ func (x *TenantListResponse) GetNextPage() uint64 {
 	return 0
 }
 
-var File_v1_tenant_proto protoreflect.FileDescriptor
+var File_api_v1_tenant_proto protoreflect.FileDescriptor
 
-const file_v1_tenant_proto_rawDesc = "" +
+const file_api_v1_tenant_proto_rawDesc = "" +
 	"\n" +
-	"\x0fv1/tenant.proto\x12\x02v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x0fv1/common.proto\x1a\fv1/iam.proto\x1a\rv1/meta.proto\x1a\x10v1/project.proto\x1a\x0ev1/quota.proto\"\x87\x01\n" +
+	"\x13api/v1/tenant.proto\x12\x06api.v1\x1a\x13api/v1/common.proto\x1a\x10api/v1/iam.proto\x1a\x11api/v1/meta.proto\x1a\x14api/v1/project.proto\x1a\x12api/v1/quota.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x87\x01\n" +
 	" FindParticipatingProjectsRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x120\n" +
 	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01B\x14\n" +
@@ -932,28 +932,27 @@ const file_v1_tenant_proto_rawDesc = "" +
 	"\x18ListTenantMembersRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x120\n" +
 	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01B\x14\n" +
-	"\x12_include_inherited\"Z\n" +
-	"\x19ListTenantMembersResponse\x12=\n" +
-	"\atenants\x18\x01 \x03(\v2#.v1.TenantWithMembershipAnnotationsR\atenants\"e\n" +
-	"!FindParticipatingProjectsResponse\x12@\n" +
-	"\bprojects\x18\x01 \x03(\v2$.v1.ProjectWithMembershipAnnotationsR\bprojects\"a\n" +
-	" FindParticipatingTenantsResponse\x12=\n" +
-	"\atenants\x18\x01 \x03(\v2#.v1.TenantWithMembershipAnnotationsR\atenants\"\xb1\x03\n" +
-	" ProjectWithMembershipAnnotations\x12%\n" +
-	"\aproject\x18\x01 \x01(\v2\v.v1.ProjectR\aproject\x12m\n" +
-	"\x13project_annotations\x18\x02 \x03(\v2<.v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntryR\x12projectAnnotations\x12j\n" +
-	"\x12tenant_annotations\x18\x03 \x03(\v2;.v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntryR\x11tenantAnnotations\x1aE\n" +
+	"\x12_include_inherited\"^\n" +
+	"\x19ListTenantMembersResponse\x12A\n" +
+	"\atenants\x18\x01 \x03(\v2'.api.v1.TenantWithMembershipAnnotationsR\atenants\"i\n" +
+	"!FindParticipatingProjectsResponse\x12D\n" +
+	"\bprojects\x18\x01 \x03(\v2(.api.v1.ProjectWithMembershipAnnotationsR\bprojects\"e\n" +
+	" FindParticipatingTenantsResponse\x12A\n" +
+	"\atenants\x18\x01 \x03(\v2'.api.v1.TenantWithMembershipAnnotationsR\atenants\"\xbd\x03\n" +
+	" ProjectWithMembershipAnnotations\x12)\n" +
+	"\aproject\x18\x01 \x01(\v2\x0f.api.v1.ProjectR\aproject\x12q\n" +
+	"\x13project_annotations\x18\x02 \x03(\v2@.api.v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntryR\x12projectAnnotations\x12n\n" +
+	"\x12tenant_annotations\x18\x03 \x03(\v2?.api.v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntryR\x11tenantAnnotations\x1aE\n" +
 	"\x17ProjectAnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aD\n" +
 	"\x16TenantAnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xcc\x03\n" +
-	"\x1fTenantWithMembershipAnnotations\x12\"\n" +
-	"\x06tenant\x18\x01 \x01(\v2\n" +
-	".v1.TenantR\x06tenant\x12l\n" +
-	"\x13project_annotations\x18\x02 \x03(\v2;.v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntryR\x12projectAnnotations\x12i\n" +
-	"\x12tenant_annotations\x18\x03 \x03(\v2:.v1.TenantWithMembershipAnnotations.TenantAnnotationsEntryR\x11tenantAnnotations\x12\x1f\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xd8\x03\n" +
+	"\x1fTenantWithMembershipAnnotations\x12&\n" +
+	"\x06tenant\x18\x01 \x01(\v2\x0e.api.v1.TenantR\x06tenant\x12p\n" +
+	"\x13project_annotations\x18\x02 \x03(\v2?.api.v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntryR\x12projectAnnotations\x12m\n" +
+	"\x12tenant_annotations\x18\x03 \x03(\v2>.api.v1.TenantWithMembershipAnnotations.TenantAnnotationsEntryR\x11tenantAnnotations\x12\x1f\n" +
 	"\vproject_ids\x18\x04 \x03(\tR\n" +
 	"projectIds\x1aE\n" +
 	"\x17ProjectAnnotationsEntry\x12\x10\n" +
@@ -961,143 +960,139 @@ const file_v1_tenant_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aD\n" +
 	"\x16TenantAnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe5\x01\n" +
-	"\x06Tenant\x12\x1c\n" +
-	"\x04meta\x18\x01 \x01(\v2\b.v1.MetaR\x04meta\x12\x12\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf5\x01\n" +
+	"\x06Tenant\x12 \n" +
+	"\x04meta\x18\x01 \x01(\v2\f.api.v1.MetaR\x04meta\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x123\n" +
-	"\x0edefault_quotas\x18\x04 \x01(\v2\f.v1.QuotaSetR\rdefaultQuotas\x12$\n" +
-	"\x06quotas\x18\x05 \x01(\v2\f.v1.QuotaSetR\x06quotas\x12,\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x127\n" +
+	"\x0edefault_quotas\x18\x04 \x01(\v2\x10.api.v1.QuotaSetR\rdefaultQuotas\x12(\n" +
+	"\x06quotas\x18\x05 \x01(\v2\x10.api.v1.QuotaSetR\x06quotas\x120\n" +
 	"\n" +
-	"iam_config\x18\x06 \x01(\v2\r.v1.IAMConfigR\tiamConfig\"9\n" +
-	"\x13TenantCreateRequest\x12\"\n" +
-	"\x06tenant\x18\x01 \x01(\v2\n" +
-	".v1.TenantR\x06tenant\"9\n" +
-	"\x13TenantUpdateRequest\x12\"\n" +
-	"\x06tenant\x18\x01 \x01(\v2\n" +
-	".v1.TenantR\x06tenant\"%\n" +
+	"iam_config\x18\x06 \x01(\v2\x11.api.v1.IAMConfigR\tiamConfig\"=\n" +
+	"\x13TenantCreateRequest\x12&\n" +
+	"\x06tenant\x18\x01 \x01(\v2\x0e.api.v1.TenantR\x06tenant\"=\n" +
+	"\x13TenantUpdateRequest\x12&\n" +
+	"\x06tenant\x18\x01 \x01(\v2\x0e.api.v1.TenantR\x06tenant\"%\n" +
 	"\x13TenantDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\"\n" +
 	"\x10TenantGetRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"U\n" +
 	"\x17TenantGetHistoryRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12*\n" +
-	"\x02at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02at\"\xff\x01\n" +
+	"\x02at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02at\"\x87\x02\n" +
 	"\x11TenantFindRequest\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x17\n" +
-	"\x04name\x18\x02 \x01(\tH\x01R\x04name\x88\x01\x01\x12\"\n" +
-	"\x06paging\x18\x03 \x01(\v2\n" +
-	".v1.PagingR\x06paging\x12H\n" +
-	"\vannotations\x18\x04 \x03(\v2&.v1.TenantFindRequest.AnnotationsEntryR\vannotations\x1a>\n" +
+	"\x04name\x18\x02 \x01(\tH\x01R\x04name\x88\x01\x01\x12&\n" +
+	"\x06paging\x18\x03 \x01(\v2\x0e.api.v1.PagingR\x06paging\x12L\n" +
+	"\vannotations\x18\x04 \x03(\v2*.api.v1.TenantFindRequest.AnnotationsEntryR\vannotations\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x05\n" +
 	"\x03_idB\a\n" +
-	"\x05_name\"4\n" +
-	"\x0eTenantResponse\x12\"\n" +
-	"\x06tenant\x18\x01 \x01(\v2\n" +
-	".v1.TenantR\x06tenant\"j\n" +
-	"\x12TenantListResponse\x12$\n" +
-	"\atenants\x18\x01 \x03(\v2\n" +
-	".v1.TenantR\atenants\x12 \n" +
+	"\x05_name\"8\n" +
+	"\x0eTenantResponse\x12&\n" +
+	"\x06tenant\x18\x01 \x01(\v2\x0e.api.v1.TenantR\x06tenant\"n\n" +
+	"\x12TenantListResponse\x12(\n" +
+	"\atenants\x18\x01 \x03(\v2\x0e.api.v1.TenantR\atenants\x12 \n" +
 	"\tnext_page\x18\x02 \x01(\x04H\x00R\bnextPage\x88\x01\x01B\f\n" +
 	"\n" +
-	"_next_page2\xfe\x04\n" +
-	"\rTenantService\x125\n" +
-	"\x06Create\x12\x17.v1.TenantCreateRequest\x1a\x12.v1.TenantResponse\x125\n" +
-	"\x06Update\x12\x17.v1.TenantUpdateRequest\x1a\x12.v1.TenantResponse\x125\n" +
-	"\x06Delete\x12\x17.v1.TenantDeleteRequest\x1a\x12.v1.TenantResponse\x12/\n" +
-	"\x03Get\x12\x14.v1.TenantGetRequest\x1a\x12.v1.TenantResponse\x12=\n" +
+	"_next_page2\xc6\x05\n" +
+	"\rTenantService\x12=\n" +
+	"\x06Create\x12\x1b.api.v1.TenantCreateRequest\x1a\x16.api.v1.TenantResponse\x12=\n" +
+	"\x06Update\x12\x1b.api.v1.TenantUpdateRequest\x1a\x16.api.v1.TenantResponse\x12=\n" +
+	"\x06Delete\x12\x1b.api.v1.TenantDeleteRequest\x1a\x16.api.v1.TenantResponse\x127\n" +
+	"\x03Get\x12\x18.api.v1.TenantGetRequest\x1a\x16.api.v1.TenantResponse\x12E\n" +
 	"\n" +
-	"GetHistory\x12\x1b.v1.TenantGetHistoryRequest\x1a\x12.v1.TenantResponse\x125\n" +
-	"\x04Find\x12\x15.v1.TenantFindRequest\x1a\x16.v1.TenantListResponse\x12P\n" +
-	"\x11ListTenantMembers\x12\x1c.v1.ListTenantMembersRequest\x1a\x1d.v1.ListTenantMembersResponse\x12h\n" +
-	"\x19FindParticipatingProjects\x12$.v1.FindParticipatingProjectsRequest\x1a%.v1.FindParticipatingProjectsResponse\x12e\n" +
-	"\x18FindParticipatingTenants\x12#.v1.FindParticipatingTenantsRequest\x1a$.v1.FindParticipatingTenantsResponseBg\n" +
-	"\x06com.v1B\vTenantProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
+	"GetHistory\x12\x1f.api.v1.TenantGetHistoryRequest\x1a\x16.api.v1.TenantResponse\x12=\n" +
+	"\x04Find\x12\x19.api.v1.TenantFindRequest\x1a\x1a.api.v1.TenantListResponse\x12X\n" +
+	"\x11ListTenantMembers\x12 .api.v1.ListTenantMembersRequest\x1a!.api.v1.ListTenantMembersResponse\x12p\n" +
+	"\x19FindParticipatingProjects\x12(.api.v1.FindParticipatingProjectsRequest\x1a).api.v1.FindParticipatingProjectsResponse\x12m\n" +
+	"\x18FindParticipatingTenants\x12'.api.v1.FindParticipatingTenantsRequest\x1a(.api.v1.FindParticipatingTenantsResponseB\x86\x01\n" +
+	"\n" +
+	"com.api.v1B\vTenantProtoP\x01Z2github.com/metal-stack/masterdata-api/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
 var (
-	file_v1_tenant_proto_rawDescOnce sync.Once
-	file_v1_tenant_proto_rawDescData []byte
+	file_api_v1_tenant_proto_rawDescOnce sync.Once
+	file_api_v1_tenant_proto_rawDescData []byte
 )
 
-func file_v1_tenant_proto_rawDescGZIP() []byte {
-	file_v1_tenant_proto_rawDescOnce.Do(func() {
-		file_v1_tenant_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_v1_tenant_proto_rawDesc), len(file_v1_tenant_proto_rawDesc)))
+func file_api_v1_tenant_proto_rawDescGZIP() []byte {
+	file_api_v1_tenant_proto_rawDescOnce.Do(func() {
+		file_api_v1_tenant_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_v1_tenant_proto_rawDesc), len(file_api_v1_tenant_proto_rawDesc)))
 	})
-	return file_v1_tenant_proto_rawDescData
+	return file_api_v1_tenant_proto_rawDescData
 }
 
-var file_v1_tenant_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
-var file_v1_tenant_proto_goTypes = []any{
-	(*FindParticipatingProjectsRequest)(nil),  // 0: v1.FindParticipatingProjectsRequest
-	(*FindParticipatingTenantsRequest)(nil),   // 1: v1.FindParticipatingTenantsRequest
-	(*ListTenantMembersRequest)(nil),          // 2: v1.ListTenantMembersRequest
-	(*ListTenantMembersResponse)(nil),         // 3: v1.ListTenantMembersResponse
-	(*FindParticipatingProjectsResponse)(nil), // 4: v1.FindParticipatingProjectsResponse
-	(*FindParticipatingTenantsResponse)(nil),  // 5: v1.FindParticipatingTenantsResponse
-	(*ProjectWithMembershipAnnotations)(nil),  // 6: v1.ProjectWithMembershipAnnotations
-	(*TenantWithMembershipAnnotations)(nil),   // 7: v1.TenantWithMembershipAnnotations
-	(*Tenant)(nil),                            // 8: v1.Tenant
-	(*TenantCreateRequest)(nil),               // 9: v1.TenantCreateRequest
-	(*TenantUpdateRequest)(nil),               // 10: v1.TenantUpdateRequest
-	(*TenantDeleteRequest)(nil),               // 11: v1.TenantDeleteRequest
-	(*TenantGetRequest)(nil),                  // 12: v1.TenantGetRequest
-	(*TenantGetHistoryRequest)(nil),           // 13: v1.TenantGetHistoryRequest
-	(*TenantFindRequest)(nil),                 // 14: v1.TenantFindRequest
-	(*TenantResponse)(nil),                    // 15: v1.TenantResponse
-	(*TenantListResponse)(nil),                // 16: v1.TenantListResponse
-	nil,                                       // 17: v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntry
-	nil,                                       // 18: v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntry
-	nil,                                       // 19: v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntry
-	nil,                                       // 20: v1.TenantWithMembershipAnnotations.TenantAnnotationsEntry
-	nil,                                       // 21: v1.TenantFindRequest.AnnotationsEntry
-	(*Project)(nil),                           // 22: v1.Project
-	(*Meta)(nil),                              // 23: v1.Meta
-	(*QuotaSet)(nil),                          // 24: v1.QuotaSet
-	(*IAMConfig)(nil),                         // 25: v1.IAMConfig
+var file_api_v1_tenant_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_api_v1_tenant_proto_goTypes = []any{
+	(*FindParticipatingProjectsRequest)(nil),  // 0: api.v1.FindParticipatingProjectsRequest
+	(*FindParticipatingTenantsRequest)(nil),   // 1: api.v1.FindParticipatingTenantsRequest
+	(*ListTenantMembersRequest)(nil),          // 2: api.v1.ListTenantMembersRequest
+	(*ListTenantMembersResponse)(nil),         // 3: api.v1.ListTenantMembersResponse
+	(*FindParticipatingProjectsResponse)(nil), // 4: api.v1.FindParticipatingProjectsResponse
+	(*FindParticipatingTenantsResponse)(nil),  // 5: api.v1.FindParticipatingTenantsResponse
+	(*ProjectWithMembershipAnnotations)(nil),  // 6: api.v1.ProjectWithMembershipAnnotations
+	(*TenantWithMembershipAnnotations)(nil),   // 7: api.v1.TenantWithMembershipAnnotations
+	(*Tenant)(nil),                            // 8: api.v1.Tenant
+	(*TenantCreateRequest)(nil),               // 9: api.v1.TenantCreateRequest
+	(*TenantUpdateRequest)(nil),               // 10: api.v1.TenantUpdateRequest
+	(*TenantDeleteRequest)(nil),               // 11: api.v1.TenantDeleteRequest
+	(*TenantGetRequest)(nil),                  // 12: api.v1.TenantGetRequest
+	(*TenantGetHistoryRequest)(nil),           // 13: api.v1.TenantGetHistoryRequest
+	(*TenantFindRequest)(nil),                 // 14: api.v1.TenantFindRequest
+	(*TenantResponse)(nil),                    // 15: api.v1.TenantResponse
+	(*TenantListResponse)(nil),                // 16: api.v1.TenantListResponse
+	nil,                                       // 17: api.v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntry
+	nil,                                       // 18: api.v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntry
+	nil,                                       // 19: api.v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntry
+	nil,                                       // 20: api.v1.TenantWithMembershipAnnotations.TenantAnnotationsEntry
+	nil,                                       // 21: api.v1.TenantFindRequest.AnnotationsEntry
+	(*Project)(nil),                           // 22: api.v1.Project
+	(*Meta)(nil),                              // 23: api.v1.Meta
+	(*QuotaSet)(nil),                          // 24: api.v1.QuotaSet
+	(*IAMConfig)(nil),                         // 25: api.v1.IAMConfig
 	(*timestamppb.Timestamp)(nil),             // 26: google.protobuf.Timestamp
-	(*Paging)(nil),                            // 27: v1.Paging
+	(*Paging)(nil),                            // 27: api.v1.Paging
 }
-var file_v1_tenant_proto_depIdxs = []int32{
-	7,  // 0: v1.ListTenantMembersResponse.tenants:type_name -> v1.TenantWithMembershipAnnotations
-	6,  // 1: v1.FindParticipatingProjectsResponse.projects:type_name -> v1.ProjectWithMembershipAnnotations
-	7,  // 2: v1.FindParticipatingTenantsResponse.tenants:type_name -> v1.TenantWithMembershipAnnotations
-	22, // 3: v1.ProjectWithMembershipAnnotations.project:type_name -> v1.Project
-	17, // 4: v1.ProjectWithMembershipAnnotations.project_annotations:type_name -> v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntry
-	18, // 5: v1.ProjectWithMembershipAnnotations.tenant_annotations:type_name -> v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntry
-	8,  // 6: v1.TenantWithMembershipAnnotations.tenant:type_name -> v1.Tenant
-	19, // 7: v1.TenantWithMembershipAnnotations.project_annotations:type_name -> v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntry
-	20, // 8: v1.TenantWithMembershipAnnotations.tenant_annotations:type_name -> v1.TenantWithMembershipAnnotations.TenantAnnotationsEntry
-	23, // 9: v1.Tenant.meta:type_name -> v1.Meta
-	24, // 10: v1.Tenant.default_quotas:type_name -> v1.QuotaSet
-	24, // 11: v1.Tenant.quotas:type_name -> v1.QuotaSet
-	25, // 12: v1.Tenant.iam_config:type_name -> v1.IAMConfig
-	8,  // 13: v1.TenantCreateRequest.tenant:type_name -> v1.Tenant
-	8,  // 14: v1.TenantUpdateRequest.tenant:type_name -> v1.Tenant
-	26, // 15: v1.TenantGetHistoryRequest.at:type_name -> google.protobuf.Timestamp
-	27, // 16: v1.TenantFindRequest.paging:type_name -> v1.Paging
-	21, // 17: v1.TenantFindRequest.annotations:type_name -> v1.TenantFindRequest.AnnotationsEntry
-	8,  // 18: v1.TenantResponse.tenant:type_name -> v1.Tenant
-	8,  // 19: v1.TenantListResponse.tenants:type_name -> v1.Tenant
-	9,  // 20: v1.TenantService.Create:input_type -> v1.TenantCreateRequest
-	10, // 21: v1.TenantService.Update:input_type -> v1.TenantUpdateRequest
-	11, // 22: v1.TenantService.Delete:input_type -> v1.TenantDeleteRequest
-	12, // 23: v1.TenantService.Get:input_type -> v1.TenantGetRequest
-	13, // 24: v1.TenantService.GetHistory:input_type -> v1.TenantGetHistoryRequest
-	14, // 25: v1.TenantService.Find:input_type -> v1.TenantFindRequest
-	2,  // 26: v1.TenantService.ListTenantMembers:input_type -> v1.ListTenantMembersRequest
-	0,  // 27: v1.TenantService.FindParticipatingProjects:input_type -> v1.FindParticipatingProjectsRequest
-	1,  // 28: v1.TenantService.FindParticipatingTenants:input_type -> v1.FindParticipatingTenantsRequest
-	15, // 29: v1.TenantService.Create:output_type -> v1.TenantResponse
-	15, // 30: v1.TenantService.Update:output_type -> v1.TenantResponse
-	15, // 31: v1.TenantService.Delete:output_type -> v1.TenantResponse
-	15, // 32: v1.TenantService.Get:output_type -> v1.TenantResponse
-	15, // 33: v1.TenantService.GetHistory:output_type -> v1.TenantResponse
-	16, // 34: v1.TenantService.Find:output_type -> v1.TenantListResponse
-	3,  // 35: v1.TenantService.ListTenantMembers:output_type -> v1.ListTenantMembersResponse
-	4,  // 36: v1.TenantService.FindParticipatingProjects:output_type -> v1.FindParticipatingProjectsResponse
-	5,  // 37: v1.TenantService.FindParticipatingTenants:output_type -> v1.FindParticipatingTenantsResponse
+var file_api_v1_tenant_proto_depIdxs = []int32{
+	7,  // 0: api.v1.ListTenantMembersResponse.tenants:type_name -> api.v1.TenantWithMembershipAnnotations
+	6,  // 1: api.v1.FindParticipatingProjectsResponse.projects:type_name -> api.v1.ProjectWithMembershipAnnotations
+	7,  // 2: api.v1.FindParticipatingTenantsResponse.tenants:type_name -> api.v1.TenantWithMembershipAnnotations
+	22, // 3: api.v1.ProjectWithMembershipAnnotations.project:type_name -> api.v1.Project
+	17, // 4: api.v1.ProjectWithMembershipAnnotations.project_annotations:type_name -> api.v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntry
+	18, // 5: api.v1.ProjectWithMembershipAnnotations.tenant_annotations:type_name -> api.v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntry
+	8,  // 6: api.v1.TenantWithMembershipAnnotations.tenant:type_name -> api.v1.Tenant
+	19, // 7: api.v1.TenantWithMembershipAnnotations.project_annotations:type_name -> api.v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntry
+	20, // 8: api.v1.TenantWithMembershipAnnotations.tenant_annotations:type_name -> api.v1.TenantWithMembershipAnnotations.TenantAnnotationsEntry
+	23, // 9: api.v1.Tenant.meta:type_name -> api.v1.Meta
+	24, // 10: api.v1.Tenant.default_quotas:type_name -> api.v1.QuotaSet
+	24, // 11: api.v1.Tenant.quotas:type_name -> api.v1.QuotaSet
+	25, // 12: api.v1.Tenant.iam_config:type_name -> api.v1.IAMConfig
+	8,  // 13: api.v1.TenantCreateRequest.tenant:type_name -> api.v1.Tenant
+	8,  // 14: api.v1.TenantUpdateRequest.tenant:type_name -> api.v1.Tenant
+	26, // 15: api.v1.TenantGetHistoryRequest.at:type_name -> google.protobuf.Timestamp
+	27, // 16: api.v1.TenantFindRequest.paging:type_name -> api.v1.Paging
+	21, // 17: api.v1.TenantFindRequest.annotations:type_name -> api.v1.TenantFindRequest.AnnotationsEntry
+	8,  // 18: api.v1.TenantResponse.tenant:type_name -> api.v1.Tenant
+	8,  // 19: api.v1.TenantListResponse.tenants:type_name -> api.v1.Tenant
+	9,  // 20: api.v1.TenantService.Create:input_type -> api.v1.TenantCreateRequest
+	10, // 21: api.v1.TenantService.Update:input_type -> api.v1.TenantUpdateRequest
+	11, // 22: api.v1.TenantService.Delete:input_type -> api.v1.TenantDeleteRequest
+	12, // 23: api.v1.TenantService.Get:input_type -> api.v1.TenantGetRequest
+	13, // 24: api.v1.TenantService.GetHistory:input_type -> api.v1.TenantGetHistoryRequest
+	14, // 25: api.v1.TenantService.Find:input_type -> api.v1.TenantFindRequest
+	2,  // 26: api.v1.TenantService.ListTenantMembers:input_type -> api.v1.ListTenantMembersRequest
+	0,  // 27: api.v1.TenantService.FindParticipatingProjects:input_type -> api.v1.FindParticipatingProjectsRequest
+	1,  // 28: api.v1.TenantService.FindParticipatingTenants:input_type -> api.v1.FindParticipatingTenantsRequest
+	15, // 29: api.v1.TenantService.Create:output_type -> api.v1.TenantResponse
+	15, // 30: api.v1.TenantService.Update:output_type -> api.v1.TenantResponse
+	15, // 31: api.v1.TenantService.Delete:output_type -> api.v1.TenantResponse
+	15, // 32: api.v1.TenantService.Get:output_type -> api.v1.TenantResponse
+	15, // 33: api.v1.TenantService.GetHistory:output_type -> api.v1.TenantResponse
+	16, // 34: api.v1.TenantService.Find:output_type -> api.v1.TenantListResponse
+	3,  // 35: api.v1.TenantService.ListTenantMembers:output_type -> api.v1.ListTenantMembersResponse
+	4,  // 36: api.v1.TenantService.FindParticipatingProjects:output_type -> api.v1.FindParticipatingProjectsResponse
+	5,  // 37: api.v1.TenantService.FindParticipatingTenants:output_type -> api.v1.FindParticipatingTenantsResponse
 	29, // [29:38] is the sub-list for method output_type
 	20, // [20:29] is the sub-list for method input_type
 	20, // [20:20] is the sub-list for extension type_name
@@ -1105,36 +1100,36 @@ var file_v1_tenant_proto_depIdxs = []int32{
 	0,  // [0:20] is the sub-list for field type_name
 }
 
-func init() { file_v1_tenant_proto_init() }
-func file_v1_tenant_proto_init() {
-	if File_v1_tenant_proto != nil {
+func init() { file_api_v1_tenant_proto_init() }
+func file_api_v1_tenant_proto_init() {
+	if File_api_v1_tenant_proto != nil {
 		return
 	}
-	file_v1_common_proto_init()
-	file_v1_iam_proto_init()
-	file_v1_meta_proto_init()
-	file_v1_project_proto_init()
-	file_v1_quota_proto_init()
-	file_v1_tenant_proto_msgTypes[0].OneofWrappers = []any{}
-	file_v1_tenant_proto_msgTypes[1].OneofWrappers = []any{}
-	file_v1_tenant_proto_msgTypes[2].OneofWrappers = []any{}
-	file_v1_tenant_proto_msgTypes[14].OneofWrappers = []any{}
-	file_v1_tenant_proto_msgTypes[16].OneofWrappers = []any{}
+	file_api_v1_common_proto_init()
+	file_api_v1_iam_proto_init()
+	file_api_v1_meta_proto_init()
+	file_api_v1_project_proto_init()
+	file_api_v1_quota_proto_init()
+	file_api_v1_tenant_proto_msgTypes[0].OneofWrappers = []any{}
+	file_api_v1_tenant_proto_msgTypes[1].OneofWrappers = []any{}
+	file_api_v1_tenant_proto_msgTypes[2].OneofWrappers = []any{}
+	file_api_v1_tenant_proto_msgTypes[14].OneofWrappers = []any{}
+	file_api_v1_tenant_proto_msgTypes[16].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_tenant_proto_rawDesc), len(file_v1_tenant_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_tenant_proto_rawDesc), len(file_api_v1_tenant_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_v1_tenant_proto_goTypes,
-		DependencyIndexes: file_v1_tenant_proto_depIdxs,
-		MessageInfos:      file_v1_tenant_proto_msgTypes,
+		GoTypes:           file_api_v1_tenant_proto_goTypes,
+		DependencyIndexes: file_api_v1_tenant_proto_depIdxs,
+		MessageInfos:      file_api_v1_tenant_proto_msgTypes,
 	}.Build()
-	File_v1_tenant_proto = out.File
-	file_v1_tenant_proto_goTypes = nil
-	file_v1_tenant_proto_depIdxs = nil
+	File_api_v1_tenant_proto = out.File
+	file_api_v1_tenant_proto_goTypes = nil
+	file_api_v1_tenant_proto_depIdxs = nil
 }

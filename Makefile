@@ -44,7 +44,7 @@ server: protoc generate
 								   -X 'github.com/metal-stack/v.Revision=$(GITVERSION)' \
 								   -X 'github.com/metal-stack/v.GitSHA1=$(SHA)' \
 								   -X 'github.com/metal-stack/v.BuildDate=$(BUILDDATE)'" \
-						 -o bin/server server/main.go
+						 -o bin/server cmd/server/main.go
 	strip bin/server
 
 .PHONY: client

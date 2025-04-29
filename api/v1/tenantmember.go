@@ -1,6 +1,6 @@
-package v1
+package apiv1
 
-//go:generate go run ../../pkg/gen/genscanvaluer.go -package v1 -type TenantMember
+//go:generate go run ../../pkg/gen/genscanvaluer.go -package apiv1 -type TenantMember
 
 func (m *TenantMember) NewTenantMemberResponse() *TenantMemberResponse {
 	return &TenantMemberResponse{

@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: v1/iam.proto
+// source: api/v1/iam.proto
 
-package v1
+package apiv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -32,7 +32,7 @@ type IAMConfig struct {
 
 func (x *IAMConfig) Reset() {
 	*x = IAMConfig{}
-	mi := &file_v1_iam_proto_msgTypes[0]
+	mi := &file_api_v1_iam_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +44,7 @@ func (x *IAMConfig) String() string {
 func (*IAMConfig) ProtoMessage() {}
 
 func (x *IAMConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_iam_proto_msgTypes[0]
+	mi := &file_api_v1_iam_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +57,7 @@ func (x *IAMConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IAMConfig.ProtoReflect.Descriptor instead.
 func (*IAMConfig) Descriptor() ([]byte, []int) {
-	return file_v1_iam_proto_rawDescGZIP(), []int{0}
+	return file_api_v1_iam_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *IAMConfig) GetIssuerConfig() *IssuerConfig {
@@ -91,7 +91,7 @@ type IssuerConfig struct {
 
 func (x *IssuerConfig) Reset() {
 	*x = IssuerConfig{}
-	mi := &file_v1_iam_proto_msgTypes[1]
+	mi := &file_api_v1_iam_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -103,7 +103,7 @@ func (x *IssuerConfig) String() string {
 func (*IssuerConfig) ProtoMessage() {}
 
 func (x *IssuerConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_iam_proto_msgTypes[1]
+	mi := &file_api_v1_iam_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -116,7 +116,7 @@ func (x *IssuerConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssuerConfig.ProtoReflect.Descriptor instead.
 func (*IssuerConfig) Descriptor() ([]byte, []int) {
-	return file_v1_iam_proto_rawDescGZIP(), []int{1}
+	return file_api_v1_iam_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *IssuerConfig) GetUrl() string {
@@ -145,7 +145,7 @@ type IDMConfig struct {
 
 func (x *IDMConfig) Reset() {
 	*x = IDMConfig{}
-	mi := &file_v1_iam_proto_msgTypes[2]
+	mi := &file_api_v1_iam_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -157,7 +157,7 @@ func (x *IDMConfig) String() string {
 func (*IDMConfig) ProtoMessage() {}
 
 func (x *IDMConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_iam_proto_msgTypes[2]
+	mi := &file_api_v1_iam_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -170,7 +170,7 @@ func (x *IDMConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IDMConfig.ProtoReflect.Descriptor instead.
 func (*IDMConfig) Descriptor() ([]byte, []int) {
-	return file_v1_iam_proto_rawDescGZIP(), []int{2}
+	return file_api_v1_iam_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *IDMConfig) GetIdmType() string {
@@ -210,7 +210,7 @@ type NamespaceGroupConfig struct {
 
 func (x *NamespaceGroupConfig) Reset() {
 	*x = NamespaceGroupConfig{}
-	mi := &file_v1_iam_proto_msgTypes[3]
+	mi := &file_api_v1_iam_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -222,7 +222,7 @@ func (x *NamespaceGroupConfig) String() string {
 func (*NamespaceGroupConfig) ProtoMessage() {}
 
 func (x *NamespaceGroupConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_iam_proto_msgTypes[3]
+	mi := &file_api_v1_iam_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -235,7 +235,7 @@ func (x *NamespaceGroupConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NamespaceGroupConfig.ProtoReflect.Descriptor instead.
 func (*NamespaceGroupConfig) Descriptor() ([]byte, []int) {
-	return file_v1_iam_proto_rawDescGZIP(), []int{3}
+	return file_api_v1_iam_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *NamespaceGroupConfig) GetExcludedNamespaces() string {
@@ -298,7 +298,7 @@ type ConnectorConfig struct {
 
 func (x *ConnectorConfig) Reset() {
 	*x = ConnectorConfig{}
-	mi := &file_v1_iam_proto_msgTypes[4]
+	mi := &file_api_v1_iam_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -310,7 +310,7 @@ func (x *ConnectorConfig) String() string {
 func (*ConnectorConfig) ProtoMessage() {}
 
 func (x *ConnectorConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_iam_proto_msgTypes[4]
+	mi := &file_api_v1_iam_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -323,7 +323,7 @@ func (x *ConnectorConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConnectorConfig.ProtoReflect.Descriptor instead.
 func (*ConnectorConfig) Descriptor() ([]byte, []int) {
-	return file_v1_iam_proto_rawDescGZIP(), []int{4}
+	return file_api_v1_iam_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ConnectorConfig) GetIdmApiUrl() string {
@@ -431,22 +431,22 @@ func (x *ConnectorConfig) GetIdmReqEmail() string {
 	return ""
 }
 
-var File_v1_iam_proto protoreflect.FileDescriptor
+var File_api_v1_iam_proto protoreflect.FileDescriptor
 
-const file_v1_iam_proto_rawDesc = "" +
+const file_api_v1_iam_proto_rawDesc = "" +
 	"\n" +
-	"\fv1/iam.proto\x12\x02v1\"\xad\x01\n" +
-	"\tIAMConfig\x125\n" +
-	"\rissuer_config\x18\x01 \x01(\v2\x10.v1.IssuerConfigR\fissuerConfig\x12,\n" +
+	"\x10api/v1/iam.proto\x12\x06api.v1\"\xb9\x01\n" +
+	"\tIAMConfig\x129\n" +
+	"\rissuer_config\x18\x01 \x01(\v2\x14.api.v1.IssuerConfigR\fissuerConfig\x120\n" +
 	"\n" +
-	"idm_config\x18\x02 \x01(\v2\r.v1.IDMConfigR\tidmConfig\x12;\n" +
-	"\fgroup_config\x18\x03 \x01(\v2\x18.v1.NamespaceGroupConfigR\vgroupConfig\"=\n" +
+	"idm_config\x18\x02 \x01(\v2\x11.api.v1.IDMConfigR\tidmConfig\x12?\n" +
+	"\fgroup_config\x18\x03 \x01(\v2\x1c.api.v1.NamespaceGroupConfigR\vgroupConfig\"=\n" +
 	"\fIssuerConfig\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1b\n" +
-	"\tclient_id\x18\x02 \x01(\tR\bclientId\"f\n" +
+	"\tclient_id\x18\x02 \x01(\tR\bclientId\"j\n" +
 	"\tIDMConfig\x12\x19\n" +
-	"\bidm_type\x18\x01 \x01(\tR\aidmType\x12>\n" +
-	"\x10connector_config\x18\x02 \x01(\v2\x13.v1.ConnectorConfigR\x0fconnectorConfig\"\xa5\x02\n" +
+	"\bidm_type\x18\x01 \x01(\tR\aidmType\x12B\n" +
+	"\x10connector_config\x18\x02 \x01(\v2\x17.api.v1.ConnectorConfigR\x0fconnectorConfig\"\xa5\x02\n" +
 	"\x14NamespaceGroupConfig\x12/\n" +
 	"\x13excluded_namespaces\x18\x01 \x01(\tR\x12excludedNamespaces\x120\n" +
 	"\x14expected_groups_list\x18\x02 \x01(\tR\x12expectedGroupsList\x120\n" +
@@ -474,34 +474,35 @@ const file_v1_iam_proto_rawDesc = "" +
 	"\fidm_req_user\x18\x0e \x01(\tR\n" +
 	"idmReqUser\x12\"\n" +
 	"\ridm_req_email\x18\x0f \x01(\tR\vidmReqEmailB\x19\n" +
-	"\x17_idm_groupname_templateBd\n" +
-	"\x06com.v1B\bIamProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
+	"\x17_idm_groupname_templateB\x83\x01\n" +
+	"\n" +
+	"com.api.v1B\bIamProtoP\x01Z2github.com/metal-stack/masterdata-api/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
 var (
-	file_v1_iam_proto_rawDescOnce sync.Once
-	file_v1_iam_proto_rawDescData []byte
+	file_api_v1_iam_proto_rawDescOnce sync.Once
+	file_api_v1_iam_proto_rawDescData []byte
 )
 
-func file_v1_iam_proto_rawDescGZIP() []byte {
-	file_v1_iam_proto_rawDescOnce.Do(func() {
-		file_v1_iam_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_v1_iam_proto_rawDesc), len(file_v1_iam_proto_rawDesc)))
+func file_api_v1_iam_proto_rawDescGZIP() []byte {
+	file_api_v1_iam_proto_rawDescOnce.Do(func() {
+		file_api_v1_iam_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_v1_iam_proto_rawDesc), len(file_api_v1_iam_proto_rawDesc)))
 	})
-	return file_v1_iam_proto_rawDescData
+	return file_api_v1_iam_proto_rawDescData
 }
 
-var file_v1_iam_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_v1_iam_proto_goTypes = []any{
-	(*IAMConfig)(nil),            // 0: v1.IAMConfig
-	(*IssuerConfig)(nil),         // 1: v1.IssuerConfig
-	(*IDMConfig)(nil),            // 2: v1.IDMConfig
-	(*NamespaceGroupConfig)(nil), // 3: v1.NamespaceGroupConfig
-	(*ConnectorConfig)(nil),      // 4: v1.ConnectorConfig
+var file_api_v1_iam_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_api_v1_iam_proto_goTypes = []any{
+	(*IAMConfig)(nil),            // 0: api.v1.IAMConfig
+	(*IssuerConfig)(nil),         // 1: api.v1.IssuerConfig
+	(*IDMConfig)(nil),            // 2: api.v1.IDMConfig
+	(*NamespaceGroupConfig)(nil), // 3: api.v1.NamespaceGroupConfig
+	(*ConnectorConfig)(nil),      // 4: api.v1.ConnectorConfig
 }
-var file_v1_iam_proto_depIdxs = []int32{
-	1, // 0: v1.IAMConfig.issuer_config:type_name -> v1.IssuerConfig
-	2, // 1: v1.IAMConfig.idm_config:type_name -> v1.IDMConfig
-	3, // 2: v1.IAMConfig.group_config:type_name -> v1.NamespaceGroupConfig
-	4, // 3: v1.IDMConfig.connector_config:type_name -> v1.ConnectorConfig
+var file_api_v1_iam_proto_depIdxs = []int32{
+	1, // 0: api.v1.IAMConfig.issuer_config:type_name -> api.v1.IssuerConfig
+	2, // 1: api.v1.IAMConfig.idm_config:type_name -> api.v1.IDMConfig
+	3, // 2: api.v1.IAMConfig.group_config:type_name -> api.v1.NamespaceGroupConfig
+	4, // 3: api.v1.IDMConfig.connector_config:type_name -> api.v1.ConnectorConfig
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -509,27 +510,27 @@ var file_v1_iam_proto_depIdxs = []int32{
 	0, // [0:4] is the sub-list for field type_name
 }
 
-func init() { file_v1_iam_proto_init() }
-func file_v1_iam_proto_init() {
-	if File_v1_iam_proto != nil {
+func init() { file_api_v1_iam_proto_init() }
+func file_api_v1_iam_proto_init() {
+	if File_api_v1_iam_proto != nil {
 		return
 	}
-	file_v1_iam_proto_msgTypes[4].OneofWrappers = []any{}
+	file_api_v1_iam_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_iam_proto_rawDesc), len(file_v1_iam_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_iam_proto_rawDesc), len(file_api_v1_iam_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_v1_iam_proto_goTypes,
-		DependencyIndexes: file_v1_iam_proto_depIdxs,
-		MessageInfos:      file_v1_iam_proto_msgTypes,
+		GoTypes:           file_api_v1_iam_proto_goTypes,
+		DependencyIndexes: file_api_v1_iam_proto_depIdxs,
+		MessageInfos:      file_api_v1_iam_proto_msgTypes,
 	}.Build()
-	File_v1_iam_proto = out.File
-	file_v1_iam_proto_goTypes = nil
-	file_v1_iam_proto_depIdxs = nil
+	File_api_v1_iam_proto = out.File
+	file_api_v1_iam_proto_goTypes = nil
+	file_api_v1_iam_proto_depIdxs = nil
 }

@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        (unknown)
-// source: v1/project_member.proto
+// source: api/v1/project_member.proto
 
-package v1
+package apiv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -33,7 +33,7 @@ type ProjectMember struct {
 
 func (x *ProjectMember) Reset() {
 	*x = ProjectMember{}
-	mi := &file_v1_project_member_proto_msgTypes[0]
+	mi := &file_api_v1_project_member_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *ProjectMember) String() string {
 func (*ProjectMember) ProtoMessage() {}
 
 func (x *ProjectMember) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_member_proto_msgTypes[0]
+	mi := &file_api_v1_project_member_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *ProjectMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectMember.ProtoReflect.Descriptor instead.
 func (*ProjectMember) Descriptor() ([]byte, []int) {
-	return file_v1_project_member_proto_rawDescGZIP(), []int{0}
+	return file_api_v1_project_member_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *ProjectMember) GetMeta() *Meta {
@@ -91,7 +91,7 @@ type ProjectMemberCreateRequest struct {
 
 func (x *ProjectMemberCreateRequest) Reset() {
 	*x = ProjectMemberCreateRequest{}
-	mi := &file_v1_project_member_proto_msgTypes[1]
+	mi := &file_api_v1_project_member_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -103,7 +103,7 @@ func (x *ProjectMemberCreateRequest) String() string {
 func (*ProjectMemberCreateRequest) ProtoMessage() {}
 
 func (x *ProjectMemberCreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_member_proto_msgTypes[1]
+	mi := &file_api_v1_project_member_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -116,7 +116,7 @@ func (x *ProjectMemberCreateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectMemberCreateRequest.ProtoReflect.Descriptor instead.
 func (*ProjectMemberCreateRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_member_proto_rawDescGZIP(), []int{1}
+	return file_api_v1_project_member_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ProjectMemberCreateRequest) GetProjectMember() *ProjectMember {
@@ -135,7 +135,7 @@ type ProjectMemberUpdateRequest struct {
 
 func (x *ProjectMemberUpdateRequest) Reset() {
 	*x = ProjectMemberUpdateRequest{}
-	mi := &file_v1_project_member_proto_msgTypes[2]
+	mi := &file_api_v1_project_member_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -147,7 +147,7 @@ func (x *ProjectMemberUpdateRequest) String() string {
 func (*ProjectMemberUpdateRequest) ProtoMessage() {}
 
 func (x *ProjectMemberUpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_member_proto_msgTypes[2]
+	mi := &file_api_v1_project_member_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +160,7 @@ func (x *ProjectMemberUpdateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectMemberUpdateRequest.ProtoReflect.Descriptor instead.
 func (*ProjectMemberUpdateRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_member_proto_rawDescGZIP(), []int{2}
+	return file_api_v1_project_member_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ProjectMemberUpdateRequest) GetProjectMember() *ProjectMember {
@@ -179,7 +179,7 @@ type ProjectMemberDeleteRequest struct {
 
 func (x *ProjectMemberDeleteRequest) Reset() {
 	*x = ProjectMemberDeleteRequest{}
-	mi := &file_v1_project_member_proto_msgTypes[3]
+	mi := &file_api_v1_project_member_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -191,7 +191,7 @@ func (x *ProjectMemberDeleteRequest) String() string {
 func (*ProjectMemberDeleteRequest) ProtoMessage() {}
 
 func (x *ProjectMemberDeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_member_proto_msgTypes[3]
+	mi := &file_api_v1_project_member_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -204,7 +204,7 @@ func (x *ProjectMemberDeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectMemberDeleteRequest.ProtoReflect.Descriptor instead.
 func (*ProjectMemberDeleteRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_member_proto_rawDescGZIP(), []int{3}
+	return file_api_v1_project_member_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ProjectMemberDeleteRequest) GetId() string {
@@ -223,7 +223,7 @@ type ProjectMemberGetRequest struct {
 
 func (x *ProjectMemberGetRequest) Reset() {
 	*x = ProjectMemberGetRequest{}
-	mi := &file_v1_project_member_proto_msgTypes[4]
+	mi := &file_api_v1_project_member_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -235,7 +235,7 @@ func (x *ProjectMemberGetRequest) String() string {
 func (*ProjectMemberGetRequest) ProtoMessage() {}
 
 func (x *ProjectMemberGetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_member_proto_msgTypes[4]
+	mi := &file_api_v1_project_member_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -248,7 +248,7 @@ func (x *ProjectMemberGetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectMemberGetRequest.ProtoReflect.Descriptor instead.
 func (*ProjectMemberGetRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_member_proto_rawDescGZIP(), []int{4}
+	return file_api_v1_project_member_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ProjectMemberGetRequest) GetId() string {
@@ -269,7 +269,7 @@ type ProjectMemberFindRequest struct {
 
 func (x *ProjectMemberFindRequest) Reset() {
 	*x = ProjectMemberFindRequest{}
-	mi := &file_v1_project_member_proto_msgTypes[5]
+	mi := &file_api_v1_project_member_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -281,7 +281,7 @@ func (x *ProjectMemberFindRequest) String() string {
 func (*ProjectMemberFindRequest) ProtoMessage() {}
 
 func (x *ProjectMemberFindRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_member_proto_msgTypes[5]
+	mi := &file_api_v1_project_member_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -294,7 +294,7 @@ func (x *ProjectMemberFindRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectMemberFindRequest.ProtoReflect.Descriptor instead.
 func (*ProjectMemberFindRequest) Descriptor() ([]byte, []int) {
-	return file_v1_project_member_proto_rawDescGZIP(), []int{5}
+	return file_api_v1_project_member_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ProjectMemberFindRequest) GetProjectId() string {
@@ -327,7 +327,7 @@ type ProjectMemberResponse struct {
 
 func (x *ProjectMemberResponse) Reset() {
 	*x = ProjectMemberResponse{}
-	mi := &file_v1_project_member_proto_msgTypes[6]
+	mi := &file_api_v1_project_member_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -339,7 +339,7 @@ func (x *ProjectMemberResponse) String() string {
 func (*ProjectMemberResponse) ProtoMessage() {}
 
 func (x *ProjectMemberResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_member_proto_msgTypes[6]
+	mi := &file_api_v1_project_member_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -352,7 +352,7 @@ func (x *ProjectMemberResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectMemberResponse.ProtoReflect.Descriptor instead.
 func (*ProjectMemberResponse) Descriptor() ([]byte, []int) {
-	return file_v1_project_member_proto_rawDescGZIP(), []int{6}
+	return file_api_v1_project_member_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ProjectMemberResponse) GetProjectMember() *ProjectMember {
@@ -371,7 +371,7 @@ type ProjectMemberListResponse struct {
 
 func (x *ProjectMemberListResponse) Reset() {
 	*x = ProjectMemberListResponse{}
-	mi := &file_v1_project_member_proto_msgTypes[7]
+	mi := &file_api_v1_project_member_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -383,7 +383,7 @@ func (x *ProjectMemberListResponse) String() string {
 func (*ProjectMemberListResponse) ProtoMessage() {}
 
 func (x *ProjectMemberListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_project_member_proto_msgTypes[7]
+	mi := &file_api_v1_project_member_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -396,7 +396,7 @@ func (x *ProjectMemberListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectMemberListResponse.ProtoReflect.Descriptor instead.
 func (*ProjectMemberListResponse) Descriptor() ([]byte, []int) {
-	return file_v1_project_member_proto_rawDescGZIP(), []int{7}
+	return file_api_v1_project_member_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ProjectMemberListResponse) GetProjectMembers() []*ProjectMember {
@@ -406,89 +406,90 @@ func (x *ProjectMemberListResponse) GetProjectMembers() []*ProjectMember {
 	return nil
 }
 
-var File_v1_project_member_proto protoreflect.FileDescriptor
+var File_api_v1_project_member_proto protoreflect.FileDescriptor
 
-const file_v1_project_member_proto_rawDesc = "" +
+const file_api_v1_project_member_proto_rawDesc = "" +
 	"\n" +
-	"\x17v1/project_member.proto\x12\x02v1\x1a\rv1/meta.proto\"i\n" +
-	"\rProjectMember\x12\x1c\n" +
-	"\x04meta\x18\x01 \x01(\v2\b.v1.MetaR\x04meta\x12\x1d\n" +
+	"\x1bapi/v1/project_member.proto\x12\x06api.v1\x1a\x11api/v1/meta.proto\"m\n" +
+	"\rProjectMember\x12 \n" +
+	"\x04meta\x18\x01 \x01(\v2\f.api.v1.MetaR\x04meta\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x02 \x01(\tR\tprojectId\x12\x1b\n" +
-	"\ttenant_id\x18\x04 \x01(\tR\btenantId\"V\n" +
-	"\x1aProjectMemberCreateRequest\x128\n" +
-	"\x0eproject_member\x18\x01 \x01(\v2\x11.v1.ProjectMemberR\rprojectMember\"V\n" +
-	"\x1aProjectMemberUpdateRequest\x128\n" +
-	"\x0eproject_member\x18\x01 \x01(\v2\x11.v1.ProjectMemberR\rprojectMember\",\n" +
+	"\ttenant_id\x18\x04 \x01(\tR\btenantId\"Z\n" +
+	"\x1aProjectMemberCreateRequest\x12<\n" +
+	"\x0eproject_member\x18\x01 \x01(\v2\x15.api.v1.ProjectMemberR\rprojectMember\"Z\n" +
+	"\x1aProjectMemberUpdateRequest\x12<\n" +
+	"\x0eproject_member\x18\x01 \x01(\v2\x15.api.v1.ProjectMemberR\rprojectMember\",\n" +
 	"\x1aProjectMemberDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\")\n" +
 	"\x17ProjectMemberGetRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x8e\x02\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x92\x02\n" +
 	"\x18ProjectMemberFindRequest\x12\"\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\tH\x00R\tprojectId\x88\x01\x01\x12 \n" +
-	"\ttenant_id\x18\x02 \x01(\tH\x01R\btenantId\x88\x01\x01\x12O\n" +
-	"\vannotations\x18\x06 \x03(\v2-.v1.ProjectMemberFindRequest.AnnotationsEntryR\vannotations\x1a>\n" +
+	"\ttenant_id\x18\x02 \x01(\tH\x01R\btenantId\x88\x01\x01\x12S\n" +
+	"\vannotations\x18\x06 \x03(\v21.api.v1.ProjectMemberFindRequest.AnnotationsEntryR\vannotations\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\r\n" +
 	"\v_project_idB\f\n" +
 	"\n" +
-	"_tenant_id\"Q\n" +
-	"\x15ProjectMemberResponse\x128\n" +
-	"\x0eproject_member\x18\x01 \x01(\v2\x11.v1.ProjectMemberR\rprojectMember\"W\n" +
-	"\x19ProjectMemberListResponse\x12:\n" +
-	"\x0fproject_members\x18\x01 \x03(\v2\x11.v1.ProjectMemberR\x0eprojectMembers2\xe9\x02\n" +
-	"\x14ProjectMemberService\x12C\n" +
-	"\x06Create\x12\x1e.v1.ProjectMemberCreateRequest\x1a\x19.v1.ProjectMemberResponse\x12C\n" +
-	"\x06Update\x12\x1e.v1.ProjectMemberUpdateRequest\x1a\x19.v1.ProjectMemberResponse\x12C\n" +
-	"\x06Delete\x12\x1e.v1.ProjectMemberDeleteRequest\x1a\x19.v1.ProjectMemberResponse\x12=\n" +
-	"\x03Get\x12\x1b.v1.ProjectMemberGetRequest\x1a\x19.v1.ProjectMemberResponse\x12C\n" +
-	"\x04Find\x12\x1c.v1.ProjectMemberFindRequest\x1a\x1d.v1.ProjectMemberListResponseBn\n" +
-	"\x06com.v1B\x12ProjectMemberProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
+	"_tenant_id\"U\n" +
+	"\x15ProjectMemberResponse\x12<\n" +
+	"\x0eproject_member\x18\x01 \x01(\v2\x15.api.v1.ProjectMemberR\rprojectMember\"[\n" +
+	"\x19ProjectMemberListResponse\x12>\n" +
+	"\x0fproject_members\x18\x01 \x03(\v2\x15.api.v1.ProjectMemberR\x0eprojectMembers2\x91\x03\n" +
+	"\x14ProjectMemberService\x12K\n" +
+	"\x06Create\x12\".api.v1.ProjectMemberCreateRequest\x1a\x1d.api.v1.ProjectMemberResponse\x12K\n" +
+	"\x06Update\x12\".api.v1.ProjectMemberUpdateRequest\x1a\x1d.api.v1.ProjectMemberResponse\x12K\n" +
+	"\x06Delete\x12\".api.v1.ProjectMemberDeleteRequest\x1a\x1d.api.v1.ProjectMemberResponse\x12E\n" +
+	"\x03Get\x12\x1f.api.v1.ProjectMemberGetRequest\x1a\x1d.api.v1.ProjectMemberResponse\x12K\n" +
+	"\x04Find\x12 .api.v1.ProjectMemberFindRequest\x1a!.api.v1.ProjectMemberListResponseB\x8d\x01\n" +
+	"\n" +
+	"com.api.v1B\x12ProjectMemberProtoP\x01Z2github.com/metal-stack/masterdata-api/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
 var (
-	file_v1_project_member_proto_rawDescOnce sync.Once
-	file_v1_project_member_proto_rawDescData []byte
+	file_api_v1_project_member_proto_rawDescOnce sync.Once
+	file_api_v1_project_member_proto_rawDescData []byte
 )
 
-func file_v1_project_member_proto_rawDescGZIP() []byte {
-	file_v1_project_member_proto_rawDescOnce.Do(func() {
-		file_v1_project_member_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_v1_project_member_proto_rawDesc), len(file_v1_project_member_proto_rawDesc)))
+func file_api_v1_project_member_proto_rawDescGZIP() []byte {
+	file_api_v1_project_member_proto_rawDescOnce.Do(func() {
+		file_api_v1_project_member_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_v1_project_member_proto_rawDesc), len(file_api_v1_project_member_proto_rawDesc)))
 	})
-	return file_v1_project_member_proto_rawDescData
+	return file_api_v1_project_member_proto_rawDescData
 }
 
-var file_v1_project_member_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_v1_project_member_proto_goTypes = []any{
-	(*ProjectMember)(nil),              // 0: v1.ProjectMember
-	(*ProjectMemberCreateRequest)(nil), // 1: v1.ProjectMemberCreateRequest
-	(*ProjectMemberUpdateRequest)(nil), // 2: v1.ProjectMemberUpdateRequest
-	(*ProjectMemberDeleteRequest)(nil), // 3: v1.ProjectMemberDeleteRequest
-	(*ProjectMemberGetRequest)(nil),    // 4: v1.ProjectMemberGetRequest
-	(*ProjectMemberFindRequest)(nil),   // 5: v1.ProjectMemberFindRequest
-	(*ProjectMemberResponse)(nil),      // 6: v1.ProjectMemberResponse
-	(*ProjectMemberListResponse)(nil),  // 7: v1.ProjectMemberListResponse
-	nil,                                // 8: v1.ProjectMemberFindRequest.AnnotationsEntry
-	(*Meta)(nil),                       // 9: v1.Meta
+var file_api_v1_project_member_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_api_v1_project_member_proto_goTypes = []any{
+	(*ProjectMember)(nil),              // 0: api.v1.ProjectMember
+	(*ProjectMemberCreateRequest)(nil), // 1: api.v1.ProjectMemberCreateRequest
+	(*ProjectMemberUpdateRequest)(nil), // 2: api.v1.ProjectMemberUpdateRequest
+	(*ProjectMemberDeleteRequest)(nil), // 3: api.v1.ProjectMemberDeleteRequest
+	(*ProjectMemberGetRequest)(nil),    // 4: api.v1.ProjectMemberGetRequest
+	(*ProjectMemberFindRequest)(nil),   // 5: api.v1.ProjectMemberFindRequest
+	(*ProjectMemberResponse)(nil),      // 6: api.v1.ProjectMemberResponse
+	(*ProjectMemberListResponse)(nil),  // 7: api.v1.ProjectMemberListResponse
+	nil,                                // 8: api.v1.ProjectMemberFindRequest.AnnotationsEntry
+	(*Meta)(nil),                       // 9: api.v1.Meta
 }
-var file_v1_project_member_proto_depIdxs = []int32{
-	9,  // 0: v1.ProjectMember.meta:type_name -> v1.Meta
-	0,  // 1: v1.ProjectMemberCreateRequest.project_member:type_name -> v1.ProjectMember
-	0,  // 2: v1.ProjectMemberUpdateRequest.project_member:type_name -> v1.ProjectMember
-	8,  // 3: v1.ProjectMemberFindRequest.annotations:type_name -> v1.ProjectMemberFindRequest.AnnotationsEntry
-	0,  // 4: v1.ProjectMemberResponse.project_member:type_name -> v1.ProjectMember
-	0,  // 5: v1.ProjectMemberListResponse.project_members:type_name -> v1.ProjectMember
-	1,  // 6: v1.ProjectMemberService.Create:input_type -> v1.ProjectMemberCreateRequest
-	2,  // 7: v1.ProjectMemberService.Update:input_type -> v1.ProjectMemberUpdateRequest
-	3,  // 8: v1.ProjectMemberService.Delete:input_type -> v1.ProjectMemberDeleteRequest
-	4,  // 9: v1.ProjectMemberService.Get:input_type -> v1.ProjectMemberGetRequest
-	5,  // 10: v1.ProjectMemberService.Find:input_type -> v1.ProjectMemberFindRequest
-	6,  // 11: v1.ProjectMemberService.Create:output_type -> v1.ProjectMemberResponse
-	6,  // 12: v1.ProjectMemberService.Update:output_type -> v1.ProjectMemberResponse
-	6,  // 13: v1.ProjectMemberService.Delete:output_type -> v1.ProjectMemberResponse
-	6,  // 14: v1.ProjectMemberService.Get:output_type -> v1.ProjectMemberResponse
-	7,  // 15: v1.ProjectMemberService.Find:output_type -> v1.ProjectMemberListResponse
+var file_api_v1_project_member_proto_depIdxs = []int32{
+	9,  // 0: api.v1.ProjectMember.meta:type_name -> api.v1.Meta
+	0,  // 1: api.v1.ProjectMemberCreateRequest.project_member:type_name -> api.v1.ProjectMember
+	0,  // 2: api.v1.ProjectMemberUpdateRequest.project_member:type_name -> api.v1.ProjectMember
+	8,  // 3: api.v1.ProjectMemberFindRequest.annotations:type_name -> api.v1.ProjectMemberFindRequest.AnnotationsEntry
+	0,  // 4: api.v1.ProjectMemberResponse.project_member:type_name -> api.v1.ProjectMember
+	0,  // 5: api.v1.ProjectMemberListResponse.project_members:type_name -> api.v1.ProjectMember
+	1,  // 6: api.v1.ProjectMemberService.Create:input_type -> api.v1.ProjectMemberCreateRequest
+	2,  // 7: api.v1.ProjectMemberService.Update:input_type -> api.v1.ProjectMemberUpdateRequest
+	3,  // 8: api.v1.ProjectMemberService.Delete:input_type -> api.v1.ProjectMemberDeleteRequest
+	4,  // 9: api.v1.ProjectMemberService.Get:input_type -> api.v1.ProjectMemberGetRequest
+	5,  // 10: api.v1.ProjectMemberService.Find:input_type -> api.v1.ProjectMemberFindRequest
+	6,  // 11: api.v1.ProjectMemberService.Create:output_type -> api.v1.ProjectMemberResponse
+	6,  // 12: api.v1.ProjectMemberService.Update:output_type -> api.v1.ProjectMemberResponse
+	6,  // 13: api.v1.ProjectMemberService.Delete:output_type -> api.v1.ProjectMemberResponse
+	6,  // 14: api.v1.ProjectMemberService.Get:output_type -> api.v1.ProjectMemberResponse
+	7,  // 15: api.v1.ProjectMemberService.Find:output_type -> api.v1.ProjectMemberListResponse
 	11, // [11:16] is the sub-list for method output_type
 	6,  // [6:11] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
@@ -496,28 +497,28 @@ var file_v1_project_member_proto_depIdxs = []int32{
 	0,  // [0:6] is the sub-list for field type_name
 }
 
-func init() { file_v1_project_member_proto_init() }
-func file_v1_project_member_proto_init() {
-	if File_v1_project_member_proto != nil {
+func init() { file_api_v1_project_member_proto_init() }
+func file_api_v1_project_member_proto_init() {
+	if File_api_v1_project_member_proto != nil {
 		return
 	}
-	file_v1_meta_proto_init()
-	file_v1_project_member_proto_msgTypes[5].OneofWrappers = []any{}
+	file_api_v1_meta_proto_init()
+	file_api_v1_project_member_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_project_member_proto_rawDesc), len(file_v1_project_member_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_project_member_proto_rawDesc), len(file_api_v1_project_member_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_v1_project_member_proto_goTypes,
-		DependencyIndexes: file_v1_project_member_proto_depIdxs,
-		MessageInfos:      file_v1_project_member_proto_msgTypes,
+		GoTypes:           file_api_v1_project_member_proto_goTypes,
+		DependencyIndexes: file_api_v1_project_member_proto_depIdxs,
+		MessageInfos:      file_api_v1_project_member_proto_msgTypes,
 	}.Build()
-	File_v1_project_member_proto = out.File
-	file_v1_project_member_proto_goTypes = nil
-	file_v1_project_member_proto_depIdxs = nil
+	File_api_v1_project_member_proto = out.File
+	file_api_v1_project_member_proto_goTypes = nil
+	file_api_v1_project_member_proto_depIdxs = nil
 }
