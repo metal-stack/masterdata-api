@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "api/v1/meta.proto";
+
+service ProjectMemberService {
+  rpc Create(ProjectMemberCreateRequest) returns (ProjectMemberResponse);
+  rpc Update(ProjectMemberUpdateRequest) returns (ProjectMemberResponse);
+  rpc Delete(ProjectMemberDeleteRequest) returns (ProjectMemberResponse);
+  rpc Get(ProjectMemberGetRequest) returns (ProjectMemberResponse);
+  rpc Find(ProjectMemberFindRequest) returns (ProjectMemberListResponse);
+}
+
+// ProjectMember is the database model
+message ProjectMember {
+  Meta meta = 1;
+  string project_id = 2;
+  string tenant_id = 4;
+}
+
+message ProjectMemberCreateRequest {
+  ProjectMember project_member = 1;
+}
+
+message ProjectMemberUpdateRequest {
+  ProjectMember project_member = 1;
+}
+
+message ProjectMemberDeleteRequest {
+  string id = 1;
+}
+
+message ProjectMemberGetRequest {
+  string id = 1;
+}
+
+message ProjectMemberFindRequest {
+  optional string project_id = 1;
+  optional string tenant_id = 2;
+  map<string, string> annotations = 6;
+}
+
+message ProjectMemberResponse {
+  ProjectMember project_member = 1;
+}
+
+message ProjectMemberListResponse {
+  repeated ProjectMember project_members = 1;
+}

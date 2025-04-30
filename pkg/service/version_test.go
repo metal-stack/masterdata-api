@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/v"
 	"github.com/stretchr/testify/assert"
@@ -17,12 +18,12 @@ func TestGetVersion(t *testing.T) {
 
 	expected := v1.GetVersionResponse{Version: v.Version, Revision: v.Revision, BuildDate: v.BuildDate, GitSha1: v.GitSHA1}
 
-	result, err := vs.Get(ctx, &v1.GetVersionRequest{})
+	result, err := vs.Get(ctx, connect.NewRequest(&v1.GetVersionRequest{}))
 
 	require.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, expected.Version, result.Version)
-	assert.Equal(t, expected.Revision, result.Revision)
-	assert.Equal(t, expected.BuildDate, result.BuildDate)
-	assert.Equal(t, expected.GitSha1, result.GitSha1)
+	assert.Equal(t, expected.Version, result.Msg.Version)
+	assert.Equal(t, expected.Revision, result.Msg.Revision)
+	assert.Equal(t, expected.BuildDate, result.Msg.BuildDate)
+	assert.Equal(t, expected.GitSha1, result.Msg.GitSha1)
 }

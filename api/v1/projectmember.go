@@ -1,6 +1,6 @@
-package v1
+package apiv1
 
-//go:generate go run ../../pkg/gen/genscanvaluer.go -package v1 -type ProjectMember
+//go:generate go run ../../pkg/gen/genscanvaluer.go -package apiv1 -type ProjectMember
 
 func (m *ProjectMember) NewProjectMemberResponse() *ProjectMemberResponse {
 	return &ProjectMemberResponse{

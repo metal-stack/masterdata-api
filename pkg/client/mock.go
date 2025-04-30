@@ -1,18 +1,18 @@
 package client
 
 import (
-	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/masterdata-api/api/v1/apiv1connect"
 )
 
 type MockClient struct {
-	psc  v1.ProjectServiceClient
-	tsc  v1.TenantServiceClient
-	pmsc v1.ProjectMemberServiceClient
-	tmsc v1.TenantMemberServiceClient
-	vsc  v1.VersionServiceClient
+	psc  apiv1connect.ProjectServiceClient
+	tsc  apiv1connect.TenantServiceClient
+	pmsc apiv1connect.ProjectMemberServiceClient
+	tmsc apiv1connect.TenantMemberServiceClient
+	vsc  apiv1connect.VersionServiceClient
 }
 
-func NewMock(psc v1.ProjectServiceClient, tsc v1.TenantServiceClient, pmsc v1.ProjectMemberServiceClient, tmsc v1.TenantMemberServiceClient, vsc v1.VersionServiceClient) *MockClient {
+func NewMock(psc apiv1connect.ProjectServiceClient, tsc apiv1connect.TenantServiceClient, pmsc apiv1connect.ProjectMemberServiceClient, tmsc apiv1connect.TenantMemberServiceClient, vsc apiv1connect.VersionServiceClient) *MockClient {
 	return &MockClient{
 		psc:  psc,
 		tsc:  tsc,
@@ -25,19 +25,19 @@ func NewMock(psc v1.ProjectServiceClient, tsc v1.TenantServiceClient, pmsc v1.Pr
 func (c *MockClient) Close() error {
 	return nil
 }
-func (c *MockClient) Project() v1.ProjectServiceClient {
+func (c *MockClient) Project() apiv1connect.ProjectServiceClient {
 	return c.psc
 }
-func (c *MockClient) ProjectMember() v1.ProjectMemberServiceClient {
+func (c *MockClient) ProjectMember() apiv1connect.ProjectMemberServiceClient {
 	return c.pmsc
 }
 
-func (c *MockClient) Tenant() v1.TenantServiceClient {
+func (c *MockClient) Tenant() apiv1connect.TenantServiceClient {
 	return c.tsc
 }
-func (c *MockClient) TenantMember() v1.TenantMemberServiceClient {
+func (c *MockClient) TenantMember() apiv1connect.TenantMemberServiceClient {
 	return c.tmsc
 }
-func (c *MockClient) Version() v1.VersionServiceClient {
+func (c *MockClient) Version() apiv1connect.VersionServiceClient {
 	return c.vsc
 }

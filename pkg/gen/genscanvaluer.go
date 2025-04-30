@@ -6,7 +6,7 @@
 Generates methods necessary to fulfil the Scanner and Valuer Interface.
 
 Example Usage for Type "Tenant" in package "v1"
-//go:generate go run ../../pkg/gen/gensv.go -package v1 -type Tenant
+//go:generate go run ../../pkg/gen/genscanvaluer.go -package v1 -type Tenant
 */
 package main
 
@@ -98,6 +98,7 @@ func (g *Generator) generate(packageName, typeName string) error {
 
 	info := map[string]string{
 		"packageName":   packageName,
+		"apiversion":    "v1", // THIS is kept to v1 to stay compatible with existing database entries
 		"typeName":      typeName,
 		"typeVariable":  strings.ToLower(string(typeName[0])),
 		"typeNameLower": strings.ToLower(typeName),
@@ -180,7 +181,7 @@ func ({{ .typeVariable }} *{{ .typeName }}) Kind() string {
 }
 
 func ({{ .typeVariable }} *{{ .typeName }}) APIVersion() string {
-	return "{{ .packageName }}"
+	return "{{ .apiversion }}"
 }
 
 // Value make the {{ .typeName }} struct implement the driver.Valuer interface. This method

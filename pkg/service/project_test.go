@@ -4,11 +4,12 @@ import (
 	"context"
 	"log/slog"
 
+	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"testing"
 
@@ -44,11 +45,11 @@ func TestCreateProject(t *testing.T) {
 	}
 	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
-	resp, err := ts.Create(ctx, tcr)
+	resp, err := ts.Create(ctx, connect.NewRequest(tcr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProject())
-	assert.Equal(t, tcr.Project.GetName(), resp.GetProject().GetName())
+	assert.NotNil(t, resp.Msg.Project)
+	assert.Equal(t, tcr.Project.GetName(), resp.Msg.Project.GetName())
 }
 
 func TestCreateProjectWithQuotaCheck(t *testing.T) {
@@ -64,7 +65,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	t1 := &v1.Tenant{
 		Quotas: &v1.QuotaSet{
 			Project: &v1.Quota{
-				Quota: &wrapperspb.Int32Value{Value: 2},
+				Quota: pointer.Pointer(int32(2)),
 			},
 		},
 	}
@@ -81,13 +82,13 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	var projects []*v1.Project
 	// see: https://github.com/stretchr/testify/blob/master/mock/mock.go#L149-L162
 	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
-	storageMock.On("Find", ctx, filter, mock.AnythingOfType("*v1.Paging")).Return(projects, nil, nil)
+	storageMock.On("Find", ctx, filter, mock.AnythingOfType("*apiv1.Paging")).Return(projects, nil, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
-	resp, err := ts.Create(ctx, tcr)
+	resp, err := ts.Create(ctx, connect.NewRequest(tcr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProject())
-	assert.Equal(t, tcr.Project.GetName(), resp.GetProject().GetName())
+	assert.NotNil(t, resp.Msg.Project)
+	assert.Equal(t, tcr.Project.GetName(), resp.Msg.Project.GetName())
 }
 
 func TestUpdateProject(t *testing.T) {
@@ -116,11 +117,11 @@ func TestUpdateProject(t *testing.T) {
 	storageMock.On("Get", ctx, t1.Meta.Id).Return(t1, nil)
 
 	storageMock.On("Update", ctx, t1).Return(nil)
-	resp, err := ts.Update(ctx, tur)
+	resp, err := ts.Update(ctx, connect.NewRequest(tur))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProject())
-	assert.Equal(t, tur.GetProject().GetName(), resp.GetProject().GetName())
+	assert.NotNil(t, resp.Msg.Project)
+	assert.Equal(t, tur.GetProject().GetName(), resp.Msg.Project.GetName())
 }
 
 func TestDeleteProject(t *testing.T) {
@@ -148,11 +149,11 @@ func TestDeleteProject(t *testing.T) {
 	projectMemberStorageMock.On("Find", ctx, filter, paging).Return([]*v1.ProjectMember{}, nil, nil)
 	storageMock.On("DeleteAll", ctx, p3.Meta.Id).Return(nil)
 	storageMock.On("Delete", ctx, p3.Meta.Id).Return(nil)
-	resp, err := ps.Delete(ctx, pdr)
+	resp, err := ps.Delete(ctx, connect.NewRequest(pdr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProject())
-	assert.Equal(t, pdr.Id, resp.GetProject().GetMeta().GetId())
+	assert.NotNil(t, resp.Msg.Project)
+	assert.Equal(t, pdr.Id, resp.Msg.Project.GetMeta().GetId())
 }
 
 func TestGetProject(t *testing.T) {
@@ -172,11 +173,11 @@ func TestGetProject(t *testing.T) {
 	}
 
 	storageMock.On("Get", ctx, "p4").Return(t4, nil)
-	resp, err := ts.Get(ctx, tgr)
+	resp, err := ts.Get(ctx, connect.NewRequest(tgr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProject())
-	assert.Equal(t, tgr.Id, resp.GetProject().GetMeta().GetId())
+	assert.NotNil(t, resp.Msg.Project)
+	assert.Equal(t, tgr.Id, resp.Msg.Project.GetMeta().GetId())
 }
 
 func TestFindProjectByID(t *testing.T) {
@@ -192,12 +193,12 @@ func TestFindProjectByID(t *testing.T) {
 	// filter by id
 	f1 := make(map[string]any)
 	tfr := &v1.ProjectFindRequest{
-		Id: &wrapperspb.StringValue{Value: "p5"},
+		Id: pointer.Pointer("p5"),
 	}
 
-	f1["id"] = "p5"
-	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging")).Return(t5s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	f1["id"] = pointer.Pointer("p5")
+	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*apiv1.Paging")).Return(t5s, nil, nil)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
@@ -215,13 +216,13 @@ func TestFindProjectByName(t *testing.T) {
 	// filter by name
 	var t6s []*v1.Project
 	tfr := &v1.ProjectFindRequest{
-		Name: &wrapperspb.StringValue{Value: "Sixth"},
+		Name: pointer.Pointer("Sixth"),
 	}
 
 	f2 := make(map[string]any)
-	f2["project ->> 'name'"] = "Sixth"
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	f2["project ->> 'name'"] = pointer.Pointer("Sixth")
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
@@ -239,13 +240,13 @@ func TestFindProjectByTenant(t *testing.T) {
 	// filter by name
 	var t6s []*v1.Project
 	tfr := &v1.ProjectFindRequest{
-		TenantId: &wrapperspb.StringValue{Value: "p1"},
+		TenantId: pointer.Pointer("p1"),
 	}
 
 	f2 := make(map[string]any)
-	f2["project ->> 'tenant_id'"] = "p1"
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	f2["project ->> 'tenant_id'"] = pointer.Pointer("p1")
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }

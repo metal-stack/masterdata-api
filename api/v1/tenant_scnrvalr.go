@@ -2,7 +2,7 @@
 // DO NOT EDIT MANUALLY.
 // Regenerate with "go generate" or "make generate"
 
-package v1
+package apiv1
 
 import (
 	"database/sql/driver"

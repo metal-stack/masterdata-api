@@ -18,6 +18,12 @@ type Server struct {
 	statusMap map[string]v1.HealthCheckResponse_ServingStatus
 }
 
+// List implements grpc_health_v1.HealthServer.
+func (s *Server) List(context.Context, *v1.HealthListRequest) (*v1.HealthListResponse, error) {
+	// FIXME implement
+	return nil, nil
+}
+
 // NewHealthServer creates a new health check server for grpc services.
 func NewHealthServer() *Server {
 	return &Server{

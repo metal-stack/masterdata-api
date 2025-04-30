@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
@@ -27,7 +28,8 @@ func NewProjectMemberService(l *slog.Logger, pds ProjectDataStore, pmds ProjectM
 	}
 }
 
-func (s *projectMemberService) Create(ctx context.Context, req *v1.ProjectMemberCreateRequest) (*v1.ProjectMemberResponse, error) {
+func (s *projectMemberService) Create(ctx context.Context, rq *connect.Request[v1.ProjectMemberCreateRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
+	req := rq.Msg
 	projectMember := req.ProjectMember
 
 	_, err := s.tenantStore.Get(ctx, projectMember.GetTenantId())
@@ -51,26 +53,30 @@ func (s *projectMemberService) Create(ctx context.Context, req *v1.ProjectMember
 		projectMember.Meta = &v1.Meta{}
 	}
 	err = s.projectMemberStore.Create(ctx, projectMember)
-	return projectMember.NewProjectMemberResponse(), err
+	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
 }
-func (s *projectMemberService) Update(ctx context.Context, req *v1.ProjectMemberUpdateRequest) (*v1.ProjectMemberResponse, error) {
+func (s *projectMemberService) Update(ctx context.Context, rq *connect.Request[v1.ProjectMemberUpdateRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
+	req := rq.Msg
 	projectMember := req.ProjectMember
 	err := s.projectMemberStore.Update(ctx, projectMember)
-	return projectMember.NewProjectMemberResponse(), err
+	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
 }
-func (s *projectMemberService) Delete(ctx context.Context, req *v1.ProjectMemberDeleteRequest) (*v1.ProjectMemberResponse, error) {
+func (s *projectMemberService) Delete(ctx context.Context, rq *connect.Request[v1.ProjectMemberDeleteRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
+	req := rq.Msg
 	projectMember := req.NewProjectMember()
 	err := s.projectMemberStore.Delete(ctx, projectMember.Meta.Id)
-	return projectMember.NewProjectMemberResponse(), err
+	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
 }
-func (s *projectMemberService) Get(ctx context.Context, req *v1.ProjectMemberGetRequest) (*v1.ProjectMemberResponse, error) {
+func (s *projectMemberService) Get(ctx context.Context, rq *connect.Request[v1.ProjectMemberGetRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
+	req := rq.Msg
 	projectMember, err := s.projectMemberStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
-	return projectMember.NewProjectMemberResponse(), nil
+	return connect.NewResponse(projectMember.NewProjectMemberResponse()), nil
 }
-func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFindRequest) (*v1.ProjectMemberListResponse, error) {
+func (s *projectMemberService) Find(ctx context.Context, rq *connect.Request[v1.ProjectMemberFindRequest]) (*connect.Response[v1.ProjectMemberListResponse], error) {
+	req := rq.Msg
 	filter := make(map[string]any)
 	if req.ProjectId != nil {
 		filter["projectmember ->> 'project_id'"] = req.ProjectId
@@ -89,5 +95,5 @@ func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFi
 	}
 	resp := new(v1.ProjectMemberListResponse)
 	resp.ProjectMembers = append(resp.ProjectMembers, res...)
-	return resp, nil
+	return connect.NewResponse(resp), nil
 }

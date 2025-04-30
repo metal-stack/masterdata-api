@@ -7,18 +7,19 @@ import (
 	"slices"
 	"testing"
 
+	"connectrpc.com/connect"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"github.com/metal-stack/masterdata-api/pkg/datastore"
-	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/metal-stack/metal-lib/pkg/testcommon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/runtime/protoimpl"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+
+	"github.com/metal-stack/masterdata-api/pkg/datastore"
+	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
 )
 
 var log *slog.Logger
@@ -57,11 +58,11 @@ func TestCreateTenant(t *testing.T) {
 	}
 
 	storageMock.On("Create", ctx, t1).Return(nil)
-	resp, err := ts.Create(ctx, tcr)
+	resp, err := ts.Create(ctx, connect.NewRequest(tcr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenant())
-	assert.Equal(t, tcr.Tenant.GetName(), resp.GetTenant().GetName())
+	assert.NotNil(t, resp.Msg.Tenant)
+	assert.Equal(t, tcr.Tenant.GetName(), resp.Msg.Tenant.GetName())
 }
 
 func TestUpdateTenant(t *testing.T) {
@@ -81,11 +82,11 @@ func TestUpdateTenant(t *testing.T) {
 	}
 
 	storageMock.On("Update", ctx, t1).Return(nil)
-	resp, err := ts.Update(ctx, tur)
+	resp, err := ts.Update(ctx, connect.NewRequest(tur))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenant())
-	assert.Equal(t, tur.Tenant.GetName(), resp.GetTenant().GetName())
+	assert.NotNil(t, resp.Msg.Tenant)
+	assert.Equal(t, tur.Tenant.GetName(), resp.Msg.Tenant.GetName())
 }
 
 func TestDeleteTenant(t *testing.T) {
@@ -114,11 +115,11 @@ func TestDeleteTenant(t *testing.T) {
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
 	memberStorageMock.On("Find", ctx, tfilter, paging).Return([]*v1.TenantMember{}, nil, nil)
 	memberStorageMock.On("Find", ctx, mfilter, paging).Return([]*v1.TenantMember{}, nil, nil)
-	resp, err := ts.Delete(ctx, tdr)
+	resp, err := ts.Delete(ctx, connect.NewRequest(tdr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenant())
-	assert.Equal(t, tdr.Id, resp.GetTenant().GetMeta().GetId())
+	assert.NotNil(t, resp.Msg.Tenant)
+	assert.Equal(t, tdr.Id, resp.Msg.Tenant.GetMeta().GetId())
 }
 
 func TestGetTenant(t *testing.T) {
@@ -136,11 +137,11 @@ func TestGetTenant(t *testing.T) {
 	}
 
 	storageMock.On("Get", ctx, "t4").Return(t4, nil)
-	resp, err := ts.Get(ctx, tgr)
+	resp, err := ts.Get(ctx, connect.NewRequest(tgr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenant())
-	assert.Equal(t, tgr.Id, resp.GetTenant().GetMeta().GetId())
+	assert.NotNil(t, resp.Msg.Tenant)
+	assert.Equal(t, tgr.Id, resp.Msg.Tenant.GetMeta().GetId())
 }
 
 func TestFindTenantByID(t *testing.T) {
@@ -154,12 +155,12 @@ func TestFindTenantByID(t *testing.T) {
 	// filter by id
 	f1 := make(map[string]any)
 	tfr := &v1.TenantFindRequest{
-		Id: &wrapperspb.StringValue{Value: "t5"},
+		Id: pointer.Pointer("t5"),
 	}
 
 	f1["id"] = "t5"
-	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging")).Return(t5s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*apiv1.Paging")).Return(t5s, nil, nil)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
@@ -175,13 +176,13 @@ func TestFindTenantByName(t *testing.T) {
 	// filter by name
 	var t6s []*v1.Tenant
 	tfr := &v1.TenantFindRequest{
-		Name: &wrapperspb.StringValue{Value: "Fifth"},
+		Name: pointer.Pointer("Fifth"),
 	}
 
 	f2 := make(map[string]any)
 	f2["tenant ->> 'name'"] = "Fifth"
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
@@ -412,19 +413,19 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.FindParticipatingProjects(ctx, tt.req)
+			got, err := s.FindParticipatingProjects(ctx, connect.NewRequest(tt.req))
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			slices.SortFunc(got.Projects, func(i, j *v1.ProjectWithMembershipAnnotations) int {
+			slices.SortFunc(got.Msg.Projects, func(i, j *v1.ProjectWithMembershipAnnotations) int {
 				if i.Project.Meta.Id < j.Project.Meta.Id {
 					return -1
 				} else {
 					return 1
 				}
 			})
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -638,20 +639,20 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.FindParticipatingTenants(ctx, tt.req)
+			got, err := s.FindParticipatingTenants(ctx, connect.NewRequest(tt.req))
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
 
-			slices.SortFunc(got.Tenants, func(i, j *v1.TenantWithMembershipAnnotations) int {
+			slices.SortFunc(got.Msg.Tenants, func(i, j *v1.TenantWithMembershipAnnotations) int {
 				if i.Tenant.Meta.Id < j.Tenant.Meta.Id {
 					return -1
 				} else {
 					return 1
 				}
 			})
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -868,12 +869,12 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.ListTenantMembers(ctx, tt.req)
+			got, err := s.ListTenantMembers(ctx, connect.NewRequest(tt.req))
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
