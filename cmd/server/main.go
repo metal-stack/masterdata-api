@@ -39,17 +39,6 @@ func main() {
 			},
 		},
 		Commands: []*cli.Command{
-			// {
-			// 	Name:    "memory",
-			// 	Aliases: []string{"m"},
-			// 	Usage:   "start with memory backend",
-			// 	Action: func(ctx *cli.Context) error {
-			// 		c := getConfig(ctx)
-			// 		c.Storage = goipam.NewMemory(ctx.Context)
-			// 		s := newServer(c)
-			// 		return s.Run()
-			// 	},
-			// },
 			{
 				Name:    "postgres",
 				Aliases: []string{"pg"},
@@ -69,19 +58,19 @@ func main() {
 					},
 					&cli.StringFlag{
 						Name:    "user",
-						Value:   "go-ipam",
+						Value:   "masterdata",
 						Usage:   "postgres db user",
 						EnvVars: []string{"MASTERDATA_PG_USER"},
 					},
 					&cli.StringFlag{
 						Name:    "password",
-						Value:   "secret",
+						Value:   "password",
 						Usage:   "postgres db password",
 						EnvVars: []string{"MASTERDATA_PG_PASSWORD"},
 					},
 					&cli.StringFlag{
 						Name:    "dbname",
-						Value:   "goipam",
+						Value:   "masterdata",
 						Usage:   "postgres db name",
 						EnvVars: []string{"MASTERDATA_PG_DBNAME"},
 					},

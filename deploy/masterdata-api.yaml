@@ -179,6 +179,9 @@ spec:
         - name: POSTGRES_DB
           value: masterdata
         resources:
+          requests:
+            memory: "128Mi"
+            cpu: "500m"
           limits:
             memory: "128Mi"
             cpu: "500m"
