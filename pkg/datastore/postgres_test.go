@@ -245,7 +245,7 @@ func TestCreate(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, tcr3.GetMeta().GetApiversion())
 	assert.NotEmpty(t, tcr3.GetMeta().GetApiversion())
-	assert.Equal(t, "apiv1", tcr3.GetMeta().GetApiversion())
+	assert.Equal(t, "v1", tcr3.GetMeta().GetApiversion())
 	assert.NotNil(t, tcr3.GetMeta().GetKind())
 	assert.NotEmpty(t, tcr3.GetMeta().GetKind())
 	assert.Equal(t, "Tenant", tcr3.GetMeta().GetKind())
@@ -268,7 +268,7 @@ func TestCreate(t *testing.T) {
 	}
 	err = tenantDS.Create(ctx, tcr6)
 	require.Error(t, err)
-	require.EqualError(t, err, "create of type:tenant failed, apiversion must be set to:apiv1")
+	require.EqualError(t, err, "create of type:tenant failed, apiversion must be set to:v1")
 }
 
 func TestUpdate(t *testing.T) {
@@ -338,7 +338,7 @@ func TestUpdate(t *testing.T) {
 	tcr1.Meta.Apiversion = "v2"
 	err = tenantDS.Update(ctx, tcr1)
 	require.Error(t, err)
-	require.EqualError(t, err, "update of type:tenant failed, apiversion must be set to:apiv1")
+	require.EqualError(t, err, "update of type:tenant failed, apiversion must be set to:v1")
 
 	checkHistory(ctx, t, t3, time.Now(), "ctenant", "C Tenant 3")
 }

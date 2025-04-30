@@ -40,7 +40,7 @@ func (p *ProjectMember) Kind() string {
 }
 
 func (p *ProjectMember) APIVersion() string {
-	return "apiv1"
+	return "v1"
 }
 
 // Value make the ProjectMember struct implement the driver.Valuer interface. This method

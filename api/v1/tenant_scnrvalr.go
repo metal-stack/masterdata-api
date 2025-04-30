@@ -40,7 +40,7 @@ func (t *Tenant) Kind() string {
 }
 
 func (t *Tenant) APIVersion() string {
-	return "apiv1"
+	return "v1"
 }
 
 // Value make the Tenant struct implement the driver.Valuer interface. This method

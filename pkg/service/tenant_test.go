@@ -264,7 +264,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 					Project: &v1.Project{
 						Meta: &v1.Meta{
 							Kind:       "Project",
-							Apiversion: "apiv1",
+							Apiversion: "v1",
 							Id:         "1",
 						},
 					},
@@ -297,7 +297,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 					Project: &v1.Project{
 						Meta: &v1.Meta{
 							Kind:       "Project",
-							Apiversion: "apiv1",
+							Apiversion: "v1",
 							Id:         "1",
 						},
 					},
@@ -324,7 +324,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 					Project: &v1.Project{
 						Meta: &v1.Meta{
 							Kind:       "Project",
-							Apiversion: "apiv1",
+							Apiversion: "v1",
 							Id:         "1",
 						},
 						TenantId: "b",
@@ -377,7 +377,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 						Project: &v1.Project{
 							Meta: &v1.Meta{
 								Kind:       "Project",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "direct-1",
 							},
 							TenantId: "req-tenant",
@@ -389,7 +389,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 						Project: &v1.Project{
 							Meta: &v1.Meta{
 								Kind:       "Project",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "indirect-2",
 							},
 							TenantId: "parent",
@@ -514,7 +514,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "b",
 							},
 						},
@@ -544,7 +544,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "b",
 							},
 						},
@@ -607,7 +607,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "direct-tnt",
 							},
 						},
@@ -617,7 +617,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "indirect-tnt",
 							},
 						},
@@ -742,7 +742,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "azure",
 							},
 						},
@@ -772,7 +772,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "google",
 							},
 						},
@@ -831,7 +831,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "github",
 							},
 						},
@@ -845,7 +845,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 						Tenant: &v1.Tenant{
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
-								Apiversion: "apiv1",
+								Apiversion: "v1",
 								Id:         "azure",
 							},
 						},
