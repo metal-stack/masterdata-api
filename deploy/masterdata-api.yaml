@@ -171,6 +171,8 @@ spec:
       containers:
       - name: masterdata-db
         image: postgres:17-alpine
+        command: 
+          - postgres
         env:
         - name: POSTGRES_PASSWORD
           value: password
