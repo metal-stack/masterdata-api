@@ -52,26 +52,32 @@ func (s *tenantService) Update(ctx context.Context, req *v1.TenantUpdateRequest)
 
 func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
 	tenant := req.NewTenant()
-	tenantFilter := map[string]any{
+	tenantIsHostFilter := map[string]any{
 		"tenantmember ->> 'tenant_id'": tenant.Meta.Id,
 	}
-	memberFilter := map[string]any{
+	tenantIsMemberFilter := map[string]any{
 		"tenantmember ->> 'member_id'": tenant.Meta.Id,
 	}
-	tenantMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantFilter, nil)
+	tenantIsHostMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantIsHostFilter, nil)
 	if err != nil {
 		return nil, err
 	}
-	memberMemberships, _, err := s.tenantMemberStore.Find(ctx, memberFilter, nil)
+	tenantIsMemberMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantIsMemberFilter, nil)
 	if err != nil {
 		return nil, err
 	}
+
+	unionMap := make(map[string]bool)
+	for _, m := range tenantIsHostMemberships {
+		unionMap[m.Meta.Id] = true
+	}
+	for _, m := range tenantIsMemberMemberships {
+		unionMap[m.Meta.Id] = true
+	}
+
 	var ids []string
-	for _, m := range tenantMemberships {
-		ids = append(ids, m.Meta.Id)
-	}
-	for _, m := range memberMemberships {
-		ids = append(ids, m.Meta.Id)
+	for k := range unionMap {
+		ids = append(ids, k)
 	}
 
 	if len(ids) > 0 {
