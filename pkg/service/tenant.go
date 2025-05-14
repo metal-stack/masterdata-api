@@ -52,17 +52,17 @@ func (s *tenantService) Update(ctx context.Context, req *v1.TenantUpdateRequest)
 
 func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
 	tenant := req.NewTenant()
-	hostFilter := map[string]any{
+	tenantIsHostFilter := map[string]any{
 		"tenantmember ->> 'tenant_id'": tenant.Meta.Id,
 	}
-	memberFilter := map[string]any{
+	tenantIsMemberFilter := map[string]any{
 		"tenantmember ->> 'member_id'": tenant.Meta.Id,
 	}
-	tenantIsHostMemberships, _, err := s.tenantMemberStore.Find(ctx, hostFilter, nil)
+	tenantIsHostMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantIsHostFilter, nil)
 	if err != nil {
 		return nil, err
 	}
-	tenantIsMemberMemberships, _, err := s.tenantMemberStore.Find(ctx, memberFilter, nil)
+	tenantIsMemberMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantIsMemberFilter, nil)
 	if err != nil {
 		return nil, err
 	}
