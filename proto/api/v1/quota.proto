@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package api.v1;
 
+import "google/protobuf/wrappers.proto";
+
 // QuotaSet defines the types of possible Quotas
 // might be specified by project or tenant
 // whatever quota is reached first counts
@@ -19,6 +21,9 @@ message QuotaSet {
 
 // Quota is the actual maximum amount
 message Quota {
-  // quota is the maximum amount for the current QuotaSet, can be nil
-  optional int32 quota = 1;
+  // TODO: remove in next release:
+  google.protobuf.Int32Value quota = 1 [deprecated = true];
+
+  // max is the maximum amount for the current QuotaSet, can be nil
+  optional int32 max = 2;
 }

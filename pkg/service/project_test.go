@@ -65,7 +65,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	t1 := &v1.Tenant{
 		Quotas: &v1.QuotaSet{
 			Project: &v1.Quota{
-				Quota: pointer.Pointer(int32(2)),
+				Max: pointer.Pointer(int32(2)),
 			},
 		},
 	}

@@ -52,9 +52,9 @@ func projectExample(c client.Client, log *slog.Logger) error {
 		Description: "Demo Project",
 		TenantId:    "customer-1",
 		Quotas: &v1.QuotaSet{
-			Cluster: &v1.Quota{Quota: pointer.Pointer(int32(3))},
-			Machine: &v1.Quota{Quota: pointer.Pointer(int32(3))},
-			Ip:      &v1.Quota{Quota: pointer.Pointer(int32(3))},
+			Cluster: &v1.Quota{Max: pointer.Pointer(int32(3))},
+			Machine: &v1.Quota{Max: pointer.Pointer(int32(3))},
+			Ip:      &v1.Quota{Max: pointer.Pointer(int32(3))},
 		},
 		Meta: &v1.Meta{
 			Annotations: map[string]string{
@@ -164,9 +164,9 @@ func tenantExample(c client.Client, log *slog.Logger) error {
 		Name:        "myTenant",
 		Description: "myDesc",
 		DefaultQuotas: &v1.QuotaSet{
-			Cluster: &v1.Quota{Quota: pointer.Pointer(int32(3))},
-			Machine: &v1.Quota{Quota: pointer.Pointer(int32(3))},
-			Ip:      &v1.Quota{Quota: pointer.Pointer(int32(3))},
+			Cluster: &v1.Quota{Max: pointer.Pointer(int32(3))},
+			Machine: &v1.Quota{Max: pointer.Pointer(int32(3))},
+			Ip:      &v1.Quota{Max: pointer.Pointer(int32(3))},
 		},
 		IamConfig: &v1.IAMConfig{
 			IssuerConfig: &v1.IssuerConfig{
@@ -176,14 +176,13 @@ func tenantExample(c client.Client, log *slog.Logger) error {
 			IdmConfig: &v1.IDMConfig{
 				IdmType: "UX",
 				ConnectorConfig: &v1.ConnectorConfig{
-					IdmApiUrl:            "a",
-					IdmApiUser:           "b",
-					IdmApiPassword:       "c",
-					IdmSystemId:          "d",
-					IdmAccessCode:        "e",
-					IdmCustomerId:        "f",
-					IdmGroupOu:           "g",
-					IdmGroupnameTemplate: pointer.Pointer("asdasdads"),
+					IdmApiUrl:      "a",
+					IdmApiUser:     "b",
+					IdmApiPassword: "c",
+					IdmSystemId:    "d",
+					IdmAccessCode:  "e",
+					IdmCustomerId:  "f",
+					IdmGroupOu:     "g",
 				},
 			},
 		},

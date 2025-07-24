@@ -44,18 +44,21 @@ func (s *projectService) Create(ctx context.Context, rq *connect.Request[v1.Proj
 	}
 
 	// Check if tenant defines project quotas
-	if tenant.GetQuotas() != nil && tenant.GetQuotas().GetProject() != nil && tenant.GetQuotas().GetProject().GetQuota() != 0 {
-		maxProjects := tenant.GetQuotas().GetProject().GetQuota()
+	if tenant.GetQuotas() != nil && tenant.GetQuotas().GetProject() != nil && tenant.GetQuotas().GetProject().Max != nil {
+		maxProjects := tenant.GetQuotas().GetProject().Max
 		filter := make(map[string]any)
 		filter["project ->> 'tenant_id'"] = project.GetTenantId()
 		projects, _, err := s.projectStore.Find(ctx, filter, nil)
 		if err != nil {
 			return nil, err
 		}
-		if len(projects) >= int(maxProjects) {
-			return nil, status.Error(
-				codes.FailedPrecondition,
-				fmt.Sprintf("unable to create project, project quota:%d for tenant:%s reached.", maxProjects, project.GetTenantId()))
+
+		if maxProjects != nil {
+			if len(projects) >= int(*maxProjects) {
+				return nil, status.Error(
+					codes.FailedPrecondition,
+					fmt.Sprintf("unable to create project, project quota:%d for tenant:%s reached.", maxProjects, project.GetTenantId()))
+			}
 		}
 	}
 
@@ -127,6 +130,20 @@ func (s *projectService) GetHistory(ctx context.Context, rq *connect.Request[v1.
 }
 func (s *projectService) Find(ctx context.Context, rq *connect.Request[v1.ProjectFindRequest]) (*connect.Response[v1.ProjectListResponse], error) {
 	req := rq.Msg
+	// TODO: remove in next release
+	if req.DeprecatedId != nil && req.Id == nil { // nolint:staticcheck
+		req.Id = &req.DeprecatedId.Value // nolint:staticcheck
+	}
+	if req.DeprecatedDescription != nil && req.Description == nil { // nolint:staticcheck
+		req.Description = &req.DeprecatedDescription.Value // nolint:staticcheck
+	}
+	if req.DeprecatedName != nil && req.Name == nil { // nolint:staticcheck
+		req.Name = &req.DeprecatedName.Value // nolint:staticcheck
+	}
+	if req.DeprecatedTenantId != nil && req.TenantId == nil { // nolint:staticcheck
+		req.TenantId = &req.DeprecatedTenantId.Value // nolint:staticcheck
+	}
+
 	filter := make(map[string]any)
 	if req.Id != nil {
 		filter["id"] = req.Id

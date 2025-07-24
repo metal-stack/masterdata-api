@@ -8,6 +8,7 @@ import "api/v1/meta.proto";
 import "api/v1/project.proto";
 import "api/v1/quota.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
 
 service TenantService {
   rpc Create(TenantCreateRequest) returns (TenantResponse);
@@ -93,10 +94,15 @@ message TenantGetHistoryRequest {
 }
 
 message TenantFindRequest {
-  optional string id = 1;
-  optional string name = 2;
+  // TODO: remove in next release:
+  google.protobuf.StringValue deprecated_id = 1 [deprecated = true];
+  google.protobuf.StringValue deprecated_name = 2 [deprecated = true];
+
   Paging paging = 3;
   map<string, string> annotations = 4;
+
+  optional string id = 5;
+  optional string name = 6;
 }
 
 message TenantResponse {

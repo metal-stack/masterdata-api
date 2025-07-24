@@ -277,23 +277,22 @@ func (x *NamespaceGroupConfig) GetRolebindingNameTemplate() string {
 type ConnectorConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// the following are all mandatory
-	IdmApiUrl            string  `protobuf:"bytes,1,opt,name=idm_api_url,json=idmApiUrl,proto3" json:"idm_api_url,omitempty"`
-	IdmApiUser           string  `protobuf:"bytes,2,opt,name=idm_api_user,json=idmApiUser,proto3" json:"idm_api_user,omitempty"`
-	IdmApiPassword       string  `protobuf:"bytes,3,opt,name=idm_api_password,json=idmApiPassword,proto3" json:"idm_api_password,omitempty"`
-	IdmSystemId          string  `protobuf:"bytes,4,opt,name=idm_system_id,json=idmSystemId,proto3" json:"idm_system_id,omitempty"`
-	IdmAccessCode        string  `protobuf:"bytes,5,opt,name=idm_access_code,json=idmAccessCode,proto3" json:"idm_access_code,omitempty"`
-	IdmCustomerId        string  `protobuf:"bytes,6,opt,name=idm_customer_id,json=idmCustomerId,proto3" json:"idm_customer_id,omitempty"`
-	IdmGroupOu           string  `protobuf:"bytes,7,opt,name=idm_group_ou,json=idmGroupOu,proto3" json:"idm_group_ou,omitempty"`
-	IdmGroupnameTemplate *string `protobuf:"bytes,8,opt,name=idm_groupname_template,json=idmGroupnameTemplate,proto3,oneof" json:"idm_groupname_template,omitempty"`
-	IdmDomainName        string  `protobuf:"bytes,9,opt,name=idm_domain_name,json=idmDomainName,proto3" json:"idm_domain_name,omitempty"`
-	IdmTenantPrefix      string  `protobuf:"bytes,10,opt,name=idm_tenant_prefix,json=idmTenantPrefix,proto3" json:"idm_tenant_prefix,omitempty"`
-	IdmSubmitter         string  `protobuf:"bytes,11,opt,name=idm_submitter,json=idmSubmitter,proto3" json:"idm_submitter,omitempty"`
-	IdmJobInfo           string  `protobuf:"bytes,12,opt,name=idm_job_info,json=idmJobInfo,proto3" json:"idm_job_info,omitempty"`
-	IdmReqSystem         string  `protobuf:"bytes,13,opt,name=idm_req_system,json=idmReqSystem,proto3" json:"idm_req_system,omitempty"`
-	IdmReqUser           string  `protobuf:"bytes,14,opt,name=idm_req_user,json=idmReqUser,proto3" json:"idm_req_user,omitempty"`
-	IdmReqEmail          string  `protobuf:"bytes,15,opt,name=idm_req_email,json=idmReqEmail,proto3" json:"idm_req_email,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	IdmApiUrl       string `protobuf:"bytes,1,opt,name=idm_api_url,json=idmApiUrl,proto3" json:"idm_api_url,omitempty"`
+	IdmApiUser      string `protobuf:"bytes,2,opt,name=idm_api_user,json=idmApiUser,proto3" json:"idm_api_user,omitempty"`
+	IdmApiPassword  string `protobuf:"bytes,3,opt,name=idm_api_password,json=idmApiPassword,proto3" json:"idm_api_password,omitempty"`
+	IdmSystemId     string `protobuf:"bytes,4,opt,name=idm_system_id,json=idmSystemId,proto3" json:"idm_system_id,omitempty"`
+	IdmAccessCode   string `protobuf:"bytes,5,opt,name=idm_access_code,json=idmAccessCode,proto3" json:"idm_access_code,omitempty"`
+	IdmCustomerId   string `protobuf:"bytes,6,opt,name=idm_customer_id,json=idmCustomerId,proto3" json:"idm_customer_id,omitempty"`
+	IdmGroupOu      string `protobuf:"bytes,7,opt,name=idm_group_ou,json=idmGroupOu,proto3" json:"idm_group_ou,omitempty"`
+	IdmDomainName   string `protobuf:"bytes,9,opt,name=idm_domain_name,json=idmDomainName,proto3" json:"idm_domain_name,omitempty"`
+	IdmTenantPrefix string `protobuf:"bytes,10,opt,name=idm_tenant_prefix,json=idmTenantPrefix,proto3" json:"idm_tenant_prefix,omitempty"`
+	IdmSubmitter    string `protobuf:"bytes,11,opt,name=idm_submitter,json=idmSubmitter,proto3" json:"idm_submitter,omitempty"`
+	IdmJobInfo      string `protobuf:"bytes,12,opt,name=idm_job_info,json=idmJobInfo,proto3" json:"idm_job_info,omitempty"`
+	IdmReqSystem    string `protobuf:"bytes,13,opt,name=idm_req_system,json=idmReqSystem,proto3" json:"idm_req_system,omitempty"`
+	IdmReqUser      string `protobuf:"bytes,14,opt,name=idm_req_user,json=idmReqUser,proto3" json:"idm_req_user,omitempty"`
+	IdmReqEmail     string `protobuf:"bytes,15,opt,name=idm_req_email,json=idmReqEmail,proto3" json:"idm_req_email,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ConnectorConfig) Reset() {
@@ -375,13 +374,6 @@ func (x *ConnectorConfig) GetIdmGroupOu() string {
 	return ""
 }
 
-func (x *ConnectorConfig) GetIdmGroupnameTemplate() string {
-	if x != nil && x.IdmGroupnameTemplate != nil {
-		return *x.IdmGroupnameTemplate
-	}
-	return ""
-}
-
 func (x *ConnectorConfig) GetIdmDomainName() string {
 	if x != nil {
 		return x.IdmDomainName
@@ -452,7 +444,7 @@ const file_api_v1_iam_proto_rawDesc = "" +
 	"\x14expected_groups_list\x18\x02 \x01(\tR\x12expectedGroupsList\x120\n" +
 	"\x14namespace_max_length\x18\x03 \x01(\x05R\x12namespaceMaxLength\x12<\n" +
 	"\x1acluster_groupname_template\x18\x04 \x01(\tR\x18clusterGroupnameTemplate\x12:\n" +
-	"\x19rolebinding_name_template\x18\x05 \x01(\tR\x17rolebindingNameTemplate\"\xf0\x04\n" +
+	"\x19rolebinding_name_template\x18\x05 \x01(\tR\x17rolebindingNameTemplate\"\xb8\x04\n" +
 	"\x0fConnectorConfig\x12\x1e\n" +
 	"\vidm_api_url\x18\x01 \x01(\tR\tidmApiUrl\x12 \n" +
 	"\fidm_api_user\x18\x02 \x01(\tR\n" +
@@ -462,8 +454,7 @@ const file_api_v1_iam_proto_rawDesc = "" +
 	"\x0fidm_access_code\x18\x05 \x01(\tR\ridmAccessCode\x12&\n" +
 	"\x0fidm_customer_id\x18\x06 \x01(\tR\ridmCustomerId\x12 \n" +
 	"\fidm_group_ou\x18\a \x01(\tR\n" +
-	"idmGroupOu\x129\n" +
-	"\x16idm_groupname_template\x18\b \x01(\tH\x00R\x14idmGroupnameTemplate\x88\x01\x01\x12&\n" +
+	"idmGroupOu\x12&\n" +
 	"\x0fidm_domain_name\x18\t \x01(\tR\ridmDomainName\x12*\n" +
 	"\x11idm_tenant_prefix\x18\n" +
 	" \x01(\tR\x0fidmTenantPrefix\x12#\n" +
@@ -473,8 +464,7 @@ const file_api_v1_iam_proto_rawDesc = "" +
 	"\x0eidm_req_system\x18\r \x01(\tR\fidmReqSystem\x12 \n" +
 	"\fidm_req_user\x18\x0e \x01(\tR\n" +
 	"idmReqUser\x12\"\n" +
-	"\ridm_req_email\x18\x0f \x01(\tR\vidmReqEmailB\x19\n" +
-	"\x17_idm_groupname_templateB\x83\x01\n" +
+	"\ridm_req_email\x18\x0f \x01(\tR\vidmReqEmailJ\x04\b\b\x10\tR\x16idm_groupname_templateB\x83\x01\n" +
 	"\n" +
 	"com.api.v1B\bIamProtoP\x01Z2github.com/metal-stack/masterdata-api/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
@@ -515,7 +505,6 @@ func file_api_v1_iam_proto_init() {
 	if File_api_v1_iam_proto != nil {
 		return
 	}
-	file_api_v1_iam_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -10,6 +10,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -328,15 +329,25 @@ func (x *ProjectGetHistoryRequest) GetAt() *timestamppb.Timestamp {
 }
 
 type ProjectFindRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id,omitempty"`
-	Name          *string                `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
-	TenantId      *string                `protobuf:"bytes,4,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
-	Paging        *Paging                `protobuf:"bytes,5,opt,name=paging,proto3" json:"paging,omitempty"`
-	Annotations   map[string]string      `protobuf:"bytes,6,rep,name=annotations,proto3" json:"annotations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// TODO: remove in next release:
+	//
+	// Deprecated: Marked as deprecated in api/v1/project.proto.
+	DeprecatedId *wrapperspb.StringValue `protobuf:"bytes,1,opt,name=deprecated_id,json=deprecatedId,proto3" json:"deprecated_id,omitempty"`
+	// Deprecated: Marked as deprecated in api/v1/project.proto.
+	DeprecatedName *wrapperspb.StringValue `protobuf:"bytes,2,opt,name=deprecated_name,json=deprecatedName,proto3" json:"deprecated_name,omitempty"`
+	// Deprecated: Marked as deprecated in api/v1/project.proto.
+	DeprecatedDescription *wrapperspb.StringValue `protobuf:"bytes,3,opt,name=deprecated_description,json=deprecatedDescription,proto3" json:"deprecated_description,omitempty"`
+	// Deprecated: Marked as deprecated in api/v1/project.proto.
+	DeprecatedTenantId *wrapperspb.StringValue `protobuf:"bytes,4,opt,name=deprecated_tenant_id,json=deprecatedTenantId,proto3" json:"deprecated_tenant_id,omitempty"`
+	Paging             *Paging                 `protobuf:"bytes,5,opt,name=paging,proto3" json:"paging,omitempty"`
+	Annotations        map[string]string       `protobuf:"bytes,6,rep,name=annotations,proto3" json:"annotations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Id                 *string                 `protobuf:"bytes,7,opt,name=id,proto3,oneof" json:"id,omitempty"`
+	Name               *string                 `protobuf:"bytes,8,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Description        *string                 `protobuf:"bytes,9,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	TenantId           *string                 `protobuf:"bytes,10,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *ProjectFindRequest) Reset() {
@@ -369,6 +380,52 @@ func (*ProjectFindRequest) Descriptor() ([]byte, []int) {
 	return file_api_v1_project_proto_rawDescGZIP(), []int{6}
 }
 
+// Deprecated: Marked as deprecated in api/v1/project.proto.
+func (x *ProjectFindRequest) GetDeprecatedId() *wrapperspb.StringValue {
+	if x != nil {
+		return x.DeprecatedId
+	}
+	return nil
+}
+
+// Deprecated: Marked as deprecated in api/v1/project.proto.
+func (x *ProjectFindRequest) GetDeprecatedName() *wrapperspb.StringValue {
+	if x != nil {
+		return x.DeprecatedName
+	}
+	return nil
+}
+
+// Deprecated: Marked as deprecated in api/v1/project.proto.
+func (x *ProjectFindRequest) GetDeprecatedDescription() *wrapperspb.StringValue {
+	if x != nil {
+		return x.DeprecatedDescription
+	}
+	return nil
+}
+
+// Deprecated: Marked as deprecated in api/v1/project.proto.
+func (x *ProjectFindRequest) GetDeprecatedTenantId() *wrapperspb.StringValue {
+	if x != nil {
+		return x.DeprecatedTenantId
+	}
+	return nil
+}
+
+func (x *ProjectFindRequest) GetPaging() *Paging {
+	if x != nil {
+		return x.Paging
+	}
+	return nil
+}
+
+func (x *ProjectFindRequest) GetAnnotations() map[string]string {
+	if x != nil {
+		return x.Annotations
+	}
+	return nil
+}
+
 func (x *ProjectFindRequest) GetId() string {
 	if x != nil && x.Id != nil {
 		return *x.Id
@@ -395,20 +452,6 @@ func (x *ProjectFindRequest) GetTenantId() string {
 		return *x.TenantId
 	}
 	return ""
-}
-
-func (x *ProjectFindRequest) GetPaging() *Paging {
-	if x != nil {
-		return x.Paging
-	}
-	return nil
-}
-
-func (x *ProjectFindRequest) GetAnnotations() map[string]string {
-	if x != nil {
-		return x.Annotations
-	}
-	return nil
 }
 
 type ProjectResponse struct {
@@ -512,7 +555,7 @@ var File_api_v1_project_proto protoreflect.FileDescriptor
 
 const file_api_v1_project_proto_rawDesc = "" +
 	"\n" +
-	"\x14api/v1/project.proto\x12\x06api.v1\x1a\x13api/v1/common.proto\x1a\x11api/v1/meta.proto\x1a\x12api/v1/quota.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa8\x01\n" +
+	"\x14api/v1/project.proto\x12\x06api.v1\x1a\x13api/v1/common.proto\x1a\x11api/v1/meta.proto\x1a\x12api/v1/quota.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\"\xa8\x01\n" +
 	"\aProject\x12 \n" +
 	"\x04meta\x18\x01 \x01(\v2\f.api.v1.MetaR\x04meta\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -529,14 +572,19 @@ const file_api_v1_project_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"V\n" +
 	"\x18ProjectGetHistoryRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12*\n" +
-	"\x02at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02at\"\xf0\x02\n" +
-	"\x12ProjectFindRequest\x12\x13\n" +
-	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x17\n" +
-	"\x04name\x18\x02 \x01(\tH\x01R\x04name\x88\x01\x01\x12%\n" +
-	"\vdescription\x18\x03 \x01(\tH\x02R\vdescription\x88\x01\x01\x12 \n" +
-	"\ttenant_id\x18\x04 \x01(\tH\x03R\btenantId\x88\x01\x01\x12&\n" +
+	"\x02at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02at\"\xaf\x05\n" +
+	"\x12ProjectFindRequest\x12E\n" +
+	"\rdeprecated_id\x18\x01 \x01(\v2\x1c.google.protobuf.StringValueB\x02\x18\x01R\fdeprecatedId\x12I\n" +
+	"\x0fdeprecated_name\x18\x02 \x01(\v2\x1c.google.protobuf.StringValueB\x02\x18\x01R\x0edeprecatedName\x12W\n" +
+	"\x16deprecated_description\x18\x03 \x01(\v2\x1c.google.protobuf.StringValueB\x02\x18\x01R\x15deprecatedDescription\x12R\n" +
+	"\x14deprecated_tenant_id\x18\x04 \x01(\v2\x1c.google.protobuf.StringValueB\x02\x18\x01R\x12deprecatedTenantId\x12&\n" +
 	"\x06paging\x18\x05 \x01(\v2\x0e.api.v1.PagingR\x06paging\x12M\n" +
-	"\vannotations\x18\x06 \x03(\v2+.api.v1.ProjectFindRequest.AnnotationsEntryR\vannotations\x1a>\n" +
+	"\vannotations\x18\x06 \x03(\v2+.api.v1.ProjectFindRequest.AnnotationsEntryR\vannotations\x12\x13\n" +
+	"\x02id\x18\a \x01(\tH\x00R\x02id\x88\x01\x01\x12\x17\n" +
+	"\x04name\x18\b \x01(\tH\x01R\x04name\x88\x01\x01\x12%\n" +
+	"\vdescription\x18\t \x01(\tH\x02R\vdescription\x88\x01\x01\x12 \n" +
+	"\ttenant_id\x18\n" +
+	" \x01(\tH\x03R\btenantId\x88\x01\x01\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x05\n" +
@@ -590,7 +638,8 @@ var file_api_v1_project_proto_goTypes = []any{
 	(*Meta)(nil),                     // 10: api.v1.Meta
 	(*QuotaSet)(nil),                 // 11: api.v1.QuotaSet
 	(*timestamppb.Timestamp)(nil),    // 12: google.protobuf.Timestamp
-	(*Paging)(nil),                   // 13: api.v1.Paging
+	(*wrapperspb.StringValue)(nil),   // 13: google.protobuf.StringValue
+	(*Paging)(nil),                   // 14: api.v1.Paging
 }
 var file_api_v1_project_proto_depIdxs = []int32{
 	10, // 0: api.v1.Project.meta:type_name -> api.v1.Meta
@@ -598,27 +647,31 @@ var file_api_v1_project_proto_depIdxs = []int32{
 	0,  // 2: api.v1.ProjectCreateRequest.project:type_name -> api.v1.Project
 	0,  // 3: api.v1.ProjectUpdateRequest.project:type_name -> api.v1.Project
 	12, // 4: api.v1.ProjectGetHistoryRequest.at:type_name -> google.protobuf.Timestamp
-	13, // 5: api.v1.ProjectFindRequest.paging:type_name -> api.v1.Paging
-	9,  // 6: api.v1.ProjectFindRequest.annotations:type_name -> api.v1.ProjectFindRequest.AnnotationsEntry
-	0,  // 7: api.v1.ProjectResponse.project:type_name -> api.v1.Project
-	0,  // 8: api.v1.ProjectListResponse.projects:type_name -> api.v1.Project
-	1,  // 9: api.v1.ProjectService.Create:input_type -> api.v1.ProjectCreateRequest
-	2,  // 10: api.v1.ProjectService.Update:input_type -> api.v1.ProjectUpdateRequest
-	3,  // 11: api.v1.ProjectService.Delete:input_type -> api.v1.ProjectDeleteRequest
-	4,  // 12: api.v1.ProjectService.Get:input_type -> api.v1.ProjectGetRequest
-	5,  // 13: api.v1.ProjectService.GetHistory:input_type -> api.v1.ProjectGetHistoryRequest
-	6,  // 14: api.v1.ProjectService.Find:input_type -> api.v1.ProjectFindRequest
-	7,  // 15: api.v1.ProjectService.Create:output_type -> api.v1.ProjectResponse
-	7,  // 16: api.v1.ProjectService.Update:output_type -> api.v1.ProjectResponse
-	7,  // 17: api.v1.ProjectService.Delete:output_type -> api.v1.ProjectResponse
-	7,  // 18: api.v1.ProjectService.Get:output_type -> api.v1.ProjectResponse
-	7,  // 19: api.v1.ProjectService.GetHistory:output_type -> api.v1.ProjectResponse
-	8,  // 20: api.v1.ProjectService.Find:output_type -> api.v1.ProjectListResponse
-	15, // [15:21] is the sub-list for method output_type
-	9,  // [9:15] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	13, // 5: api.v1.ProjectFindRequest.deprecated_id:type_name -> google.protobuf.StringValue
+	13, // 6: api.v1.ProjectFindRequest.deprecated_name:type_name -> google.protobuf.StringValue
+	13, // 7: api.v1.ProjectFindRequest.deprecated_description:type_name -> google.protobuf.StringValue
+	13, // 8: api.v1.ProjectFindRequest.deprecated_tenant_id:type_name -> google.protobuf.StringValue
+	14, // 9: api.v1.ProjectFindRequest.paging:type_name -> api.v1.Paging
+	9,  // 10: api.v1.ProjectFindRequest.annotations:type_name -> api.v1.ProjectFindRequest.AnnotationsEntry
+	0,  // 11: api.v1.ProjectResponse.project:type_name -> api.v1.Project
+	0,  // 12: api.v1.ProjectListResponse.projects:type_name -> api.v1.Project
+	1,  // 13: api.v1.ProjectService.Create:input_type -> api.v1.ProjectCreateRequest
+	2,  // 14: api.v1.ProjectService.Update:input_type -> api.v1.ProjectUpdateRequest
+	3,  // 15: api.v1.ProjectService.Delete:input_type -> api.v1.ProjectDeleteRequest
+	4,  // 16: api.v1.ProjectService.Get:input_type -> api.v1.ProjectGetRequest
+	5,  // 17: api.v1.ProjectService.GetHistory:input_type -> api.v1.ProjectGetHistoryRequest
+	6,  // 18: api.v1.ProjectService.Find:input_type -> api.v1.ProjectFindRequest
+	7,  // 19: api.v1.ProjectService.Create:output_type -> api.v1.ProjectResponse
+	7,  // 20: api.v1.ProjectService.Update:output_type -> api.v1.ProjectResponse
+	7,  // 21: api.v1.ProjectService.Delete:output_type -> api.v1.ProjectResponse
+	7,  // 22: api.v1.ProjectService.Get:output_type -> api.v1.ProjectResponse
+	7,  // 23: api.v1.ProjectService.GetHistory:output_type -> api.v1.ProjectResponse
+	8,  // 24: api.v1.ProjectService.Find:output_type -> api.v1.ProjectListResponse
+	19, // [19:25] is the sub-list for method output_type
+	13, // [13:19] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_api_v1_project_proto_init() }

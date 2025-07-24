@@ -113,8 +113,25 @@ func TestDeleteTenant(t *testing.T) {
 	var paging *v1.Paging
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
-	memberStorageMock.On("Find", ctx, tfilter, paging).Return([]*v1.TenantMember{}, nil, nil)
-	memberStorageMock.On("Find", ctx, mfilter, paging).Return([]*v1.TenantMember{}, nil, nil)
+	memberStorageMock.On("Find", ctx, tfilter, paging).Return([]*v1.TenantMember{
+		{
+			Meta: &v1.Meta{
+				Id: "t3",
+			},
+			TenantId: t3.Meta.Id,
+			MemberId: t3.Meta.Id,
+		},
+	}, nil, nil)
+	memberStorageMock.On("Find", ctx, mfilter, paging).Return([]*v1.TenantMember{
+		{
+			Meta: &v1.Meta{
+				Id: "t3",
+			},
+			TenantId: t3.Meta.Id,
+			MemberId: t3.Meta.Id,
+		},
+	}, nil, nil)
+	memberStorageMock.On("DeleteAll", ctx, "t3").Return(nil)
 	resp, err := ts.Delete(ctx, connect.NewRequest(tdr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

@@ -20,8 +20,15 @@ type Server struct {
 
 // List implements grpc_health_v1.HealthServer.
 func (s *Server) List(context.Context, *v1.HealthListRequest) (*v1.HealthListResponse, error) {
-	// FIXME implement
-	return nil, nil
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	statusMap := make(map[string]*v1.HealthCheckResponse, len(s.statusMap))
+	for k, v := range s.statusMap {
+		statusMap[k] = &v1.HealthCheckResponse{Status: v}
+	}
+
+	return &v1.HealthListResponse{Statuses: statusMap}, nil
 }
 
 // NewHealthServer creates a new health check server for grpc services.
@@ -40,6 +47,7 @@ func (s *Server) AuthFuncOverride(ctx context.Context, fullMethodName string) (c
 func (s *Server) Check(ctx context.Context, in *v1.HealthCheckRequest) (*v1.HealthCheckResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
 	_, ok := s.statusMap["initdb"]
 	if !ok {
 		return &v1.HealthCheckResponse{
