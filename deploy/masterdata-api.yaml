@@ -171,11 +171,8 @@ spec:
       containers:
       - name: masterdata-db
         image: postgres:17-alpine
-<<<<<<< HEAD
         command: 
           - postgres
-=======
->>>>>>> 2b74fceb3ead9881fdb248ca8abf4d6fb854eecc
         env:
         - name: POSTGRES_PASSWORD
           value: password
