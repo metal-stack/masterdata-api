@@ -9,6 +9,7 @@ package v1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -100,8 +101,12 @@ func (x *QuotaSet) GetProject() *Quota {
 // Quota is the actual maximum amount
 type Quota struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// TODO: remove in next release:
+	//
+	// Deprecated: Marked as deprecated in v1/quota.proto.
+	DeprecatedQuota *wrapperspb.Int32Value `protobuf:"bytes,1,opt,name=deprecated_quota,json=deprecatedQuota,proto3" json:"deprecated_quota,omitempty"`
 	// quota is the maximum amount for the current QuotaSet, can be nil
-	Quota         *int32 `protobuf:"varint,1,opt,name=quota,proto3,oneof" json:"quota,omitempty"`
+	Quota         *int32 `protobuf:"varint,2,opt,name=quota,proto3,oneof" json:"quota,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -136,6 +141,14 @@ func (*Quota) Descriptor() ([]byte, []int) {
 	return file_v1_quota_proto_rawDescGZIP(), []int{1}
 }
 
+// Deprecated: Marked as deprecated in v1/quota.proto.
+func (x *Quota) GetDeprecatedQuota() *wrapperspb.Int32Value {
+	if x != nil {
+		return x.DeprecatedQuota
+	}
+	return nil
+}
+
 func (x *Quota) GetQuota() int32 {
 	if x != nil && x.Quota != nil {
 		return *x.Quota
@@ -147,14 +160,15 @@ var File_v1_quota_proto protoreflect.FileDescriptor
 
 const file_v1_quota_proto_rawDesc = "" +
 	"\n" +
-	"\x0ev1/quota.proto\x12\x02v1\"\x94\x01\n" +
+	"\x0ev1/quota.proto\x12\x02v1\x1a\x1egoogle/protobuf/wrappers.proto\"\x94\x01\n" +
 	"\bQuotaSet\x12#\n" +
 	"\acluster\x18\x01 \x01(\v2\t.v1.QuotaR\acluster\x12#\n" +
 	"\amachine\x18\x02 \x01(\v2\t.v1.QuotaR\amachine\x12\x19\n" +
 	"\x02ip\x18\x03 \x01(\v2\t.v1.QuotaR\x02ip\x12#\n" +
-	"\aproject\x18\x04 \x01(\v2\t.v1.QuotaR\aproject\",\n" +
-	"\x05Quota\x12\x19\n" +
-	"\x05quota\x18\x01 \x01(\x05H\x00R\x05quota\x88\x01\x01B\b\n" +
+	"\aproject\x18\x04 \x01(\v2\t.v1.QuotaR\aproject\"x\n" +
+	"\x05Quota\x12J\n" +
+	"\x10deprecated_quota\x18\x01 \x01(\v2\x1b.google.protobuf.Int32ValueB\x02\x18\x01R\x0fdeprecatedQuota\x12\x19\n" +
+	"\x05quota\x18\x02 \x01(\x05H\x00R\x05quota\x88\x01\x01B\b\n" +
 	"\x06_quotaBf\n" +
 	"\x06com.v1B\n" +
 	"QuotaProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
@@ -173,19 +187,21 @@ func file_v1_quota_proto_rawDescGZIP() []byte {
 
 var file_v1_quota_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_v1_quota_proto_goTypes = []any{
-	(*QuotaSet)(nil), // 0: v1.QuotaSet
-	(*Quota)(nil),    // 1: v1.Quota
+	(*QuotaSet)(nil),              // 0: v1.QuotaSet
+	(*Quota)(nil),                 // 1: v1.Quota
+	(*wrapperspb.Int32Value)(nil), // 2: google.protobuf.Int32Value
 }
 var file_v1_quota_proto_depIdxs = []int32{
 	1, // 0: v1.QuotaSet.cluster:type_name -> v1.Quota
 	1, // 1: v1.QuotaSet.machine:type_name -> v1.Quota
 	1, // 2: v1.QuotaSet.ip:type_name -> v1.Quota
 	1, // 3: v1.QuotaSet.project:type_name -> v1.Quota
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	2, // 4: v1.Quota.deprecated_quota:type_name -> google.protobuf.Int32Value
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_v1_quota_proto_init() }

@@ -118,11 +118,11 @@ func (s *tenantService) GetHistory(ctx context.Context, req *v1.TenantGetHistory
 
 func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v1.TenantListResponse, error) {
 	// TODO: remove in next release
-	if req.DeprecatedId != nil && req.Id == nil {
-		req.Id = &req.DeprecatedId.Value
+	if req.DeprecatedId != nil && req.Id == nil { // nolint:staticcheck
+		req.Id = &req.DeprecatedId.Value // nolint:staticcheck
 	}
-	if req.DeprecatedName != nil && req.Name == nil {
-		req.Id = &req.DeprecatedName.Value
+	if req.DeprecatedName != nil && req.Name == nil { // nolint:staticcheck
+		req.Id = &req.DeprecatedName.Value // nolint:staticcheck
 	}
 
 	filter := make(map[string]any)

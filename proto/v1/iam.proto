@@ -45,6 +45,9 @@ message NamespaceGroupConfig {
 
 // optional config if idm webhook is used to automatically create/delete groups/roles in the tenant idm
 message ConnectorConfig {
+  reserved 8;
+  reserved "idm_groupname_template";
+
   // the following are all mandatory
   string idm_api_url = 1;
   string idm_api_user = 2;
@@ -54,7 +57,6 @@ message ConnectorConfig {
   string idm_access_code = 5;
   string idm_customer_id = 6;
   string idm_group_ou = 7;
-  optional string idm_groupname_template = 8;
 
   string idm_domain_name = 9;
   string idm_tenant_prefix = 10;
