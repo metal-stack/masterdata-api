@@ -122,7 +122,7 @@ func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v
 		req.Id = &req.DeprecatedId.Value // nolint:staticcheck
 	}
 	if req.DeprecatedName != nil && req.Name == nil { // nolint:staticcheck
-		req.Id = &req.DeprecatedName.Value // nolint:staticcheck
+		req.Name = &req.DeprecatedName.Value // nolint:staticcheck
 	}
 
 	filter := make(map[string]any)

@@ -128,13 +128,13 @@ func (s *projectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 		req.Id = &req.DeprecatedId.Value // nolint:staticcheck
 	}
 	if req.DeprecatedDescription != nil && req.Description == nil { // nolint:staticcheck
-		req.Id = &req.DeprecatedDescription.Value // nolint:staticcheck
+		req.Description = &req.DeprecatedDescription.Value // nolint:staticcheck
 	}
 	if req.DeprecatedName != nil && req.Name == nil { // nolint:staticcheck
-		req.Id = &req.DeprecatedName.Value // nolint:staticcheck
+		req.Name = &req.DeprecatedName.Value // nolint:staticcheck
 	}
 	if req.DeprecatedTenantId != nil && req.TenantId == nil { // nolint:staticcheck
-		req.Id = &req.DeprecatedTenantId.Value // nolint:staticcheck
+		req.TenantId = &req.DeprecatedTenantId.Value // nolint:staticcheck
 	}
 
 	filter := make(map[string]any)
