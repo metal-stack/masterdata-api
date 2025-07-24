@@ -111,10 +111,10 @@ func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	if err != nil {
 		return err
 	}
-	bs.log.Info("initdb", "meta", mm.Meta.GetKind())
+	bs.log.Info("initdb", "meta", mm.GetKind())
 
-	kind := mm.Meta.GetKind()
-	apiversion := mm.Meta.GetApiversion()
+	kind := mm.GetKind()
+	apiversion := mm.GetApiversion()
 
 	var e E
 	if kind != e.Kind() {
@@ -141,7 +141,7 @@ func (bs *bootstrap[E]) createOrUpdate(ctx context.Context, ydoc []byte) error {
 	// now check that this type is already present for this id,
 	// therefore create nil interface to get into
 	exists := true
-	existingEntity, err := bs.ds.Get(ctx, mm.Meta.GetId())
+	existingEntity, err := bs.ds.Get(ctx, mm.GetId())
 	if err != nil {
 		if errors.As(err, &NotFoundError{}) {
 			exists = false

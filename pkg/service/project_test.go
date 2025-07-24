@@ -5,10 +5,10 @@ import (
 	"log/slog"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	"testing"
 
@@ -64,7 +64,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	t1 := &v1.Tenant{
 		Quotas: &v1.QuotaSet{
 			Project: &v1.Quota{
-				Quota: &wrapperspb.Int32Value{Value: 2},
+				Max: pointer.Pointer(int32(2)),
 			},
 		},
 	}
@@ -192,10 +192,10 @@ func TestFindProjectByID(t *testing.T) {
 	// filter by id
 	f1 := make(map[string]any)
 	tfr := &v1.ProjectFindRequest{
-		Id: &wrapperspb.StringValue{Value: "p5"},
+		Id: pointer.Pointer("p5"),
 	}
 
-	f1["id"] = "p5"
+	f1["id"] = pointer.Pointer("p5")
 	storageMock.On("Find", ctx, f1, mock.AnythingOfType("*v1.Paging")).Return(t5s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
@@ -215,11 +215,11 @@ func TestFindProjectByName(t *testing.T) {
 	// filter by name
 	var t6s []*v1.Project
 	tfr := &v1.ProjectFindRequest{
-		Name: &wrapperspb.StringValue{Value: "Sixth"},
+		Name: pointer.Pointer("Sixth"),
 	}
 
 	f2 := make(map[string]any)
-	f2["project ->> 'name'"] = "Sixth"
+	f2["project ->> 'name'"] = pointer.Pointer("Sixth")
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
@@ -239,11 +239,11 @@ func TestFindProjectByTenant(t *testing.T) {
 	// filter by name
 	var t6s []*v1.Project
 	tfr := &v1.ProjectFindRequest{
-		TenantId: &wrapperspb.StringValue{Value: "p1"},
+		TenantId: pointer.Pointer("p1"),
 	}
 
 	f2 := make(map[string]any)
-	f2["project ->> 'tenant_id'"] = "p1"
+	f2["project ->> 'tenant_id'"] = pointer.Pointer("p1")
 	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)

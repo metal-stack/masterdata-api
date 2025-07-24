@@ -48,12 +48,19 @@ message ProjectGetHistoryRequest {
 }
 
 message ProjectFindRequest {
-  google.protobuf.StringValue id = 1;
-  google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue description = 3;
-  google.protobuf.StringValue tenant_id = 4;
+  // TODO: remove in next release:
+  google.protobuf.StringValue deprecated_id = 1 [deprecated = true];
+  google.protobuf.StringValue deprecated_name = 2 [deprecated = true];
+  google.protobuf.StringValue deprecated_description = 3 [deprecated = true];
+  google.protobuf.StringValue deprecated_tenant_id = 4 [deprecated = true];
+
   Paging paging = 5;
   map<string, string> annotations = 6;
+
+  optional string id = 7;
+  optional string name = 8;
+  optional string description = 9;
+  optional string tenant_id = 10;
 }
 
 message ProjectResponse {

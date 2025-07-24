@@ -15,7 +15,6 @@ import (
 
 // MigrateDB applies necessary DB Migrations.
 func MigrateDB(log *slog.Logger, db *sqlx.DB, healthServer *health.Server) error {
-
 	m, err := migrator.New(
 		migrator.Migrations(
 			// migrations will be applied and remembered in this order, so always add new migrations below if necessary
@@ -30,6 +29,46 @@ func MigrateDB(log *slog.Logger, db *sqlx.DB, healthServer *health.Server) error
 					}
 					for _, tenant := range tenants {
 						log.Debug("migrate", "tenant", tenant)
+					}
+
+					return nil
+				},
+			},
+			&migrator.Migration{
+				Name: "Migrate quota field",
+				Func: func(tx *sql.Tx) error {
+					ts := New(log, db, &v1.Tenant{})
+					ctx := context.Background()
+
+					tenants, _, err := ts.Find(ctx, nil, nil)
+					if err != nil {
+						return err
+					}
+					for _, tenant := range tenants {
+						if tenant.Quotas == nil {
+							continue
+						}
+
+						for _, q := range []*v1.Quota{
+							tenant.Quotas.Cluster,
+							tenant.Quotas.Ip,
+							tenant.Quotas.Machine,
+							tenant.Quotas.Project,
+						} {
+							if q == nil {
+								continue
+							}
+
+							if q.Quota != nil { // nolint:staticcheck
+								q.Max = &q.Quota.Value // nolint:staticcheck
+								log.Info("migrating deprecated quota field of tenant", "tenant", tenant.Meta.Id, "value", *q.Max)
+							}
+						}
+
+						err := ts.Update(ctx, tenant)
+						if err != nil {
+							return err
+						}
 					}
 
 					return nil

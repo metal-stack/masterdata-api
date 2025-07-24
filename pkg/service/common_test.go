@@ -18,7 +18,7 @@ func StartPostgres(ctx context.Context, ves ...datastore.Entity) (testcontainers
 	var err error
 	pgContainer, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
-			Image:        "postgres:16-alpine",
+			Image:        "postgres:17-alpine",
 			ExposedPorts: []string{"5432/tcp"},
 			Env:          map[string]string{"POSTGRES_PASSWORD": "password"},
 			WaitingFor: wait.ForAll(

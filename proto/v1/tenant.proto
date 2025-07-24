@@ -94,10 +94,15 @@ message TenantGetHistoryRequest {
 }
 
 message TenantFindRequest {
-  google.protobuf.StringValue id = 1;
-  google.protobuf.StringValue name = 2;
+  // TODO: remove in next release:
+  google.protobuf.StringValue deprecated_id = 1 [deprecated = true];
+  google.protobuf.StringValue deprecated_name = 2 [deprecated = true];
+
   Paging paging = 3;
   map<string, string> annotations = 4;
+
+  optional string id = 5;
+  optional string name = 6;
 }
 
 message TenantResponse {

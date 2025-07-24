@@ -117,12 +117,20 @@ func (s *tenantService) GetHistory(ctx context.Context, req *v1.TenantGetHistory
 }
 
 func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v1.TenantListResponse, error) {
+	// TODO: remove in next release
+	if req.DeprecatedId != nil && req.Id == nil { // nolint:staticcheck
+		req.Id = &req.DeprecatedId.Value // nolint:staticcheck
+	}
+	if req.DeprecatedName != nil && req.Name == nil { // nolint:staticcheck
+		req.Name = &req.DeprecatedName.Value // nolint:staticcheck
+	}
+
 	filter := make(map[string]any)
 	if req.Id != nil {
-		filter["id"] = req.GetId().GetValue()
+		filter["id"] = req.GetId()
 	}
 	if req.Name != nil {
-		filter["tenant ->> 'name'"] = req.GetName().GetValue()
+		filter["tenant ->> 'name'"] = req.GetName()
 	}
 	for key, value := range req.Annotations {
 		// select * from tenants where tenant -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
