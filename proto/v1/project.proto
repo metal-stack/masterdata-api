@@ -3,6 +3,7 @@ syntax = "proto3";
 package v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
 import "v1/common.proto";
 import "v1/meta.proto";
 import "v1/quota.proto";
@@ -47,12 +48,19 @@ message ProjectGetHistoryRequest {
 }
 
 message ProjectFindRequest {
-  optional string id = 1;
-  optional string name = 2;
-  optional string description = 3;
-  optional string tenant_id = 4;
+  // TODO: remove in next release:
+  google.protobuf.StringValue deprecated_id = 1 [deprecated = true];
+  google.protobuf.StringValue deprecated_name = 2 [deprecated = true];
+  google.protobuf.StringValue deprecated_description = 3 [deprecated = true];
+  google.protobuf.StringValue deprecated_tenant_id = 4 [deprecated = true];
+
   Paging paging = 5;
   map<string, string> annotations = 6;
+
+  optional string id = 7;
+  optional string name = 8;
+  optional string description = 9;
+  optional string tenant_id = 10;
 }
 
 message ProjectResponse {

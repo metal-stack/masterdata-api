@@ -120,6 +120,20 @@ func (s *projectService) GetHistory(ctx context.Context, req *v1.ProjectGetHisto
 	return project.NewProjectResponse(), nil
 }
 func (s *projectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (*v1.ProjectListResponse, error) {
+	// TODO: remove in next release
+	if req.DeprecatedId != nil && req.Id == nil {
+		req.Id = &req.DeprecatedId.Value
+	}
+	if req.DeprecatedDescription != nil && req.Description == nil {
+		req.Id = &req.DeprecatedDescription.Value
+	}
+	if req.DeprecatedName != nil && req.Name == nil {
+		req.Id = &req.DeprecatedName.Value
+	}
+	if req.DeprecatedTenantId != nil && req.TenantId == nil {
+		req.Id = &req.DeprecatedTenantId.Value
+	}
+
 	filter := make(map[string]any)
 	if req.Id != nil {
 		filter["id"] = req.Id
