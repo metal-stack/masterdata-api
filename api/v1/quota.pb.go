@@ -104,9 +104,9 @@ type Quota struct {
 	// TODO: remove in next release:
 	//
 	// Deprecated: Marked as deprecated in v1/quota.proto.
-	DeprecatedQuota *wrapperspb.Int32Value `protobuf:"bytes,1,opt,name=deprecated_quota,json=deprecatedQuota,proto3" json:"deprecated_quota,omitempty"`
-	// quota is the maximum amount for the current QuotaSet, can be nil
-	Quota         *int32 `protobuf:"varint,2,opt,name=quota,proto3,oneof" json:"quota,omitempty"`
+	Quota *wrapperspb.Int32Value `protobuf:"bytes,1,opt,name=quota,proto3" json:"quota,omitempty"`
+	// max is the maximum amount for the current QuotaSet, can be nil
+	Max           *int32 `protobuf:"varint,2,opt,name=max,proto3,oneof" json:"max,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -142,16 +142,16 @@ func (*Quota) Descriptor() ([]byte, []int) {
 }
 
 // Deprecated: Marked as deprecated in v1/quota.proto.
-func (x *Quota) GetDeprecatedQuota() *wrapperspb.Int32Value {
+func (x *Quota) GetQuota() *wrapperspb.Int32Value {
 	if x != nil {
-		return x.DeprecatedQuota
+		return x.Quota
 	}
 	return nil
 }
 
-func (x *Quota) GetQuota() int32 {
-	if x != nil && x.Quota != nil {
-		return *x.Quota
+func (x *Quota) GetMax() int32 {
+	if x != nil && x.Max != nil {
+		return *x.Max
 	}
 	return 0
 }
@@ -165,11 +165,11 @@ const file_v1_quota_proto_rawDesc = "" +
 	"\acluster\x18\x01 \x01(\v2\t.v1.QuotaR\acluster\x12#\n" +
 	"\amachine\x18\x02 \x01(\v2\t.v1.QuotaR\amachine\x12\x19\n" +
 	"\x02ip\x18\x03 \x01(\v2\t.v1.QuotaR\x02ip\x12#\n" +
-	"\aproject\x18\x04 \x01(\v2\t.v1.QuotaR\aproject\"x\n" +
-	"\x05Quota\x12J\n" +
-	"\x10deprecated_quota\x18\x01 \x01(\v2\x1b.google.protobuf.Int32ValueB\x02\x18\x01R\x0fdeprecatedQuota\x12\x19\n" +
-	"\x05quota\x18\x02 \x01(\x05H\x00R\x05quota\x88\x01\x01B\b\n" +
-	"\x06_quotaBf\n" +
+	"\aproject\x18\x04 \x01(\v2\t.v1.QuotaR\aproject\"]\n" +
+	"\x05Quota\x125\n" +
+	"\x05quota\x18\x01 \x01(\v2\x1b.google.protobuf.Int32ValueB\x02\x18\x01R\x05quota\x12\x15\n" +
+	"\x03max\x18\x02 \x01(\x05H\x00R\x03max\x88\x01\x01B\x06\n" +
+	"\x04_maxBf\n" +
 	"\x06com.v1B\n" +
 	"QuotaProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
 
@@ -196,7 +196,7 @@ var file_v1_quota_proto_depIdxs = []int32{
 	1, // 1: v1.QuotaSet.machine:type_name -> v1.Quota
 	1, // 2: v1.QuotaSet.ip:type_name -> v1.Quota
 	1, // 3: v1.QuotaSet.project:type_name -> v1.Quota
-	2, // 4: v1.Quota.deprecated_quota:type_name -> google.protobuf.Int32Value
+	2, // 4: v1.Quota.quota:type_name -> google.protobuf.Int32Value
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name

@@ -144,12 +144,9 @@ func ToMdmV1Quota(q *v1.Quota) *mdmv1.Quota {
 	if q == nil {
 		return nil
 	}
-	if q.Quota == nil {
-		return nil
-	}
 
 	return &mdmv1.Quota{
-		Quota: q.Quota,
+		Max: q.Quota,
 	}
 }
 
@@ -240,8 +237,9 @@ func ToV1Quota(q *mdmv1.Quota) *v1.Quota {
 	if q == nil {
 		return nil
 	}
+
 	return &v1.Quota{
-		Quota: q.Quota,
+		Quota: q.Max,
 	}
 }
 

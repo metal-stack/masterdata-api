@@ -22,8 +22,8 @@ message QuotaSet {
 // Quota is the actual maximum amount
 message Quota {
   // TODO: remove in next release:
-  google.protobuf.Int32Value deprecated_quota = 1 [deprecated = true];
+  google.protobuf.Int32Value quota = 1 [deprecated = true];
 
-  // quota is the maximum amount for the current QuotaSet, can be nil
-  optional int32 quota = 2;
+  // max is the maximum amount for the current QuotaSet, can be nil
+  optional int32 max = 2;
 }

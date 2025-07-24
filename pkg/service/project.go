@@ -42,12 +42,8 @@ func (s *projectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 	}
 
 	// Check if tenant defines project quotas
-	if tenant.GetQuotas() != nil && tenant.GetQuotas().GetProject() != nil && tenant.GetQuotas().GetProject().GetQuota() != 0 {
-		maxProjects := tenant.GetQuotas().GetProject().Quota
-		// TODO: remove in next release
-		if tenant.GetQuotas().GetProject().GetDeprecatedQuota() != nil && maxProjects == nil { // nolint:staticcheck
-			maxProjects = &tenant.GetQuotas().GetProject().GetDeprecatedQuota().Value // nolint:staticcheck
-		}
+	if tenant.GetQuotas() != nil && tenant.GetQuotas().GetProject() != nil && tenant.GetQuotas().GetProject().Max != nil {
+		maxProjects := tenant.GetQuotas().GetProject().Max
 		filter := make(map[string]any)
 		filter["project ->> 'tenant_id'"] = project.GetTenantId()
 		projects, _, err := s.projectStore.Find(ctx, filter, nil)
