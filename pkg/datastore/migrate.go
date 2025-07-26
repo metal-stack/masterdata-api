@@ -59,10 +59,12 @@ func MigrateDB(log *slog.Logger, db *sqlx.DB, healthServer *health.Server) error
 								continue
 							}
 
-							if q.Quota != nil { // nolint:staticcheck
-								q.Max = &q.Quota.Value // nolint:staticcheck
-								log.Info("migrating deprecated quota field of tenant", "tenant", tenant.Meta.Id, "value", *q.Max)
-							}
+							// We rely on a already deployed v0.12.0 of masterdata-api
+							//
+							// if q.Quota != nil { // nolint:staticcheck
+							// 	q.Max = &q.Quota.Value // nolint:staticcheck
+							// 	log.Info("migrating deprecated quota field of tenant", "tenant", tenant.Meta.Id, "value", *q.Max)
+							// }
 						}
 
 						err := ts.Update(ctx, tenant)
