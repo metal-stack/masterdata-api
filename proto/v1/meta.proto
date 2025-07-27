@@ -13,4 +13,5 @@ message Meta {
   google.protobuf.Timestamp updated_time = 6;
   map<string, string> annotations = 7;
   repeated string labels = 8;
+  string created_by = 9;
 }
