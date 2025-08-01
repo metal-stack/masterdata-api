@@ -7,6 +7,7 @@
 package v1
 
 import (
+	_type "github.com/metal-stack/masterdata-api/google/type"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -1001,7 +1002,7 @@ type ContactDetails struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
 	Email       string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	PhoneNumber string                 `protobuf:"bytes,2,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
-	Address     *Address               `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	Address     *_type.PostalAddress   `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
 	AvatarUrl   string                 `protobuf:"bytes,4,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
 	// Annotations of this payment details
 	Annotations map[string]string `protobuf:"bytes,5,rep,name=annotations,proto3" json:"annotations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
@@ -1055,7 +1056,7 @@ func (x *ContactDetails) GetPhoneNumber() string {
 	return ""
 }
 
-func (x *ContactDetails) GetAddress() *Address {
+func (x *ContactDetails) GetAddress() *_type.PostalAddress {
 	if x != nil {
 		return x.Address
 	}
@@ -1083,72 +1084,11 @@ func (x *ContactDetails) GetLabels() []string {
 	return nil
 }
 
-// Address is the postal address
-type Address struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AddressLines  []string               `protobuf:"bytes,1,rep,name=address_lines,json=addressLines,proto3" json:"address_lines,omitempty"`
-	PostalCode    string                 `protobuf:"bytes,2,opt,name=postal_code,json=postalCode,proto3" json:"postal_code,omitempty"`
-	Country       string                 `protobuf:"bytes,3,opt,name=country,proto3" json:"country,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Address) Reset() {
-	*x = Address{}
-	mi := &file_v1_tenant_proto_msgTypes[19]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Address) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Address) ProtoMessage() {}
-
-func (x *Address) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_tenant_proto_msgTypes[19]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Address.ProtoReflect.Descriptor instead.
-func (*Address) Descriptor() ([]byte, []int) {
-	return file_v1_tenant_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *Address) GetAddressLines() []string {
-	if x != nil {
-		return x.AddressLines
-	}
-	return nil
-}
-
-func (x *Address) GetPostalCode() string {
-	if x != nil {
-		return x.PostalCode
-	}
-	return ""
-}
-
-func (x *Address) GetCountry() string {
-	if x != nil {
-		return x.Country
-	}
-	return ""
-}
-
 var File_v1_tenant_proto protoreflect.FileDescriptor
 
 const file_v1_tenant_proto_rawDesc = "" +
 	"\n" +
-	"\x0fv1/tenant.proto\x12\x02v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x0fv1/common.proto\x1a\fv1/iam.proto\x1a\rv1/meta.proto\x1a\x10v1/project.proto\x1a\x0ev1/quota.proto\"\x87\x01\n" +
+	"\x0fv1/tenant.proto\x12\x02v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/type/postal_address.proto\x1a\x0fv1/common.proto\x1a\fv1/iam.proto\x1a\rv1/meta.proto\x1a\x10v1/project.proto\x1a\x0ev1/quota.proto\"\x87\x01\n" +
 	" FindParticipatingProjectsRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x120\n" +
 	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01B\x14\n" +
@@ -1242,23 +1182,18 @@ const file_v1_tenant_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xae\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xbd\x02\n" +
 	"\x0eContactDetails\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12!\n" +
-	"\fphone_number\x18\x02 \x01(\tR\vphoneNumber\x12%\n" +
-	"\aaddress\x18\x03 \x01(\v2\v.v1.AddressR\aaddress\x12\x1d\n" +
+	"\fphone_number\x18\x02 \x01(\tR\vphoneNumber\x124\n" +
+	"\aaddress\x18\x03 \x01(\v2\x1a.google.type.PostalAddressR\aaddress\x12\x1d\n" +
 	"\n" +
 	"avatar_url\x18\x04 \x01(\tR\tavatarUrl\x12E\n" +
 	"\vannotations\x18\x05 \x03(\v2#.v1.ContactDetails.AnnotationsEntryR\vannotations\x12\x16\n" +
 	"\x06labels\x18\x06 \x03(\tR\x06labels\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"i\n" +
-	"\aAddress\x12#\n" +
-	"\raddress_lines\x18\x01 \x03(\tR\faddressLines\x12\x1f\n" +
-	"\vpostal_code\x18\x02 \x01(\tR\n" +
-	"postalCode\x12\x18\n" +
-	"\acountry\x18\x03 \x01(\tR\acountry2\xfe\x04\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\xfe\x04\n" +
 	"\rTenantService\x125\n" +
 	"\x06Create\x12\x17.v1.TenantCreateRequest\x1a\x12.v1.TenantResponse\x125\n" +
 	"\x06Update\x12\x17.v1.TenantUpdateRequest\x1a\x12.v1.TenantResponse\x125\n" +
@@ -1284,7 +1219,7 @@ func file_v1_tenant_proto_rawDescGZIP() []byte {
 	return file_v1_tenant_proto_rawDescData
 }
 
-var file_v1_tenant_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_v1_tenant_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_v1_tenant_proto_goTypes = []any{
 	(*FindParticipatingProjectsRequest)(nil),  // 0: v1.FindParticipatingProjectsRequest
 	(*FindParticipatingTenantsRequest)(nil),   // 1: v1.FindParticipatingTenantsRequest
@@ -1305,49 +1240,49 @@ var file_v1_tenant_proto_goTypes = []any{
 	(*TenantListResponse)(nil),                // 16: v1.TenantListResponse
 	(*PaymentDetails)(nil),                    // 17: v1.PaymentDetails
 	(*ContactDetails)(nil),                    // 18: v1.ContactDetails
-	(*Address)(nil),                           // 19: v1.Address
-	nil,                                       // 20: v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntry
-	nil,                                       // 21: v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntry
-	nil,                                       // 22: v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntry
-	nil,                                       // 23: v1.TenantWithMembershipAnnotations.TenantAnnotationsEntry
-	nil,                                       // 24: v1.TenantFindRequest.AnnotationsEntry
-	nil,                                       // 25: v1.PaymentDetails.DetailsEntry
-	nil,                                       // 26: v1.PaymentDetails.AnnotationsEntry
-	nil,                                       // 27: v1.ContactDetails.AnnotationsEntry
-	(*Project)(nil),                           // 28: v1.Project
-	(*Meta)(nil),                              // 29: v1.Meta
-	(*QuotaSet)(nil),                          // 30: v1.QuotaSet
-	(*IAMConfig)(nil),                         // 31: v1.IAMConfig
-	(*timestamppb.Timestamp)(nil),             // 32: google.protobuf.Timestamp
-	(*Paging)(nil),                            // 33: v1.Paging
+	nil,                                       // 19: v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntry
+	nil,                                       // 20: v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntry
+	nil,                                       // 21: v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntry
+	nil,                                       // 22: v1.TenantWithMembershipAnnotations.TenantAnnotationsEntry
+	nil,                                       // 23: v1.TenantFindRequest.AnnotationsEntry
+	nil,                                       // 24: v1.PaymentDetails.DetailsEntry
+	nil,                                       // 25: v1.PaymentDetails.AnnotationsEntry
+	nil,                                       // 26: v1.ContactDetails.AnnotationsEntry
+	(*Project)(nil),                           // 27: v1.Project
+	(*Meta)(nil),                              // 28: v1.Meta
+	(*QuotaSet)(nil),                          // 29: v1.QuotaSet
+	(*IAMConfig)(nil),                         // 30: v1.IAMConfig
+	(*timestamppb.Timestamp)(nil),             // 31: google.protobuf.Timestamp
+	(*Paging)(nil),                            // 32: v1.Paging
+	(*_type.PostalAddress)(nil),               // 33: google.type.PostalAddress
 }
 var file_v1_tenant_proto_depIdxs = []int32{
 	7,  // 0: v1.ListTenantMembersResponse.tenants:type_name -> v1.TenantWithMembershipAnnotations
 	6,  // 1: v1.FindParticipatingProjectsResponse.projects:type_name -> v1.ProjectWithMembershipAnnotations
 	7,  // 2: v1.FindParticipatingTenantsResponse.tenants:type_name -> v1.TenantWithMembershipAnnotations
-	28, // 3: v1.ProjectWithMembershipAnnotations.project:type_name -> v1.Project
-	20, // 4: v1.ProjectWithMembershipAnnotations.project_annotations:type_name -> v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntry
-	21, // 5: v1.ProjectWithMembershipAnnotations.tenant_annotations:type_name -> v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntry
+	27, // 3: v1.ProjectWithMembershipAnnotations.project:type_name -> v1.Project
+	19, // 4: v1.ProjectWithMembershipAnnotations.project_annotations:type_name -> v1.ProjectWithMembershipAnnotations.ProjectAnnotationsEntry
+	20, // 5: v1.ProjectWithMembershipAnnotations.tenant_annotations:type_name -> v1.ProjectWithMembershipAnnotations.TenantAnnotationsEntry
 	8,  // 6: v1.TenantWithMembershipAnnotations.tenant:type_name -> v1.Tenant
-	22, // 7: v1.TenantWithMembershipAnnotations.project_annotations:type_name -> v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntry
-	23, // 8: v1.TenantWithMembershipAnnotations.tenant_annotations:type_name -> v1.TenantWithMembershipAnnotations.TenantAnnotationsEntry
-	29, // 9: v1.Tenant.meta:type_name -> v1.Meta
-	30, // 10: v1.Tenant.default_quotas:type_name -> v1.QuotaSet
-	30, // 11: v1.Tenant.quotas:type_name -> v1.QuotaSet
-	31, // 12: v1.Tenant.iam_config:type_name -> v1.IAMConfig
+	21, // 7: v1.TenantWithMembershipAnnotations.project_annotations:type_name -> v1.TenantWithMembershipAnnotations.ProjectAnnotationsEntry
+	22, // 8: v1.TenantWithMembershipAnnotations.tenant_annotations:type_name -> v1.TenantWithMembershipAnnotations.TenantAnnotationsEntry
+	28, // 9: v1.Tenant.meta:type_name -> v1.Meta
+	29, // 10: v1.Tenant.default_quotas:type_name -> v1.QuotaSet
+	29, // 11: v1.Tenant.quotas:type_name -> v1.QuotaSet
+	30, // 12: v1.Tenant.iam_config:type_name -> v1.IAMConfig
 	17, // 13: v1.Tenant.payment:type_name -> v1.PaymentDetails
 	18, // 14: v1.Tenant.contact_details:type_name -> v1.ContactDetails
 	8,  // 15: v1.TenantCreateRequest.tenant:type_name -> v1.Tenant
 	8,  // 16: v1.TenantUpdateRequest.tenant:type_name -> v1.Tenant
-	32, // 17: v1.TenantGetHistoryRequest.at:type_name -> google.protobuf.Timestamp
-	33, // 18: v1.TenantFindRequest.paging:type_name -> v1.Paging
-	24, // 19: v1.TenantFindRequest.annotations:type_name -> v1.TenantFindRequest.AnnotationsEntry
+	31, // 17: v1.TenantGetHistoryRequest.at:type_name -> google.protobuf.Timestamp
+	32, // 18: v1.TenantFindRequest.paging:type_name -> v1.Paging
+	23, // 19: v1.TenantFindRequest.annotations:type_name -> v1.TenantFindRequest.AnnotationsEntry
 	8,  // 20: v1.TenantResponse.tenant:type_name -> v1.Tenant
 	8,  // 21: v1.TenantListResponse.tenants:type_name -> v1.Tenant
-	25, // 22: v1.PaymentDetails.details:type_name -> v1.PaymentDetails.DetailsEntry
-	26, // 23: v1.PaymentDetails.annotations:type_name -> v1.PaymentDetails.AnnotationsEntry
-	19, // 24: v1.ContactDetails.address:type_name -> v1.Address
-	27, // 25: v1.ContactDetails.annotations:type_name -> v1.ContactDetails.AnnotationsEntry
+	24, // 22: v1.PaymentDetails.details:type_name -> v1.PaymentDetails.DetailsEntry
+	25, // 23: v1.PaymentDetails.annotations:type_name -> v1.PaymentDetails.AnnotationsEntry
+	33, // 24: v1.ContactDetails.address:type_name -> google.type.PostalAddress
+	26, // 25: v1.ContactDetails.annotations:type_name -> v1.ContactDetails.AnnotationsEntry
 	9,  // 26: v1.TenantService.Create:input_type -> v1.TenantCreateRequest
 	10, // 27: v1.TenantService.Update:input_type -> v1.TenantUpdateRequest
 	11, // 28: v1.TenantService.Delete:input_type -> v1.TenantDeleteRequest
@@ -1394,7 +1329,7 @@ func file_v1_tenant_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_tenant_proto_rawDesc), len(file_v1_tenant_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   28,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

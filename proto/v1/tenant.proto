@@ -3,6 +3,7 @@ syntax = "proto3";
 package v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/type/postal_address.proto";
 import "v1/common.proto";
 import "v1/iam.proto";
 import "v1/meta.proto";
@@ -127,19 +128,15 @@ message PaymentDetails {
 
 // ContactDetails contain more properties of a tenant
 message ContactDetails {
+  // Email of this tenant
   string email = 1;
+  // Phone Number of this tenant
   string phone_number = 2;
-  Address address = 3;
+  // Address of this tenant
+  google.type.PostalAddress address = 3;
   string avatar_url = 4;
   // Annotations of this payment details
   map<string, string> annotations = 5;
   // Labels of this payment details
   repeated string labels = 6;
-}
-
-// Address is the postal address
-message Address {
-  repeated string address_lines = 1;
-  string postal_code = 2;
-  string country = 3;
 }
