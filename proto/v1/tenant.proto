@@ -104,6 +104,7 @@ message TenantFindRequest {
 
   optional string id = 5;
   optional string name = 6;
+  repeated string labels = 7;
 }
 
 message TenantResponse {
@@ -134,6 +135,7 @@ message ContactDetails {
   string phone_number = 2;
   // Address of this tenant
   google.type.PostalAddress address = 3;
+  // Avatar URL
   string avatar_url = 4;
   // Annotations of this payment details
   map<string, string> annotations = 5;

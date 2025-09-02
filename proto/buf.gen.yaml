@@ -1,6 +1,9 @@
 version: v2
 managed:
   enabled: true
+  disable:
+    - file_option: go_package
+      module: buf.build/googleapis/googleapis
   override:
     - file_option: go_package_prefix
       value: github.com/metal-stack/masterdata-api
@@ -8,6 +11,6 @@ plugins:
   - remote: buf.build/grpc/go:v1.5.1
     out: ../api
     opt: paths=source_relative,require_unimplemented_servers=false
-  - remote: buf.build/protocolbuffers/go:v1.36.6
+  - remote: buf.build/protocolbuffers/go:v1.36.8
     out: ../api
     opt: paths=source_relative

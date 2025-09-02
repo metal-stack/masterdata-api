@@ -81,7 +81,7 @@ func (s *tenantMemberService) Find(ctx context.Context, req *v1.TenantMemberFind
 		f := fmt.Sprintf("tenantmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
 	}
-	res, _, err := s.tenantMemberStore.Find(ctx, filter, nil)
+	res, _, err := s.tenantMemberStore.Find(ctx, nil, filter)
 	if err != nil {
 		return nil, err
 	}

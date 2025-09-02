@@ -79,9 +79,12 @@ func (_m *Storage[E]) DeleteAll(ctx context.Context, ids ...string) error {
 	return r0
 }
 
-// Find provides a mock function with given fields: ctx, filter, paging
-func (_m *Storage[E]) Find(ctx context.Context, filter map[string]interface{}, paging *v1.Paging) ([]E, *uint64, error) {
-	ret := _m.Called(ctx, filter, paging)
+// Find provides a mock function with given fields: ctx, paging, filters
+func (_m *Storage[E]) Find(ctx context.Context, paging *v1.Paging, filters ...interface{}) ([]E, *uint64, error) {
+	var _ca []interface{}
+	_ca = append(_ca, ctx, paging)
+	_ca = append(_ca, filters...)
+	ret := _m.Called(_ca...)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Find")
@@ -90,27 +93,27 @@ func (_m *Storage[E]) Find(ctx context.Context, filter map[string]interface{}, p
 	var r0 []E
 	var r1 *uint64
 	var r2 error
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]interface{}, *v1.Paging) ([]E, *uint64, error)); ok {
-		return rf(ctx, filter, paging)
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.Paging, ...interface{}) ([]E, *uint64, error)); ok {
+		return rf(ctx, paging, filters...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]interface{}, *v1.Paging) []E); ok {
-		r0 = rf(ctx, filter, paging)
+	if rf, ok := ret.Get(0).(func(context.Context, *v1.Paging, ...interface{}) []E); ok {
+		r0 = rf(ctx, paging, filters...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]E)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, map[string]interface{}, *v1.Paging) *uint64); ok {
-		r1 = rf(ctx, filter, paging)
+	if rf, ok := ret.Get(1).(func(context.Context, *v1.Paging, ...interface{}) *uint64); ok {
+		r1 = rf(ctx, paging, filters...)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*uint64)
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(context.Context, map[string]interface{}, *v1.Paging) error); ok {
-		r2 = rf(ctx, filter, paging)
+	if rf, ok := ret.Get(2).(func(context.Context, *v1.Paging, ...interface{}) error); ok {
+		r2 = rf(ctx, paging, filters...)
 	} else {
 		r2 = ret.Error(2)
 	}
