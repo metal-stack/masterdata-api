@@ -90,7 +90,7 @@ func BenchmarkFindTenant(b *testing.B) {
 		f := make(map[string]any)
 		f["tenant ->> 'name'"] = "tenant-1"
 
-		t, _, err := ds.Find(context.Background(), f, nil)
+		t, _, err := ds.Find(context.Background(), nil, f)
 		require.NoError(b, err)
 		assert.NotNil(b, t)
 		assert.Len(b, t, 1)
