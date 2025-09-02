@@ -70,8 +70,8 @@ func (m *memoryDatastore[E]) DeleteAll(ctx context.Context, ids ...string) error
 }
 
 // Find implements Storage.
-func (m *memoryDatastore[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
-	m.log.Debug("find", "entity", m.entity, "filter", filter)
+func (m *memoryDatastore[E]) Find(ctx context.Context, paging *v1.Paging, filters ...any) ([]E, *uint64, error) {
+	m.log.Debug("find", "entity", m.entity, "filter", filters)
 
 	m.lock.Lock()
 	defer m.lock.Unlock()

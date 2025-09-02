@@ -153,7 +153,7 @@ func TestFindProjectMemberByProject(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'project_id'"] = pointer.Pointer("p1")
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), f2).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -179,7 +179,7 @@ func TestFindProjectMemberByTenant(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'tenant_id'"] = pointer.Pointer("t1")
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*v1.Paging")).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), f2).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

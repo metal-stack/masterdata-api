@@ -58,8 +58,8 @@ func (s StorageStatusWrapper[E]) GetHistoryCreated(ctx context.Context, id strin
 	return wrapGetStatusError(s.storage.GetHistoryCreated(ctx, id, ve))
 }
 
-func (s StorageStatusWrapper[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
-	return s.storage.Find(ctx, filter, paging)
+func (s StorageStatusWrapper[E]) Find(ctx context.Context, paging *v1.Paging, filters ...any) ([]E, *uint64, error) {
+	return s.storage.Find(ctx, paging, filters...)
 }
 
 // wrapCreateStatusError wraps some errors in a grpc status error

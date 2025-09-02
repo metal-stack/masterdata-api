@@ -346,6 +346,7 @@ type ProjectFindRequest struct {
 	Name               *string                 `protobuf:"bytes,8,opt,name=name,proto3,oneof" json:"name,omitempty"`
 	Description        *string                 `protobuf:"bytes,9,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	TenantId           *string                 `protobuf:"bytes,10,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
+	Labels             []string                `protobuf:"bytes,11,rep,name=labels,proto3" json:"labels,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -452,6 +453,13 @@ func (x *ProjectFindRequest) GetTenantId() string {
 		return *x.TenantId
 	}
 	return ""
+}
+
+func (x *ProjectFindRequest) GetLabels() []string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
 }
 
 type ProjectResponse struct {
@@ -572,7 +580,7 @@ const file_v1_project_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"V\n" +
 	"\x18ProjectGetHistoryRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12*\n" +
-	"\x02at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02at\"\xa7\x05\n" +
+	"\x02at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02at\"\xbf\x05\n" +
 	"\x12ProjectFindRequest\x12E\n" +
 	"\rdeprecated_id\x18\x01 \x01(\v2\x1c.google.protobuf.StringValueB\x02\x18\x01R\fdeprecatedId\x12I\n" +
 	"\x0fdeprecated_name\x18\x02 \x01(\v2\x1c.google.protobuf.StringValueB\x02\x18\x01R\x0edeprecatedName\x12W\n" +
@@ -585,7 +593,8 @@ const file_v1_project_proto_rawDesc = "" +
 	"\x04name\x18\b \x01(\tH\x01R\x04name\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\t \x01(\tH\x02R\vdescription\x88\x01\x01\x12 \n" +
 	"\ttenant_id\x18\n" +
-	" \x01(\tH\x03R\btenantId\x88\x01\x01\x1a>\n" +
+	" \x01(\tH\x03R\btenantId\x88\x01\x01\x12\x16\n" +
+	"\x06labels\x18\v \x03(\tR\x06labels\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x05\n" +

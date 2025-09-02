@@ -32,7 +32,7 @@ type Storage[E Entity] interface {
 	Get(ctx context.Context, id string) (E, error)
 	GetHistory(ctx context.Context, id string, at time.Time, ve E) error
 	GetHistoryCreated(ctx context.Context, id string, ve E) error
-	Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error)
+	Find(ctx context.Context, paging *v1.Paging, filters ...any) ([]E, *uint64, error)
 }
 
 // Entity defines a database entity which is stored in jsonb format and with version information
@@ -370,14 +370,15 @@ func (ds *datastore[E]) DeleteAll(ctx context.Context, ids ...string) error {
 }
 
 // Find returns matching elements from the database
-func (ds *datastore[E]) Find(ctx context.Context, filter map[string]any, paging *v1.Paging) ([]E, *uint64, error) {
-	ds.log.Debug("find", "entity", ds.jsonField, "filter", filter)
+func (ds *datastore[E]) Find(ctx context.Context, paging *v1.Paging, filters ...any) ([]E, *uint64, error) {
+	ds.log.Debug("find", "entity", ds.jsonField, "filters", filters)
 	q := ds.sb.Select(ds.jsonField).
 		From(ds.tableName)
 
-	if len(filter) > 0 {
+	for _, filter := range filters {
 		q = q.Where(filter)
 	}
+
 	q = q.OrderBy("id")
 
 	// Add paging query if paging is defined
