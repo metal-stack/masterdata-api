@@ -367,7 +367,9 @@ var (
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
 		Join(tenants.TableName() + " ON " + tenants.TableName() + ".id = " + projectMembers.JSONField() + "->>'tenant_id'").
-		Where(projects.JSONField() + "->>'tenant_id' = :tenantId")
+		Where(projects.JSONField() + "->>'tenant_id' = :tenantId").
+		// COALESCE is required to provide an empty string as default value in case the namespace field is not present
+		Where("COALESCE(" + projectMembers.JSONField() + "->> 'namespace', '') = :namespace")
 )
 
 // ListTenantMembers returns all members of a tenant.
