@@ -107,31 +107,7 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 	}
 
 	if namespace != "" {
-		namespaceInterceptor := func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-			switch r := req.(type) {
-			case *v1.TenantMemberCreateRequest:
-				if r.TenantMember.Namespace == "" {
-					r.TenantMember.Namespace = namespace
-				}
-			case *v1.TenantMemberFindRequest:
-				if r.Namespace == "" {
-					r.Namespace = namespace
-				}
-			case *v1.ProjectMemberCreateRequest:
-				if r.ProjectMember.Namespace == "" {
-					r.ProjectMember.Namespace = namespace
-				}
-			case *v1.ProjectMemberFindRequest:
-				if r.Namespace == "" {
-					r.Namespace = namespace
-				}
-			}
-			return invoker(ctx, method, req, reply, cc, opts...)
-		}
-
-		opts = append(opts,
-			grpc.WithChainUnaryInterceptor(namespaceInterceptor),
-		)
+		opts = append(opts, NamespaceInterceptor(namespace))
 	}
 
 	// Set up a connection to the server.
@@ -143,6 +119,30 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 	client.conn = conn
 
 	return client, nil
+}
+
+func NamespaceInterceptor(namespace string) grpc.DialOption {
+	return grpc.WithChainUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		switch r := req.(type) {
+		case *v1.TenantMemberCreateRequest:
+			if r.TenantMember.Namespace == "" {
+				r.TenantMember.Namespace = namespace
+			}
+		case *v1.TenantMemberFindRequest:
+			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
+		case *v1.ProjectMemberCreateRequest:
+			if r.ProjectMember.Namespace == "" {
+				r.ProjectMember.Namespace = namespace
+			}
+		case *v1.ProjectMemberFindRequest:
+			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
+		}
+		return invoker(ctx, method, req, reply, cc, opts...)
+	})
 }
 
 // Close the underlying connection
