@@ -4,16 +4,16 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 
-	"github.com/metal-stack/masterdata-api/pkg/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/masterdata-api/pkg/auth"
 )
 
 // Client defines the client API
@@ -35,7 +35,6 @@ type GRPCClient struct {
 
 // NewClient creates a new client for the services for the given address, with the certificate and hmac.
 func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, insecure bool, logger *slog.Logger, namespace string) (Client, error) {
-
 	address := fmt.Sprintf("%s:%d", hostname, port)
 
 	certPool, err := x509.SystemCertPool()
@@ -55,21 +54,51 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		}
 	}
 
-	clientCertificate, err := tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		return nil, fmt.Errorf("could not load client key pair: %w", err)
+	var (
+		certificates []tls.Certificate
+		opts         []grpc.DialOption
+	)
+
+	if certFile != "" && keyFile != "" {
+		clientCertificate, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			return nil, fmt.Errorf("could not load client key pair: %w", err)
+		}
+
+		certificates = append(certificates, clientCertificate)
+
+		creds := credentials.NewTLS(&tls.Config{
+			ServerName:         hostname,
+			Certificates:       certificates,
+			RootCAs:            certPool,
+			MinVersion:         tls.VersionTLS12,
+			InsecureSkipVerify: insecure, // nolint:gosec
+		})
+
+		opts = append(opts,
+			// oauth.NewOauthAccess requires the configuration of transport
+			// credentials.
+			grpc.WithTransportCredentials(creds),
+		)
+	} else {
+		opts = append(opts,
+			grpc.WithTransportCredentials(grpcinsecure.NewCredentials()),
+		)
 	}
 
-	creds := credentials.NewTLS(&tls.Config{
-		ServerName:         hostname,
-		Certificates:       []tls.Certificate{clientCertificate},
-		RootCAs:            certPool,
-		MinVersion:         tls.VersionTLS12,
-		InsecureSkipVerify: insecure, // nolint:gosec
-	})
+	if hmacKey != "" {
+		// Set up the credentials for the connection.
+		perRPCHMACAuthenticator, err := auth.NewHMACAuther(hmacKey, auth.EditUser)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create hmac-authenticator: %w", err)
+		}
 
-	if hmacKey == "" {
-		return nil, errors.New("no hmac-key specified")
+		opts = append(opts,
+			// In addition to the following grpc.DialOption, callers may also use
+			// the grpc.CallOption grpc.PerRPCCredentials with the RPC invocation
+			// itself.
+			// See: https://godoc.org/google.golang.org/grpc#PerRPCCredentials
+			grpc.WithPerRPCCredentials(perRPCHMACAuthenticator))
 	}
 
 	client := GRPCClient{
@@ -77,45 +106,40 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		hmacKey: hmacKey,
 	}
 
-	// Set up the credentials for the connection.
-	perRPCHMACAuthenticator, err := auth.NewHMACAuther(hmacKey, auth.EditUser)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create hmac-authenticator: %w", err)
-	}
-
-	namespaceInterceptor := func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		switch r := req.(type) {
-		case *v1.TenantMemberCreateRequest:
-			r.TenantMember.Namespace = namespace
-		case *v1.TenantMemberFindRequest:
-			r.Namespace = namespace
-		case *v1.ProjectMemberCreateRequest:
-			r.ProjectMember.Namespace = namespace
-		case *v1.ProjectMemberFindRequest:
-			r.Namespace = namespace
+	if namespace != "" {
+		namespaceInterceptor := func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+			switch r := req.(type) {
+			case *v1.TenantMemberCreateRequest:
+				if r.TenantMember.Namespace == "" {
+					r.TenantMember.Namespace = namespace
+				}
+			case *v1.TenantMemberFindRequest:
+				if r.Namespace == "" {
+					r.Namespace = namespace
+				}
+			case *v1.ProjectMemberCreateRequest:
+				if r.ProjectMember.Namespace == "" {
+					r.ProjectMember.Namespace = namespace
+				}
+			case *v1.ProjectMemberFindRequest:
+				if r.Namespace == "" {
+					r.Namespace = namespace
+				}
+			}
+			return invoker(ctx, method, req, reply, cc, opts...)
 		}
-		return invoker(ctx, method, req, reply, cc, opts...)
+
+		opts = append(opts,
+			grpc.WithChainUnaryInterceptor(namespaceInterceptor),
+		)
 	}
 
-	opts := []grpc.DialOption{
-		// In addition to the following grpc.DialOption, callers may also use
-		// the grpc.CallOption grpc.PerRPCCredentials with the RPC invocation
-		// itself.
-		// See: https://godoc.org/google.golang.org/grpc#PerRPCCredentials
-		grpc.WithPerRPCCredentials(perRPCHMACAuthenticator),
-		// oauth.NewOauthAccess requires the configuration of transport
-		// credentials.
-		grpc.WithTransportCredentials(creds),
-
-		grpc.WithChainUnaryInterceptor(namespaceInterceptor),
-
-		// grpc.WithInsecure(),
-	}
 	// Set up a connection to the server.
 	conn, err := grpc.NewClient(address, opts...)
 	if err != nil {
 		return nil, err
 	}
+
 	client.conn = conn
 
 	return client, nil
