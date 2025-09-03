@@ -18,12 +18,12 @@ import (
 	"testing"
 
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
-	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
+	"github.com/metal-stack/masterdata-api/pkg/test/mocks"
 )
 
 func TestCreateProject(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Project]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	storageMock := mocks.NewMockStorage[*v1.Project](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
@@ -58,8 +58,8 @@ func TestCreateProject(t *testing.T) {
 }
 
 func TestCreateProjectWithQuotaCheck(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Project]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	storageMock := mocks.NewMockStorage[*v1.Project](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
@@ -87,7 +87,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	var projects []*v1.Project
 	// see: https://github.com/stretchr/testify/blob/master/mock/mock.go#L149-L162
 	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
-	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), filter).Return(projects, nil, nil)
+	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{filter}).Return(projects, nil, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
 	resp, err := ts.Create(ctx, tcr)
 	require.NoError(t, err)
@@ -97,8 +97,8 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 }
 
 func TestUpdateProject(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Project]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	storageMock := mocks.NewMockStorage[*v1.Project](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,
@@ -130,9 +130,9 @@ func TestUpdateProject(t *testing.T) {
 }
 
 func TestDeleteProject(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Project]{}
-	projectMemberStorageMock := &mocks.Storage[*v1.ProjectMember]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	storageMock := mocks.NewMockStorage[*v1.Project](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
+	projectMemberStorageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
 	ps := &projectService{
 		projectStore:       storageMock,
 		projectMemberStore: projectMemberStorageMock,
@@ -151,8 +151,10 @@ func TestDeleteProject(t *testing.T) {
 	}
 	var paging *v1.Paging
 
-	projectMemberStorageMock.On("Find", ctx, paging, filter).Return([]*v1.ProjectMember{}, nil, nil)
-	storageMock.On("DeleteAll", ctx, p3.Meta.Id).Return(nil)
+	projectMemberStorageMock.On("Find", ctx, paging, []any{filter}).Return([]*v1.ProjectMember{
+		{Meta: &v1.Meta{Id: p3.Meta.Id}},
+	}, nil, nil)
+	projectMemberStorageMock.On("DeleteAll", ctx, []string{p3.Meta.Id}).Return(nil)
 	storageMock.On("Delete", ctx, p3.Meta.Id).Return(nil)
 	resp, err := ps.Delete(ctx, pdr)
 	require.NoError(t, err)
@@ -162,8 +164,8 @@ func TestDeleteProject(t *testing.T) {
 }
 
 func TestGetProject(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Project]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
+	storageMock := mocks.NewMockStorage[*v1.Project](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
 	ts := &projectService{
 		projectStore: storageMock,
 		tenantStore:  tenantStorageMock,

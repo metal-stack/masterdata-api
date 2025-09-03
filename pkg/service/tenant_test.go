@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/runtime/protoimpl"
 
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
-	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
+	"github.com/metal-stack/masterdata-api/pkg/test/mocks"
 )
 
 var log *slog.Logger
@@ -32,7 +32,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateTenant(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Tenant]{}
+	storageMock := mocks.NewMockStorage[*v1.Tenant](t)
 	ts := &tenantService{
 		tenantStore: storageMock,
 		log:         slog.Default(),
@@ -64,7 +64,7 @@ func TestCreateTenant(t *testing.T) {
 }
 
 func TestUpdateTenant(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Tenant]{}
+	storageMock := mocks.NewMockStorage[*v1.Tenant](t)
 	ts := &tenantService{
 		tenantStore: storageMock,
 		log:         slog.Default(),
@@ -88,8 +88,8 @@ func TestUpdateTenant(t *testing.T) {
 }
 
 func TestDeleteTenant(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Tenant]{}
-	memberStorageMock := &mocks.Storage[*v1.TenantMember]{}
+	storageMock := mocks.NewMockStorage[*v1.Tenant](t)
+	memberStorageMock := mocks.NewMockStorage[*v1.TenantMember](t)
 	ts := &tenantService{
 		tenantStore:       storageMock,
 		tenantMemberStore: memberStorageMock,
@@ -111,7 +111,7 @@ func TestDeleteTenant(t *testing.T) {
 	var paging *v1.Paging
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
-	memberStorageMock.On("Find", ctx, paging, tfilter).Return([]*v1.TenantMember{
+	memberStorageMock.On("Find", ctx, paging, []any{tfilter}).Return([]*v1.TenantMember{
 		{
 			Meta: &v1.Meta{
 				Id: "t3",
@@ -120,7 +120,7 @@ func TestDeleteTenant(t *testing.T) {
 			MemberId: t3.Meta.Id,
 		},
 	}, nil, nil)
-	memberStorageMock.On("Find", ctx, paging, mfilter).Return([]*v1.TenantMember{
+	memberStorageMock.On("Find", ctx, paging, []any{mfilter}).Return([]*v1.TenantMember{
 		{
 			Meta: &v1.Meta{
 				Id: "t3",
@@ -129,7 +129,7 @@ func TestDeleteTenant(t *testing.T) {
 			MemberId: t3.Meta.Id,
 		},
 	}, nil, nil)
-	memberStorageMock.On("DeleteAll", ctx, "t3").Return(nil)
+	memberStorageMock.On("DeleteAll", ctx, []string{"t3"}).Return(nil)
 	resp, err := ts.Delete(ctx, tdr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
@@ -138,7 +138,7 @@ func TestDeleteTenant(t *testing.T) {
 }
 
 func TestGetTenant(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.Tenant]{}
+	storageMock := mocks.NewMockStorage[*v1.Tenant](t)
 	ts := &tenantService{
 		tenantStore: storageMock,
 		log:         slog.Default(),
