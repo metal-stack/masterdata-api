@@ -53,11 +53,24 @@ func (s *projectMemberService) Create(ctx context.Context, req *v1.ProjectMember
 	err = s.projectMemberStore.Create(ctx, projectMember)
 	return projectMember.NewProjectMemberResponse(), err
 }
+
 func (s *projectMemberService) Update(ctx context.Context, req *v1.ProjectMemberUpdateRequest) (*v1.ProjectMemberResponse, error) {
 	projectMember := req.ProjectMember
-	err := s.projectMemberStore.Update(ctx, projectMember)
+
+	old, err := s.projectMemberStore.Get(ctx, projectMember.Meta.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if old.Namespace != projectMember.Namespace {
+		return nil, status.Error(codes.InvalidArgument, "updating the namespace of a project member is not allowed")
+	}
+
+	err = s.projectMemberStore.Update(ctx, projectMember)
+
 	return projectMember.NewProjectMemberResponse(), err
 }
+
 func (s *projectMemberService) Delete(ctx context.Context, req *v1.ProjectMemberDeleteRequest) (*v1.ProjectMemberResponse, error) {
 	projectMember := req.NewProjectMember()
 	err := s.projectMemberStore.Delete(ctx, projectMember.Meta.Id)
@@ -74,6 +87,9 @@ func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFi
 	filter := make(map[string]any)
 	if req.ProjectId != nil {
 		filter["projectmember ->> 'project_id'"] = req.ProjectId
+	}
+	if req.TenantId != nil {
+		filter["projectmember ->> 'tenant_id'"] = req.TenantId
 	}
 	if req.TenantId != nil {
 		filter["projectmember ->> 'tenant_id'"] = req.TenantId

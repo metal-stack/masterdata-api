@@ -34,7 +34,7 @@ type GRPCClient struct {
 }
 
 // NewClient creates a new client for the services for the given address, with the certificate and hmac.
-func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, insecure bool, logger *slog.Logger) (Client, error) {
+func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, insecure bool, logger *slog.Logger, namespace string) (Client, error) {
 
 	address := fmt.Sprintf("%s:%d", hostname, port)
 
@@ -83,6 +83,20 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		return nil, fmt.Errorf("failed to create hmac-authenticator: %w", err)
 	}
 
+	namespaceInterceptor := func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		switch r := req.(type) {
+		case *v1.TenantMemberCreateRequest:
+			r.TenantMember.Namespace = namespace
+		case *v1.TenantMemberFindRequest:
+			r.Namespace = namespace
+		case *v1.ProjectMemberCreateRequest:
+			r.ProjectMember.Namespace = namespace
+		case *v1.ProjectMemberFindRequest:
+			r.Namespace = namespace
+		}
+		return invoker(ctx, method, req, reply, cc, opts...)
+	}
+
 	opts := []grpc.DialOption{
 		// In addition to the following grpc.DialOption, callers may also use
 		// the grpc.CallOption grpc.PerRPCCredentials with the RPC invocation
@@ -92,6 +106,8 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		// oauth.NewOauthAccess requires the configuration of transport
 		// credentials.
 		grpc.WithTransportCredentials(creds),
+
+		grpc.WithChainUnaryInterceptor(namespaceInterceptor),
 
 		// grpc.WithInsecure(),
 	}

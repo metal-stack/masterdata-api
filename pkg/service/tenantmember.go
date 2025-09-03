@@ -53,7 +53,18 @@ func (s *tenantMemberService) Create(ctx context.Context, req *v1.TenantMemberCr
 }
 func (s *tenantMemberService) Update(ctx context.Context, req *v1.TenantMemberUpdateRequest) (*v1.TenantMemberResponse, error) {
 	tenantMember := req.TenantMember
-	err := s.tenantMemberStore.Update(ctx, tenantMember)
+
+	old, err := s.tenantMemberStore.Get(ctx, tenantMember.Meta.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if old.Namespace != tenantMember.Namespace {
+		return nil, status.Error(codes.InvalidArgument, "updating the namespace of a tenant member is not allowed")
+	}
+
+	err = s.tenantMemberStore.Update(ctx, tenantMember)
+
 	return tenantMember.NewTenantMemberResponse(), err
 }
 func (s *tenantMemberService) Delete(ctx context.Context, req *v1.TenantMemberDeleteRequest) (*v1.TenantMemberResponse, error) {
@@ -69,7 +80,9 @@ func (s *tenantMemberService) Get(ctx context.Context, req *v1.TenantMemberGetRe
 	return tenantMember.NewTenantMemberResponse(), nil
 }
 func (s *tenantMemberService) Find(ctx context.Context, req *v1.TenantMemberFindRequest) (*v1.TenantMemberListResponse, error) {
-	filter := make(map[string]any)
+	filter := map[string]any{
+		"tenantmember ->> 'namespace'": req.Namespace,
+	}
 	if req.TenantId != nil {
 		filter["tenantmember ->> 'tenant_id'"] = req.TenantId
 	}
