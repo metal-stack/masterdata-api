@@ -119,7 +119,7 @@ func TestCRUD(t *testing.T) {
 	filter := make(map[string]any)
 	// filter["tenant->>name"] = "Important Tenant"
 	filter["id"] = "tenant-1"
-	tenants, _, err := tenantDS.Find(ctx, filter, nil)
+	tenants, _, err := tenantDS.Find(ctx, nil, filter)
 	require.NoError(t, err)
 	assert.NotNil(t, tenants)
 	assert.Len(t, tenants, 1)
@@ -503,7 +503,7 @@ func TestFind(t *testing.T) {
 	// now search it
 	filter := make(map[string]any)
 	filter["id"] = t6
-	tfr, _, err := tenantDS.Find(ctx, filter, nil)
+	tfr, _, err := tenantDS.Find(ctx, nil, filter)
 	require.NoError(t, err)
 	assert.NotNil(t, tfr)
 	assert.Len(t, tfr, 1)
@@ -520,13 +520,13 @@ func TestFind(t *testing.T) {
 	}
 	// find all
 	filter = make(map[string]any)
-	tfr, _, err = tenantDS.Find(ctx, filter, nil)
+	tfr, _, err = tenantDS.Find(ctx, nil, filter)
 	require.NoError(t, err)
 	assert.NotNil(t, tfr)
 
 	// find one
 	filter["id"] = "ftenant-9"
-	t9, _, err := tenantDS.Find(ctx, filter, nil)
+	t9, _, err := tenantDS.Find(ctx, nil, filter)
 	require.NoError(t, err)
 	assert.NotNil(t, t9)
 	assert.Len(t, t9, 1)
@@ -534,7 +534,7 @@ func TestFind(t *testing.T) {
 	// find one by name
 	filter = make(map[string]any)
 	filter["tenant ->> 'name'"] = "tenant-8"
-	t8, _, err := tenantDS.Find(ctx, filter, nil)
+	t8, _, err := tenantDS.Find(ctx, nil, filter)
 	require.NoError(t, err)
 	assert.NotNil(t, t8)
 	assert.Len(t, t8, 1)
@@ -542,7 +542,7 @@ func TestFind(t *testing.T) {
 	// find one by description
 	filter = make(map[string]any)
 	filter["tenant ->> 'description'"] = "Tenant 4"
-	t4, _, err := tenantDS.Find(ctx, filter, nil)
+	t4, _, err := tenantDS.Find(ctx, nil, filter)
 	require.NoError(t, err)
 	assert.NotNil(t, t4)
 	assert.Len(t, t4, 1)
@@ -575,14 +575,14 @@ func TestFindWithPaging(t *testing.T) {
 	assert.Len(t, ts, 100)
 
 	// Then find the first 60 results
-	ts, nextpage, err = tenantDS.Find(ctx, nil, &v1.Paging{Count: pointer.Pointer(uint64(60))})
+	ts, nextpage, err = tenantDS.Find(ctx, &v1.Paging{Count: pointer.Pointer(uint64(60))})
 	require.NoError(t, err)
 	assert.NotNil(t, nextpage)
 	assert.Equal(t, uint64(1), *nextpage)
 	assert.Len(t, ts, 60)
 
 	// At least the next 60, but only 40 left and no more pages
-	ts, nextpage, err = tenantDS.Find(ctx, nil, &v1.Paging{Page: nextpage, Count: pointer.Pointer(uint64(60))})
+	ts, nextpage, err = tenantDS.Find(ctx, &v1.Paging{Page: nextpage, Count: pointer.Pointer(uint64(60))})
 	require.NoError(t, err)
 	assert.Nil(t, nextpage)
 	assert.Len(t, ts, 40)

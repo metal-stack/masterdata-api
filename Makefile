@@ -54,18 +54,12 @@ client:
 
 .PHONY: mocks
 mocks:
-	rm -rf pkg/datastore/mocks api/v1/mocks
+	rm -rf pkg/test/mocks
 	docker run --rm \
 		--user $$(id -u):$$(id -g) \
 		-w /work \
 		-v ${PWD}:/work \
-		vektra/mockery:v2.53.3 -r --keeptree --dir api/v1 --output api/v1/mocks --all
-
-	docker run --rm \
-		--user $$(id -u):$$(id -g) \
-		-w /work \
-		-v ${PWD}:/work \
-		vektra/mockery:v2.53.3 -r --keeptree --dir pkg/datastore --output pkg/datastore/mocks --all
+		vektra/mockery:v3.5.4
 
 .PHONY: postgres-up
 postgres-up: postgres-rm

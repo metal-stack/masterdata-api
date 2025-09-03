@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strconv"
+	"strings"
 
 	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
@@ -48,7 +50,7 @@ func (s *projectService) Create(ctx context.Context, rq *connect.Request[v1.Proj
 		maxProjects := tenant.GetQuotas().GetProject().Max
 		filter := make(map[string]any)
 		filter["project ->> 'tenant_id'"] = project.GetTenantId()
-		projects, _, err := s.projectStore.Find(ctx, filter, nil)
+		projects, _, err := s.projectStore.Find(ctx, nil, filter)
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +90,7 @@ func (s *projectService) Delete(ctx context.Context, rq *connect.Request[v1.Proj
 	filter := map[string]any{
 		"projectmember ->> 'project_id'": project.Meta.Id,
 	}
-	memberships, _, err := s.projectMemberStore.Find(ctx, filter, nil)
+	memberships, _, err := s.projectMemberStore.Find(ctx, nil, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -144,25 +146,45 @@ func (s *projectService) Find(ctx context.Context, rq *connect.Request[v1.Projec
 		req.TenantId = &req.DeprecatedTenantId.Value // nolint:staticcheck
 	}
 
-	filter := make(map[string]any)
+	var filters []any
+
+	mapFilter := make(map[string]any)
 	if req.Id != nil {
-		filter["id"] = req.Id
+		mapFilter["id"] = req.Id
 	}
 	if req.Name != nil {
-		filter["project ->> 'name'"] = req.Name
+		mapFilter["project ->> 'name'"] = req.Name
 	}
 	if req.Description != nil {
-		filter["project ->> 'description'"] = req.Description
+		mapFilter["project ->> 'description'"] = req.Description
 	}
 	if req.TenantId != nil {
-		filter["project ->> 'tenant_id'"] = req.TenantId
+		mapFilter["project ->> 'tenant_id'"] = req.TenantId
 	}
 	for key, value := range req.Annotations {
 		// select * from project where project -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
 		f := fmt.Sprintf("project -> 'meta' -> 'annotations' ->> '%s'", key)
-		filter[f] = value
+		mapFilter[f] = value
 	}
-	res, nextPage, err := s.projectStore.Find(ctx, filter, req.Paging)
+
+	if len(mapFilter) > 0 {
+		filters = append(filters, mapFilter)
+	}
+
+	if len(req.Labels) > 0 {
+		var contains []string
+
+		for _, label := range req.Labels {
+			contains = append(contains, strconv.Quote(label))
+		}
+
+		// select * from projects where project -> 'meta' -> 'labels' @> '["a=b","c=d"]';
+		labelFilter := fmt.Sprintf(`project -> 'meta' -> 'labels' @> '[%s]'`, strings.Join(contains, ","))
+
+		filters = append(filters, labelFilter)
+	}
+
+	res, nextPage, err := s.projectStore.Find(ctx, req.Paging, filters...)
 	if err != nil {
 		return nil, err
 	}

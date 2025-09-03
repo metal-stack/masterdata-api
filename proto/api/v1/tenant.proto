@@ -103,6 +103,7 @@ message TenantFindRequest {
 
   optional string id = 5;
   optional string name = 6;
+  repeated string labels = 7;
 }
 
 message TenantResponse {

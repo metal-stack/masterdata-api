@@ -13,13 +13,13 @@ import (
 
 	"testing"
 
-	"github.com/metal-stack/masterdata-api/pkg/datastore/mocks"
+	"github.com/metal-stack/masterdata-api/pkg/test/mocks"
 )
 
 func TestCreateProjectMember(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.ProjectMember]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
-	projectStorageMock := &mocks.Storage[*v1.Project]{}
+	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
+	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
@@ -48,9 +48,9 @@ func TestCreateProjectMember(t *testing.T) {
 }
 
 func TestUpdateProjectMember(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.ProjectMember]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
-	projectStorageMock := &mocks.Storage[*v1.Project]{}
+	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
+	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
@@ -83,9 +83,9 @@ func TestUpdateProjectMember(t *testing.T) {
 }
 
 func TestDeleteProjectMember(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.ProjectMember]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
-	projectStorageMock := &mocks.Storage[*v1.Project]{}
+	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
+	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
@@ -109,9 +109,9 @@ func TestDeleteProjectMember(t *testing.T) {
 }
 
 func TestGetProjectMember(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.ProjectMember]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
-	projectStorageMock := &mocks.Storage[*v1.Project]{}
+	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
+	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
@@ -135,9 +135,9 @@ func TestGetProjectMember(t *testing.T) {
 }
 
 func TestFindProjectMemberByProject(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.ProjectMember]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
-	projectStorageMock := &mocks.Storage[*v1.Project]{}
+	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
+	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
@@ -146,24 +146,25 @@ func TestFindProjectMemberByProject(t *testing.T) {
 	}
 	ctx := context.Background()
 
+	p1 := pointer.Pointer("p1")
 	// filter by name
 	var t6s []*v1.ProjectMember
 	tfr := &v1.ProjectMemberFindRequest{
-		ProjectId: pointer.Pointer("p1"),
+		ProjectId: p1,
 	}
 
 	f2 := make(map[string]any)
-	f2["projectmember ->> 'project_id'"] = pointer.Pointer("p1")
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
+	f2["projectmember ->> 'project_id'"] = p1
+	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
 
 func TestFindProjectMemberByTenant(t *testing.T) {
-	storageMock := &mocks.Storage[*v1.ProjectMember]{}
-	tenantStorageMock := &mocks.Storage[*v1.Tenant]{}
-	projectStorageMock := &mocks.Storage[*v1.Project]{}
+	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
+	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
+	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
 	ts := &projectMemberService{
 		projectMemberStore: storageMock,
 		tenantStore:        tenantStorageMock,
@@ -180,7 +181,7 @@ func TestFindProjectMemberByTenant(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'tenant_id'"] = pointer.Pointer("t1")
-	storageMock.On("Find", ctx, f2, mock.AnythingOfType("*apiv1.Paging")).Return(t6s, nil, nil)
+	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)

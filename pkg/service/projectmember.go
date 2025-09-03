@@ -89,7 +89,7 @@ func (s *projectMemberService) Find(ctx context.Context, rq *connect.Request[v1.
 		f := fmt.Sprintf("projectmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
 	}
-	res, _, err := s.projectMemberStore.Find(ctx, filter, nil)
+	res, _, err := s.projectMemberStore.Find(ctx, nil, filter)
 	if err != nil {
 		return nil, err
 	}

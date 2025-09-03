@@ -61,6 +61,7 @@ message ProjectFindRequest {
   optional string name = 8;
   optional string description = 9;
   optional string tenant_id = 10;
+  repeated string labels = 11;
 }
 
 message ProjectResponse {

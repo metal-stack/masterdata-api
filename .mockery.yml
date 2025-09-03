@@ -1,0 +1,9 @@
+---
+all: true
+recursive: true
+dir: pkg/test/mocks/
+filename: "{{.InterfaceName}}.go"
+pkgname: mocks
+packages:
+  github.com/metal-stack/masterdata-api/api/v1:
+  github.com/metal-stack/masterdata-api/pkg/datastore:

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"strconv"
+	"strings"
 
 	"connectrpc.com/connect"
 	sq "github.com/Masterminds/squirrel"
@@ -62,11 +64,11 @@ func (s *tenantService) Delete(ctx context.Context, rq *connect.Request[v1.Tenan
 	tenantIsMemberFilter := map[string]any{
 		"tenantmember ->> 'member_id'": tenant.Meta.Id,
 	}
-	tenantIsHostMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantIsHostFilter, nil)
+	tenantIsHostMemberships, _, err := s.tenantMemberStore.Find(ctx, nil, tenantIsHostFilter)
 	if err != nil {
 		return nil, err
 	}
-	tenantIsMemberMemberships, _, err := s.tenantMemberStore.Find(ctx, tenantIsMemberFilter, nil)
+	tenantIsMemberMemberships, _, err := s.tenantMemberStore.Find(ctx, nil, tenantIsMemberFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -132,19 +134,38 @@ func (s *tenantService) Find(ctx context.Context, rq *connect.Request[v1.TenantF
 		req.Name = &req.DeprecatedName.Value // nolint:staticcheck
 	}
 
-	filter := make(map[string]any)
+	var filters []any
+
+	mapFilter := make(map[string]any)
 	if req.Id != nil {
-		filter["id"] = req.GetId()
+		mapFilter["id"] = req.GetId()
 	}
 	if req.Name != nil {
-		filter["tenant ->> 'name'"] = req.GetName()
+		mapFilter["tenant ->> 'name'"] = req.GetName()
 	}
 	for key, value := range req.Annotations {
 		// select * from tenants where tenant -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
 		f := fmt.Sprintf("tenant -> 'meta' -> 'annotations' ->> '%s'", key)
-		filter[f] = value
+		mapFilter[f] = value
 	}
-	res, nextPage, err := s.tenantStore.Find(ctx, filter, req.Paging)
+
+	if len(mapFilter) > 0 {
+		filters = append(filters, mapFilter)
+	}
+
+	if len(req.Labels) > 0 {
+		var contains []string
+
+		for _, label := range req.Labels {
+			contains = append(contains, strconv.Quote(label))
+		}
+
+		// select * from tenants where tenant -> 'meta' -> 'labels' @> '["a=b","c=d"]';
+		labelFilter := fmt.Sprintf(`tenant -> 'meta' -> 'labels' @> '[%s]'`, strings.Join(contains, ","))
+
+		filters = append(filters, labelFilter)
+	}
+	res, nextPage, err := s.tenantStore.Find(ctx, req.Paging, filters...)
 	if err != nil {
 		return nil, err
 	}
