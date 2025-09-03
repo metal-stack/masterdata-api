@@ -128,16 +128,28 @@ func NamespaceInterceptor(namespace string) grpc.DialOption {
 			if r.TenantMember.Namespace == "" {
 				r.TenantMember.Namespace = namespace
 			}
-		case *v1.TenantMemberFindRequest:
-			if r.Namespace == "" {
-				r.Namespace = namespace
-			}
 		case *v1.ProjectMemberCreateRequest:
 			if r.ProjectMember.Namespace == "" {
 				r.ProjectMember.Namespace = namespace
 			}
+		case *v1.TenantMemberFindRequest:
+			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
 		case *v1.ProjectMemberFindRequest:
 			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
+		case *v1.FindParticipatingProjectsRequest:
+			if r.Namespace != "" {
+				r.Namespace = namespace
+			}
+		case *v1.FindParticipatingTenantsRequest:
+			if r.Namespace != "" {
+				r.Namespace = namespace
+			}
+		case *v1.ListTenantMembersRequest:
+			if r.Namespace != "" {
 				r.Namespace = namespace
 			}
 		}
