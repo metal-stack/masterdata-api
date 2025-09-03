@@ -895,7 +895,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 
 	s := &tenantService{
 		db:  db,
-		log: slog.Default(),
+		log: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})),
 	}
 
 	var (
