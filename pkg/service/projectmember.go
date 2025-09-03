@@ -85,7 +85,7 @@ func (s *projectMemberService) Get(ctx context.Context, req *v1.ProjectMemberGet
 }
 func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFindRequest) (*v1.ProjectMemberListResponse, error) {
 	filter := map[string]any{
-		"projectmember ->> 'namespace'": req.Namespace,
+		"COALESCE(projectmember ->> 'namespace', '')": req.Namespace,
 	}
 	if req.ProjectId != nil {
 		filter["projectmember ->> 'project_id'"] = req.ProjectId

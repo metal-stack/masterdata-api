@@ -81,7 +81,7 @@ func (s *tenantMemberService) Get(ctx context.Context, req *v1.TenantMemberGetRe
 }
 func (s *tenantMemberService) Find(ctx context.Context, req *v1.TenantMemberFindRequest) (*v1.TenantMemberListResponse, error) {
 	filter := map[string]any{
-		"tenantmember ->> 'namespace'": req.Namespace,
+		"COALESCE(tenantmember ->> 'namespace', '')": req.Namespace,
 	}
 	if req.TenantId != nil {
 		filter["tenantmember ->> 'tenant_id'"] = req.TenantId

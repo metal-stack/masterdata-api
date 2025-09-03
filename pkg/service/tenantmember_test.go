@@ -145,7 +145,7 @@ func TestFindTenantMemberByTenant(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["tenantmember ->> 'tenant_id'"] = pointer.Pointer("p1")
-	f2["tenantmember ->> 'namespace'"] = "a"
+	f2["COALESCE(tenantmember ->> 'namespace', '')"] = "a"
 	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
@@ -171,7 +171,7 @@ func TestFindTenantMemberByMember(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["tenantmember ->> 'member_id'"] = pointer.Pointer("t1")
-	f2["tenantmember ->> 'namespace'"] = "a"
+	f2["COALESCE(tenantmember ->> 'namespace', '')"] = "a"
 	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
