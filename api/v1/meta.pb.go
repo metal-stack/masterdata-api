@@ -32,6 +32,7 @@ type Meta struct {
 	UpdatedTime   *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_time,json=updatedTime,proto3" json:"updated_time,omitempty"`
 	Annotations   map[string]string      `protobuf:"bytes,7,rep,name=annotations,proto3" json:"annotations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Labels        []string               `protobuf:"bytes,8,rep,name=labels,proto3" json:"labels,omitempty"`
+	CreatedBy     string                 `protobuf:"bytes,9,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -122,11 +123,18 @@ func (x *Meta) GetLabels() []string {
 	return nil
 }
 
+func (x *Meta) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
 var File_v1_meta_proto protoreflect.FileDescriptor
 
 const file_v1_meta_proto_rawDesc = "" +
 	"\n" +
-	"\rv1/meta.proto\x12\x02v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf7\x02\n" +
+	"\rv1/meta.proto\x12\x02v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x96\x03\n" +
 	"\x04Meta\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x1e\n" +
@@ -137,7 +145,9 @@ const file_v1_meta_proto_rawDesc = "" +
 	"\fcreated_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vcreatedTime\x12=\n" +
 	"\fupdated_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\vupdatedTime\x12;\n" +
 	"\vannotations\x18\a \x03(\v2\x19.v1.Meta.AnnotationsEntryR\vannotations\x12\x16\n" +
-	"\x06labels\x18\b \x03(\tR\x06labels\x1a>\n" +
+	"\x06labels\x18\b \x03(\tR\x06labels\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\t \x01(\tR\tcreatedBy\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01Be\n" +

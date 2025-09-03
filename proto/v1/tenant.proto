@@ -3,7 +3,7 @@ syntax = "proto3";
 package v1;
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/wrappers.proto";
+import "google/type/postal_address.proto";
 import "v1/common.proto";
 import "v1/iam.proto";
 import "v1/meta.proto";
@@ -70,6 +70,8 @@ message Tenant {
   QuotaSet default_quotas = 4;
   QuotaSet quotas = 5;
   IAMConfig iam_config = 6;
+  PaymentDetails payment = 7;
+  ContactDetails contact_details = 8;
 }
 
 message TenantCreateRequest {
@@ -94,9 +96,8 @@ message TenantGetHistoryRequest {
 }
 
 message TenantFindRequest {
-  // TODO: remove in next release:
-  google.protobuf.StringValue deprecated_id = 1 [deprecated = true];
-  google.protobuf.StringValue deprecated_name = 2 [deprecated = true];
+  reserved 1, 2;
+  reserved "deprecated_id", "deprecated_name";
 
   Paging paging = 3;
   map<string, string> annotations = 4;
@@ -114,4 +115,30 @@ message TenantListResponse {
   repeated Tenant tenants = 1;
   // next_page is used for pagination, returns the next page to be fetched and must then be provided in the list request.
   optional uint64 next_page = 2;
+}
+
+// PaymentDetails describe payment specific configurations of a tenant
+message PaymentDetails {
+  // Details stored as key value pairs
+  map<string, string> details = 1;
+  // Annotations of this payment details
+  map<string, string> annotations = 2;
+  // Labels of this payment details
+  repeated string labels = 3;
+}
+
+// ContactDetails contain more properties of a tenant
+message ContactDetails {
+  // Email of this tenant
+  string email = 1;
+  // Phone Number of this tenant
+  string phone_number = 2;
+  // Address of this tenant
+  google.type.PostalAddress address = 3;
+  // Avatar URL
+  string avatar_url = 4;
+  // Annotations of this payment details
+  map<string, string> annotations = 5;
+  // Labels of this payment details
+  repeated string labels = 6;
 }

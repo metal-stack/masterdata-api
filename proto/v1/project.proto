@@ -3,7 +3,6 @@ syntax = "proto3";
 package v1;
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/wrappers.proto";
 import "v1/common.proto";
 import "v1/meta.proto";
 import "v1/quota.proto";
@@ -48,11 +47,8 @@ message ProjectGetHistoryRequest {
 }
 
 message ProjectFindRequest {
-  // TODO: remove in next release:
-  google.protobuf.StringValue deprecated_id = 1 [deprecated = true];
-  google.protobuf.StringValue deprecated_name = 2 [deprecated = true];
-  google.protobuf.StringValue deprecated_description = 3 [deprecated = true];
-  google.protobuf.StringValue deprecated_tenant_id = 4 [deprecated = true];
+  reserved 1, 2, 3, 4;
+  reserved "deprecated_id", "deprecated_name", "deprecated_description", "deprecated_tenant_id";
 
   Paging paging = 5;
   map<string, string> annotations = 6;
