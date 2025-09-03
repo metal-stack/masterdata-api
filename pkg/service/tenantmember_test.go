@@ -69,6 +69,7 @@ func TestUpdateTenantMember(t *testing.T) {
 		},
 	}
 
+	storageMock.On("Get", ctx, pm1.Meta.Id).Return(pm1, nil)
 	storageMock.On("Update", ctx, pm1).Return(nil)
 	resp, err := ts.Update(ctx, pmur)
 	require.NoError(t, err)
@@ -138,11 +139,13 @@ func TestFindTenantMemberByTenant(t *testing.T) {
 	// filter by name
 	var t6s []*v1.TenantMember
 	tfr := &v1.TenantMemberFindRequest{
-		TenantId: pointer.Pointer("p1"),
+		TenantId:  pointer.Pointer("p1"),
+		Namespace: "a",
 	}
 
 	f2 := make(map[string]any)
 	f2["tenantmember ->> 'tenant_id'"] = pointer.Pointer("p1")
+	f2["tenantmember ->> 'namespace'"] = "a"
 	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
@@ -162,11 +165,13 @@ func TestFindTenantMemberByMember(t *testing.T) {
 	// filter by name
 	var t6s []*v1.TenantMember
 	tfr := &v1.TenantMemberFindRequest{
-		MemberId: pointer.Pointer("t1"),
+		MemberId:  pointer.Pointer("t1"),
+		Namespace: "a",
 	}
 
 	f2 := make(map[string]any)
 	f2["tenantmember ->> 'member_id'"] = pointer.Pointer("t1")
+	f2["tenantmember ->> 'namespace'"] = "a"
 	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)

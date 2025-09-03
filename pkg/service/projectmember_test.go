@@ -73,6 +73,7 @@ func TestUpdateProjectMember(t *testing.T) {
 		},
 	}
 
+	storageMock.On("Get", ctx, pm1.Meta.Id).Return(pm1, nil)
 	storageMock.On("Update", ctx, pm1).Return(nil)
 	resp, err := ts.Update(ctx, pmur)
 	require.NoError(t, err)
@@ -149,10 +150,12 @@ func TestFindProjectMemberByProject(t *testing.T) {
 	var t6s []*v1.ProjectMember
 	tfr := &v1.ProjectMemberFindRequest{
 		ProjectId: pointer.Pointer("p1"),
+		Namespace: "a",
 	}
 
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'project_id'"] = pointer.Pointer("p1")
+	f2["projectmember ->> 'namespace'"] = "a"
 	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
@@ -174,11 +177,13 @@ func TestFindProjectMemberByTenant(t *testing.T) {
 	// filter by name
 	var t6s []*v1.ProjectMember
 	tfr := &v1.ProjectMemberFindRequest{
-		TenantId: pointer.Pointer("t1"),
+		TenantId:  pointer.Pointer("t1"),
+		Namespace: "a",
 	}
 
 	f2 := make(map[string]any)
 	f2["projectmember ->> 'tenant_id'"] = pointer.Pointer("t1")
+	f2["projectmember ->> 'namespace'"] = "a"
 	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
 	resp, err := ts.Find(ctx, tfr)
 	require.NoError(t, err)
