@@ -141,15 +141,15 @@ func NamespaceInterceptor(namespace string) grpc.DialOption {
 				r.Namespace = namespace
 			}
 		case *v1.FindParticipatingProjectsRequest:
-			if r.Namespace != "" {
+			if r.Namespace == "" {
 				r.Namespace = namespace
 			}
 		case *v1.FindParticipatingTenantsRequest:
-			if r.Namespace != "" {
+			if r.Namespace == "" {
 				r.Namespace = namespace
 			}
 		case *v1.ListTenantMembersRequest:
-			if r.Namespace != "" {
+			if r.Namespace == "" {
 				r.Namespace = namespace
 			}
 		}
