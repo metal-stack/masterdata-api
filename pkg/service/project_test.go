@@ -88,7 +88,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	var projects []*v1.Project
 	// see: https://github.com/stretchr/testify/blob/master/mock/mock.go#L149-L162
 	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
-	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{filter}).Return(projects, nil, nil)
+	storageMock.On("Find", ctx, mock.Anything, []any{filter}).Return(projects, nil, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
 	resp, err := ts.Create(ctx, connect.NewRequest(tcr))
 	require.NoError(t, err)
@@ -443,7 +443,7 @@ func TestFindProject(t *testing.T) {
 					return 1
 				}
 			})
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
