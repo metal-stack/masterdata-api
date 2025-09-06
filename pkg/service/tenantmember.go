@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
@@ -25,7 +26,8 @@ func NewTenantMemberService(l *slog.Logger, tds TenantDataStore, tmds TenantMemb
 	}
 }
 
-func (s *tenantMemberService) Create(ctx context.Context, req *v1.TenantMemberCreateRequest) (*v1.TenantMemberResponse, error) {
+func (s *tenantMemberService) Create(ctx context.Context, rq *connect.Request[v1.TenantMemberCreateRequest]) (*connect.Response[v1.TenantMemberResponse], error) {
+	req := rq.Msg
 	tenantMember := req.TenantMember
 
 	_, err := s.tenantStore.Get(ctx, tenantMember.GetTenantId())
@@ -49,26 +51,30 @@ func (s *tenantMemberService) Create(ctx context.Context, req *v1.TenantMemberCr
 		tenantMember.Meta = &v1.Meta{}
 	}
 	err = s.tenantMemberStore.Create(ctx, tenantMember)
-	return tenantMember.NewTenantMemberResponse(), err
+	return connect.NewResponse(tenantMember.NewTenantMemberResponse()), err
 }
-func (s *tenantMemberService) Update(ctx context.Context, req *v1.TenantMemberUpdateRequest) (*v1.TenantMemberResponse, error) {
+func (s *tenantMemberService) Update(ctx context.Context, rq *connect.Request[v1.TenantMemberUpdateRequest]) (*connect.Response[v1.TenantMemberResponse], error) {
+	req := rq.Msg
 	tenantMember := req.TenantMember
 	err := s.tenantMemberStore.Update(ctx, tenantMember)
-	return tenantMember.NewTenantMemberResponse(), err
+	return connect.NewResponse(tenantMember.NewTenantMemberResponse()), err
 }
-func (s *tenantMemberService) Delete(ctx context.Context, req *v1.TenantMemberDeleteRequest) (*v1.TenantMemberResponse, error) {
+func (s *tenantMemberService) Delete(ctx context.Context, rq *connect.Request[v1.TenantMemberDeleteRequest]) (*connect.Response[v1.TenantMemberResponse], error) {
+	req := rq.Msg
 	tenantMember := req.NewTenantMember()
 	err := s.tenantMemberStore.Delete(ctx, tenantMember.Meta.Id)
-	return tenantMember.NewTenantMemberResponse(), err
+	return connect.NewResponse(tenantMember.NewTenantMemberResponse()), err
 }
-func (s *tenantMemberService) Get(ctx context.Context, req *v1.TenantMemberGetRequest) (*v1.TenantMemberResponse, error) {
+func (s *tenantMemberService) Get(ctx context.Context, rq *connect.Request[v1.TenantMemberGetRequest]) (*connect.Response[v1.TenantMemberResponse], error) {
+	req := rq.Msg
 	tenantMember, err := s.tenantMemberStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
-	return tenantMember.NewTenantMemberResponse(), nil
+	return connect.NewResponse(tenantMember.NewTenantMemberResponse()), nil
 }
-func (s *tenantMemberService) Find(ctx context.Context, req *v1.TenantMemberFindRequest) (*v1.TenantMemberListResponse, error) {
+func (s *tenantMemberService) Find(ctx context.Context, rq *connect.Request[v1.TenantMemberFindRequest]) (*connect.Response[v1.TenantMemberListResponse], error) {
+	req := rq.Msg
 	filter := make(map[string]any)
 	if req.TenantId != nil {
 		filter["tenantmember ->> 'tenant_id'"] = req.TenantId
@@ -87,5 +93,5 @@ func (s *tenantMemberService) Find(ctx context.Context, req *v1.TenantMemberFind
 	}
 	resp := new(v1.TenantMemberListResponse)
 	resp.TenantMembers = append(resp.TenantMembers, res...)
-	return resp, nil
+	return connect.NewResponse(resp), nil
 }

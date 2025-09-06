@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.8
 // 	protoc        (unknown)
-// source: v1/common.proto
+// source: api/v1/common.proto
 
-package v1
+package apiv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -34,7 +34,7 @@ type Paging struct {
 
 func (x *Paging) Reset() {
 	*x = Paging{}
-	mi := &file_v1_common_proto_msgTypes[0]
+	mi := &file_api_v1_common_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -46,7 +46,7 @@ func (x *Paging) String() string {
 func (*Paging) ProtoMessage() {}
 
 func (x *Paging) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_common_proto_msgTypes[0]
+	mi := &file_api_v1_common_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -59,7 +59,7 @@ func (x *Paging) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Paging.ProtoReflect.Descriptor instead.
 func (*Paging) Descriptor() ([]byte, []int) {
-	return file_v1_common_proto_rawDescGZIP(), []int{0}
+	return file_api_v1_common_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Paging) GetPage() uint64 {
@@ -76,35 +76,36 @@ func (x *Paging) GetCount() uint64 {
 	return 0
 }
 
-var File_v1_common_proto protoreflect.FileDescriptor
+var File_api_v1_common_proto protoreflect.FileDescriptor
 
-const file_v1_common_proto_rawDesc = "" +
+const file_api_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x0fv1/common.proto\x12\x02v1\"O\n" +
+	"\x13api/v1/common.proto\x12\x06api.v1\"O\n" +
 	"\x06Paging\x12\x17\n" +
 	"\x04page\x18\x01 \x01(\x04H\x00R\x04page\x88\x01\x01\x12\x19\n" +
 	"\x05count\x18\x02 \x01(\x04H\x01R\x05count\x88\x01\x01B\a\n" +
 	"\x05_pageB\b\n" +
-	"\x06_countBg\n" +
-	"\x06com.v1B\vCommonProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
+	"\x06_countB\x86\x01\n" +
+	"\n" +
+	"com.api.v1B\vCommonProtoP\x01Z2github.com/metal-stack/masterdata-api/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
 var (
-	file_v1_common_proto_rawDescOnce sync.Once
-	file_v1_common_proto_rawDescData []byte
+	file_api_v1_common_proto_rawDescOnce sync.Once
+	file_api_v1_common_proto_rawDescData []byte
 )
 
-func file_v1_common_proto_rawDescGZIP() []byte {
-	file_v1_common_proto_rawDescOnce.Do(func() {
-		file_v1_common_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_v1_common_proto_rawDesc), len(file_v1_common_proto_rawDesc)))
+func file_api_v1_common_proto_rawDescGZIP() []byte {
+	file_api_v1_common_proto_rawDescOnce.Do(func() {
+		file_api_v1_common_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_v1_common_proto_rawDesc), len(file_api_v1_common_proto_rawDesc)))
 	})
-	return file_v1_common_proto_rawDescData
+	return file_api_v1_common_proto_rawDescData
 }
 
-var file_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_v1_common_proto_goTypes = []any{
-	(*Paging)(nil), // 0: v1.Paging
+var file_api_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_api_v1_common_proto_goTypes = []any{
+	(*Paging)(nil), // 0: api.v1.Paging
 }
-var file_v1_common_proto_depIdxs = []int32{
+var file_api_v1_common_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -112,27 +113,27 @@ var file_v1_common_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_v1_common_proto_init() }
-func file_v1_common_proto_init() {
-	if File_v1_common_proto != nil {
+func init() { file_api_v1_common_proto_init() }
+func file_api_v1_common_proto_init() {
+	if File_api_v1_common_proto != nil {
 		return
 	}
-	file_v1_common_proto_msgTypes[0].OneofWrappers = []any{}
+	file_api_v1_common_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_common_proto_rawDesc), len(file_v1_common_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_common_proto_rawDesc), len(file_api_v1_common_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_v1_common_proto_goTypes,
-		DependencyIndexes: file_v1_common_proto_depIdxs,
-		MessageInfos:      file_v1_common_proto_msgTypes,
+		GoTypes:           file_api_v1_common_proto_goTypes,
+		DependencyIndexes: file_api_v1_common_proto_depIdxs,
+		MessageInfos:      file_api_v1_common_proto_msgTypes,
 	}.Build()
-	File_v1_common_proto = out.File
-	file_v1_common_proto_goTypes = nil
-	file_v1_common_proto_depIdxs = nil
+	File_api_v1_common_proto = out.File
+	file_api_v1_common_proto_goTypes = nil
+	file_api_v1_common_proto_depIdxs = nil
 }

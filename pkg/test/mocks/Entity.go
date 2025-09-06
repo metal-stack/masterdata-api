@@ -81,19 +81,19 @@ func (_c *MockEntity_APIVersion_Call) RunAndReturn(run func() string) *MockEntit
 }
 
 // GetMeta provides a mock function for the type MockEntity
-func (_mock *MockEntity) GetMeta() *v1.Meta {
+func (_mock *MockEntity) GetMeta() *apiv1.Meta {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetMeta")
 	}
 
-	var r0 *v1.Meta
-	if returnFunc, ok := ret.Get(0).(func() *v1.Meta); ok {
+	var r0 *apiv1.Meta
+	if returnFunc, ok := ret.Get(0).(func() *apiv1.Meta); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.Meta)
+			r0 = ret.Get(0).(*apiv1.Meta)
 		}
 	}
 	return r0
@@ -116,12 +116,12 @@ func (_c *MockEntity_GetMeta_Call) Run(run func()) *MockEntity_GetMeta_Call {
 	return _c
 }
 
-func (_c *MockEntity_GetMeta_Call) Return(meta *v1.Meta) *MockEntity_GetMeta_Call {
+func (_c *MockEntity_GetMeta_Call) Return(meta *apiv1.Meta) *MockEntity_GetMeta_Call {
 	_c.Call.Return(meta)
 	return _c
 }
 
-func (_c *MockEntity_GetMeta_Call) RunAndReturn(run func() *v1.Meta) *MockEntity_GetMeta_Call {
+func (_c *MockEntity_GetMeta_Call) RunAndReturn(run func() *apiv1.Meta) *MockEntity_GetMeta_Call {
 	_c.Call.Return(run)
 	return _c
 }

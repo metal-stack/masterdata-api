@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.8
 // 	protoc        (unknown)
-// source: v1/version.proto
+// source: api/v1/version.proto
 
-package v1
+package apiv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -29,7 +29,7 @@ type GetVersionRequest struct {
 
 func (x *GetVersionRequest) Reset() {
 	*x = GetVersionRequest{}
-	mi := &file_v1_version_proto_msgTypes[0]
+	mi := &file_api_v1_version_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -41,7 +41,7 @@ func (x *GetVersionRequest) String() string {
 func (*GetVersionRequest) ProtoMessage() {}
 
 func (x *GetVersionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_version_proto_msgTypes[0]
+	mi := &file_api_v1_version_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -54,7 +54,7 @@ func (x *GetVersionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVersionRequest.ProtoReflect.Descriptor instead.
 func (*GetVersionRequest) Descriptor() ([]byte, []int) {
-	return file_v1_version_proto_rawDescGZIP(), []int{0}
+	return file_api_v1_version_proto_rawDescGZIP(), []int{0}
 }
 
 type GetVersionResponse struct {
@@ -69,7 +69,7 @@ type GetVersionResponse struct {
 
 func (x *GetVersionResponse) Reset() {
 	*x = GetVersionResponse{}
-	mi := &file_v1_version_proto_msgTypes[1]
+	mi := &file_api_v1_version_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -81,7 +81,7 @@ func (x *GetVersionResponse) String() string {
 func (*GetVersionResponse) ProtoMessage() {}
 
 func (x *GetVersionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_version_proto_msgTypes[1]
+	mi := &file_api_v1_version_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -94,7 +94,7 @@ func (x *GetVersionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVersionResponse.ProtoReflect.Descriptor instead.
 func (*GetVersionResponse) Descriptor() ([]byte, []int) {
-	return file_v1_version_proto_rawDescGZIP(), []int{1}
+	return file_api_v1_version_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetVersionResponse) GetVersion() string {
@@ -125,42 +125,43 @@ func (x *GetVersionResponse) GetBuildDate() string {
 	return ""
 }
 
-var File_v1_version_proto protoreflect.FileDescriptor
+var File_api_v1_version_proto protoreflect.FileDescriptor
 
-const file_v1_version_proto_rawDesc = "" +
+const file_api_v1_version_proto_rawDesc = "" +
 	"\n" +
-	"\x10v1/version.proto\x12\x02v1\"\x13\n" +
+	"\x14api/v1/version.proto\x12\x06api.v1\"\x13\n" +
 	"\x11GetVersionRequest\"\x84\x01\n" +
 	"\x12GetVersionResponse\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\tR\aversion\x12\x1a\n" +
 	"\brevision\x18\x02 \x01(\tR\brevision\x12\x19\n" +
 	"\bgit_sha1\x18\x03 \x01(\tR\agitSha1\x12\x1d\n" +
 	"\n" +
-	"build_date\x18\x04 \x01(\tR\tbuildDate2F\n" +
-	"\x0eVersionService\x124\n" +
-	"\x03Get\x12\x15.v1.GetVersionRequest\x1a\x16.v1.GetVersionResponseBh\n" +
-	"\x06com.v1B\fVersionProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
+	"build_date\x18\x04 \x01(\tR\tbuildDate2N\n" +
+	"\x0eVersionService\x12<\n" +
+	"\x03Get\x12\x19.api.v1.GetVersionRequest\x1a\x1a.api.v1.GetVersionResponseB\x87\x01\n" +
+	"\n" +
+	"com.api.v1B\fVersionProtoP\x01Z2github.com/metal-stack/masterdata-api/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
 var (
-	file_v1_version_proto_rawDescOnce sync.Once
-	file_v1_version_proto_rawDescData []byte
+	file_api_v1_version_proto_rawDescOnce sync.Once
+	file_api_v1_version_proto_rawDescData []byte
 )
 
-func file_v1_version_proto_rawDescGZIP() []byte {
-	file_v1_version_proto_rawDescOnce.Do(func() {
-		file_v1_version_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_v1_version_proto_rawDesc), len(file_v1_version_proto_rawDesc)))
+func file_api_v1_version_proto_rawDescGZIP() []byte {
+	file_api_v1_version_proto_rawDescOnce.Do(func() {
+		file_api_v1_version_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_v1_version_proto_rawDesc), len(file_api_v1_version_proto_rawDesc)))
 	})
-	return file_v1_version_proto_rawDescData
+	return file_api_v1_version_proto_rawDescData
 }
 
-var file_v1_version_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_v1_version_proto_goTypes = []any{
-	(*GetVersionRequest)(nil),  // 0: v1.GetVersionRequest
-	(*GetVersionResponse)(nil), // 1: v1.GetVersionResponse
+var file_api_v1_version_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_api_v1_version_proto_goTypes = []any{
+	(*GetVersionRequest)(nil),  // 0: api.v1.GetVersionRequest
+	(*GetVersionResponse)(nil), // 1: api.v1.GetVersionResponse
 }
-var file_v1_version_proto_depIdxs = []int32{
-	0, // 0: v1.VersionService.Get:input_type -> v1.GetVersionRequest
-	1, // 1: v1.VersionService.Get:output_type -> v1.GetVersionResponse
+var file_api_v1_version_proto_depIdxs = []int32{
+	0, // 0: api.v1.VersionService.Get:input_type -> api.v1.GetVersionRequest
+	1, // 1: api.v1.VersionService.Get:output_type -> api.v1.GetVersionResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -168,26 +169,26 @@ var file_v1_version_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_v1_version_proto_init() }
-func file_v1_version_proto_init() {
-	if File_v1_version_proto != nil {
+func init() { file_api_v1_version_proto_init() }
+func file_api_v1_version_proto_init() {
+	if File_api_v1_version_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_version_proto_rawDesc), len(file_v1_version_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_version_proto_rawDesc), len(file_api_v1_version_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_v1_version_proto_goTypes,
-		DependencyIndexes: file_v1_version_proto_depIdxs,
-		MessageInfos:      file_v1_version_proto_msgTypes,
+		GoTypes:           file_api_v1_version_proto_goTypes,
+		DependencyIndexes: file_api_v1_version_proto_depIdxs,
+		MessageInfos:      file_api_v1_version_proto_msgTypes,
 	}.Build()
-	File_v1_version_proto = out.File
-	file_v1_version_proto_goTypes = nil
-	file_v1_version_proto_depIdxs = nil
+	File_api_v1_version_proto = out.File
+	file_api_v1_version_proto_goTypes = nil
+	file_api_v1_version_proto_depIdxs = nil
 }

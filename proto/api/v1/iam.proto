@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package api.v1;
+
+message IAMConfig {
+  IssuerConfig issuer_config = 1;
+  IDMConfig idm_config = 2;
+  NamespaceGroupConfig group_config = 3;
+}
+
+message IssuerConfig {
+  string url = 1;
+  string client_id = 2;
+}
+
+// mandatory config
+message IDMConfig {
+  string idm_type = 1;
+
+  // optional
+  ConnectorConfig connector_config = 2;
+}
+
+// Config for group-rolebinding-controller
+message NamespaceGroupConfig {
+  // no action is taken or any namespace in this list
+  string excluded_namespaces = 1;
+
+  // for each element a RoleBinding is created in any Namespace - ClusterRoles are bound with this name
+  // admin,edit,view
+  string expected_groups_list = 2;
+
+  // Maximum length of namespace-part in clusterGroupname and therefore in the corresponding groupname in the directory.
+  // 20 chars für AD, given the naming-conventions
+  int32 namespace_max_length = 3;
+
+  // The created RoleBindings will reference this group (from token).
+  // oidc:{{ .Namespace }}-{{ .Group }}
+  string cluster_groupname_template = 4;
+
+  // The RoleBindings will created with this name.
+  // oidc-{{ .Namespace }}-{{ .Group }}
+  string rolebinding_name_template = 5;
+}
+
+// optional config if idm webhook is used to automatically create/delete groups/roles in the tenant idm
+message ConnectorConfig {
+  reserved 8;
+  reserved "idm_groupname_template";
+
+  // the following are all mandatory
+  string idm_api_url = 1;
+  string idm_api_user = 2;
+  string idm_api_password = 3;
+
+  string idm_system_id = 4;
+  string idm_access_code = 5;
+  string idm_customer_id = 6;
+  string idm_group_ou = 7;
+
+  string idm_domain_name = 9;
+  string idm_tenant_prefix = 10;
+
+  string idm_submitter = 11;
+  string idm_job_info = 12;
+  string idm_req_system = 13;
+  string idm_req_user = 14;
+  string idm_req_email = 15;
+}

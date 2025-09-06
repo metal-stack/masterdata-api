@@ -171,6 +171,8 @@ spec:
       containers:
       - name: masterdata-db
         image: postgres:17-alpine
+        command: 
+          - postgres
         env:
         - name: POSTGRES_PASSWORD
           value: password
@@ -179,6 +181,9 @@ spec:
         - name: POSTGRES_DB
           value: masterdata
         resources:
+          requests:
+            memory: "128Mi"
+            cpu: "500m"
           limits:
             memory: "128Mi"
             cpu: "500m"

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
@@ -29,7 +30,8 @@ func NewProjectService(l *slog.Logger, pds ProjectDataStore, pmds ProjectMemberD
 	}
 }
 
-func (s *projectService) Create(ctx context.Context, req *v1.ProjectCreateRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) Create(ctx context.Context, rq *connect.Request[v1.ProjectCreateRequest]) (*connect.Response[v1.ProjectResponse], error) {
+	req := rq.Msg
 	project := req.Project
 
 	tenant, err := s.tenantStore.Get(ctx, project.GetTenantId())
@@ -67,9 +69,10 @@ func (s *projectService) Create(ctx context.Context, req *v1.ProjectCreateReques
 		project.Meta = &v1.Meta{}
 	}
 	err = s.projectStore.Create(ctx, project)
-	return project.NewProjectResponse(), err
+	return connect.NewResponse(project.NewProjectResponse()), err
 }
-func (s *projectService) Update(ctx context.Context, req *v1.ProjectUpdateRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) Update(ctx context.Context, rq *connect.Request[v1.ProjectUpdateRequest]) (*connect.Response[v1.ProjectResponse], error) {
+	req := rq.Msg
 	old, err := s.projectStore.Get(ctx, req.Project.Meta.Id)
 	if err != nil {
 		return nil, err
@@ -79,9 +82,10 @@ func (s *projectService) Update(ctx context.Context, req *v1.ProjectUpdateReques
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("update tenant of project:%s is not allowed", project.Meta.Id))
 	}
 	err = s.projectStore.Update(ctx, project)
-	return project.NewProjectResponse(), err
+	return connect.NewResponse(project.NewProjectResponse()), err
 }
-func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) Delete(ctx context.Context, rq *connect.Request[v1.ProjectDeleteRequest]) (*connect.Response[v1.ProjectResponse], error) {
+	req := rq.Msg
 	project := req.NewProject()
 	filter := map[string]any{
 		"projectmember ->> 'project_id'": project.Meta.Id,
@@ -106,25 +110,28 @@ func (s *projectService) Delete(ctx context.Context, req *v1.ProjectDeleteReques
 	if err != nil {
 		return nil, err
 	}
-	return project.NewProjectResponse(), nil
+	return connect.NewResponse(project.NewProjectResponse()), nil
 }
-func (s *projectService) Get(ctx context.Context, req *v1.ProjectGetRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) Get(ctx context.Context, rq *connect.Request[v1.ProjectGetRequest]) (*connect.Response[v1.ProjectResponse], error) {
+	req := rq.Msg
 	project, err := s.projectStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
-	return project.NewProjectResponse(), nil
+	return connect.NewResponse(project.NewProjectResponse()), nil
 }
-func (s *projectService) GetHistory(ctx context.Context, req *v1.ProjectGetHistoryRequest) (*v1.ProjectResponse, error) {
+func (s *projectService) GetHistory(ctx context.Context, rq *connect.Request[v1.ProjectGetHistoryRequest]) (*connect.Response[v1.ProjectResponse], error) {
+	req := rq.Msg
 	project := &v1.Project{}
 	at := req.At.AsTime()
 	err := s.projectStore.GetHistory(ctx, req.Id, at, project)
 	if err != nil {
 		return nil, err
 	}
-	return project.NewProjectResponse(), nil
+	return connect.NewResponse(project.NewProjectResponse()), nil
 }
-func (s *projectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (*v1.ProjectListResponse, error) {
+func (s *projectService) Find(ctx context.Context, rq *connect.Request[v1.ProjectFindRequest]) (*connect.Response[v1.ProjectListResponse], error) {
+	req := rq.Msg
 	// TODO: remove in next release
 	if req.DeprecatedId != nil && req.Id == nil { // nolint:staticcheck
 		req.Id = &req.DeprecatedId.Value // nolint:staticcheck
@@ -184,5 +191,5 @@ func (s *projectService) Find(ctx context.Context, req *v1.ProjectFindRequest) (
 	resp := new(v1.ProjectListResponse)
 	resp.Projects = append(resp.Projects, res...)
 	resp.NextPage = nextPage
-	return resp, nil
+	return connect.NewResponse(resp), nil
 }

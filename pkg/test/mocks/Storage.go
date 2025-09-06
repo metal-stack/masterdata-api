@@ -221,7 +221,7 @@ func (_c *MockStorage_DeleteAll_Call[E]) RunAndReturn(run func(ctx context.Conte
 }
 
 // Find provides a mock function for the type MockStorage
-func (_mock *MockStorage[E]) Find(ctx context.Context, paging *v1.Paging, filters ...any) ([]E, *uint64, error) {
+func (_mock *MockStorage[E]) Find(ctx context.Context, paging *apiv1.Paging, filters ...any) ([]E, *uint64, error) {
 	var tmpRet mock.Arguments
 	if len(filters) > 0 {
 		tmpRet = _mock.Called(ctx, paging, filters)
@@ -237,24 +237,24 @@ func (_mock *MockStorage[E]) Find(ctx context.Context, paging *v1.Paging, filter
 	var r0 []E
 	var r1 *uint64
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.Paging, ...any) ([]E, *uint64, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *apiv1.Paging, ...any) ([]E, *uint64, error)); ok {
 		return returnFunc(ctx, paging, filters...)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.Paging, ...any) []E); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *apiv1.Paging, ...any) []E); ok {
 		r0 = returnFunc(ctx, paging, filters...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]E)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.Paging, ...any) *uint64); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *apiv1.Paging, ...any) *uint64); ok {
 		r1 = returnFunc(ctx, paging, filters...)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*uint64)
 		}
 	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, *v1.Paging, ...any) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(context.Context, *apiv1.Paging, ...any) error); ok {
 		r2 = returnFunc(ctx, paging, filters...)
 	} else {
 		r2 = ret.Error(2)
@@ -269,22 +269,22 @@ type MockStorage_Find_Call[E datastore.Entity] struct {
 
 // Find is a helper method to define mock.On call
 //   - ctx context.Context
-//   - paging *v1.Paging
+//   - paging *apiv1.Paging
 //   - filters ...any
 func (_e *MockStorage_Expecter[E]) Find(ctx interface{}, paging interface{}, filters ...interface{}) *MockStorage_Find_Call[E] {
 	return &MockStorage_Find_Call[E]{Call: _e.mock.On("Find",
 		append([]interface{}{ctx, paging}, filters...)...)}
 }
 
-func (_c *MockStorage_Find_Call[E]) Run(run func(ctx context.Context, paging *v1.Paging, filters ...any)) *MockStorage_Find_Call[E] {
+func (_c *MockStorage_Find_Call[E]) Run(run func(ctx context.Context, paging *apiv1.Paging, filters ...any)) *MockStorage_Find_Call[E] {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.Paging
+		var arg1 *apiv1.Paging
 		if args[1] != nil {
-			arg1 = args[1].(*v1.Paging)
+			arg1 = args[1].(*apiv1.Paging)
 		}
 		var arg2 []any
 		var variadicArgs []any
@@ -306,7 +306,7 @@ func (_c *MockStorage_Find_Call[E]) Return(vs []E, v *uint64, err error) *MockSt
 	return _c
 }
 
-func (_c *MockStorage_Find_Call[E]) RunAndReturn(run func(ctx context.Context, paging *v1.Paging, filters ...any) ([]E, *uint64, error)) *MockStorage_Find_Call[E] {
+func (_c *MockStorage_Find_Call[E]) RunAndReturn(run func(ctx context.Context, paging *apiv1.Paging, filters ...any) ([]E, *uint64, error)) *MockStorage_Find_Call[E] {
 	_c.Call.Return(run)
 	return _c
 }

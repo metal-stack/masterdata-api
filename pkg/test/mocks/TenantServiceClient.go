@@ -7,9 +7,9 @@ package mocks
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/metal-stack/masterdata-api/api/v1"
 	mock "github.com/stretchr/testify/mock"
-	"google.golang.org/grpc"
 )
 
 // NewMockTenantServiceClient creates a new instance of MockTenantServiceClient. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
@@ -40,33 +40,27 @@ func (_m *MockTenantServiceClient) EXPECT() *MockTenantServiceClient_Expecter {
 }
 
 // Create provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) Create(ctx context.Context, in *v1.TenantCreateRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) Create(context1 context.Context, request *connect.Request[apiv1.TenantCreateRequest]) (*connect.Response[apiv1.TenantResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
 	}
 
-	var r0 *v1.TenantResponse
+	var r0 *connect.Response[apiv1.TenantResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantCreateRequest, ...grpc.CallOption) (*v1.TenantResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantCreateRequest]) (*connect.Response[apiv1.TenantResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantCreateRequest, ...grpc.CallOption) *v1.TenantResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantCreateRequest]) *connect.Response[apiv1.TenantResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.TenantResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.TenantResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.TenantCreateRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.TenantCreateRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -79,77 +73,62 @@ type MockTenantServiceClient_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.TenantCreateRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) Create(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_Create_Call {
-	return &MockTenantServiceClient_Create_Call{Call: _e.mock.On("Create",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.TenantCreateRequest]
+func (_e *MockTenantServiceClient_Expecter) Create(context1 interface{}, request interface{}) *MockTenantServiceClient_Create_Call {
+	return &MockTenantServiceClient_Create_Call{Call: _e.mock.On("Create", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_Create_Call) Run(run func(ctx context.Context, in *v1.TenantCreateRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_Create_Call {
+func (_c *MockTenantServiceClient_Create_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.TenantCreateRequest])) *MockTenantServiceClient_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.TenantCreateRequest
+		var arg1 *connect.Request[apiv1.TenantCreateRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.TenantCreateRequest)
+			arg1 = args[1].(*connect.Request[apiv1.TenantCreateRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Create_Call) Return(tenantResponse *v1.TenantResponse, err error) *MockTenantServiceClient_Create_Call {
-	_c.Call.Return(tenantResponse, err)
+func (_c *MockTenantServiceClient_Create_Call) Return(response *connect.Response[apiv1.TenantResponse], err error) *MockTenantServiceClient_Create_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Create_Call) RunAndReturn(run func(ctx context.Context, in *v1.TenantCreateRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error)) *MockTenantServiceClient_Create_Call {
+func (_c *MockTenantServiceClient_Create_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.TenantCreateRequest]) (*connect.Response[apiv1.TenantResponse], error)) *MockTenantServiceClient_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Delete provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) Delete(ctx context.Context, in *v1.TenantDeleteRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) Delete(context1 context.Context, request *connect.Request[apiv1.TenantDeleteRequest]) (*connect.Response[apiv1.TenantResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Delete")
 	}
 
-	var r0 *v1.TenantResponse
+	var r0 *connect.Response[apiv1.TenantResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantDeleteRequest, ...grpc.CallOption) (*v1.TenantResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantDeleteRequest]) (*connect.Response[apiv1.TenantResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantDeleteRequest, ...grpc.CallOption) *v1.TenantResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantDeleteRequest]) *connect.Response[apiv1.TenantResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.TenantResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.TenantResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.TenantDeleteRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.TenantDeleteRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -162,77 +141,62 @@ type MockTenantServiceClient_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.TenantDeleteRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) Delete(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_Delete_Call {
-	return &MockTenantServiceClient_Delete_Call{Call: _e.mock.On("Delete",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.TenantDeleteRequest]
+func (_e *MockTenantServiceClient_Expecter) Delete(context1 interface{}, request interface{}) *MockTenantServiceClient_Delete_Call {
+	return &MockTenantServiceClient_Delete_Call{Call: _e.mock.On("Delete", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_Delete_Call) Run(run func(ctx context.Context, in *v1.TenantDeleteRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_Delete_Call {
+func (_c *MockTenantServiceClient_Delete_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.TenantDeleteRequest])) *MockTenantServiceClient_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.TenantDeleteRequest
+		var arg1 *connect.Request[apiv1.TenantDeleteRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.TenantDeleteRequest)
+			arg1 = args[1].(*connect.Request[apiv1.TenantDeleteRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Delete_Call) Return(tenantResponse *v1.TenantResponse, err error) *MockTenantServiceClient_Delete_Call {
-	_c.Call.Return(tenantResponse, err)
+func (_c *MockTenantServiceClient_Delete_Call) Return(response *connect.Response[apiv1.TenantResponse], err error) *MockTenantServiceClient_Delete_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Delete_Call) RunAndReturn(run func(ctx context.Context, in *v1.TenantDeleteRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error)) *MockTenantServiceClient_Delete_Call {
+func (_c *MockTenantServiceClient_Delete_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.TenantDeleteRequest]) (*connect.Response[apiv1.TenantResponse], error)) *MockTenantServiceClient_Delete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Find provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) Find(ctx context.Context, in *v1.TenantFindRequest, opts ...grpc.CallOption) (*v1.TenantListResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) Find(context1 context.Context, request *connect.Request[apiv1.TenantFindRequest]) (*connect.Response[apiv1.TenantListResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Find")
 	}
 
-	var r0 *v1.TenantListResponse
+	var r0 *connect.Response[apiv1.TenantListResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantFindRequest, ...grpc.CallOption) (*v1.TenantListResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantFindRequest]) (*connect.Response[apiv1.TenantListResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantFindRequest, ...grpc.CallOption) *v1.TenantListResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantFindRequest]) *connect.Response[apiv1.TenantListResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.TenantListResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.TenantListResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.TenantFindRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.TenantFindRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -245,77 +209,62 @@ type MockTenantServiceClient_Find_Call struct {
 }
 
 // Find is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.TenantFindRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) Find(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_Find_Call {
-	return &MockTenantServiceClient_Find_Call{Call: _e.mock.On("Find",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.TenantFindRequest]
+func (_e *MockTenantServiceClient_Expecter) Find(context1 interface{}, request interface{}) *MockTenantServiceClient_Find_Call {
+	return &MockTenantServiceClient_Find_Call{Call: _e.mock.On("Find", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_Find_Call) Run(run func(ctx context.Context, in *v1.TenantFindRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_Find_Call {
+func (_c *MockTenantServiceClient_Find_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.TenantFindRequest])) *MockTenantServiceClient_Find_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.TenantFindRequest
+		var arg1 *connect.Request[apiv1.TenantFindRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.TenantFindRequest)
+			arg1 = args[1].(*connect.Request[apiv1.TenantFindRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Find_Call) Return(tenantListResponse *v1.TenantListResponse, err error) *MockTenantServiceClient_Find_Call {
-	_c.Call.Return(tenantListResponse, err)
+func (_c *MockTenantServiceClient_Find_Call) Return(response *connect.Response[apiv1.TenantListResponse], err error) *MockTenantServiceClient_Find_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Find_Call) RunAndReturn(run func(ctx context.Context, in *v1.TenantFindRequest, opts ...grpc.CallOption) (*v1.TenantListResponse, error)) *MockTenantServiceClient_Find_Call {
+func (_c *MockTenantServiceClient_Find_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.TenantFindRequest]) (*connect.Response[apiv1.TenantListResponse], error)) *MockTenantServiceClient_Find_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // FindParticipatingProjects provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) FindParticipatingProjects(ctx context.Context, in *v1.FindParticipatingProjectsRequest, opts ...grpc.CallOption) (*v1.FindParticipatingProjectsResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) FindParticipatingProjects(context1 context.Context, request *connect.Request[apiv1.FindParticipatingProjectsRequest]) (*connect.Response[apiv1.FindParticipatingProjectsResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindParticipatingProjects")
 	}
 
-	var r0 *v1.FindParticipatingProjectsResponse
+	var r0 *connect.Response[apiv1.FindParticipatingProjectsResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.FindParticipatingProjectsRequest, ...grpc.CallOption) (*v1.FindParticipatingProjectsResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.FindParticipatingProjectsRequest]) (*connect.Response[apiv1.FindParticipatingProjectsResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.FindParticipatingProjectsRequest, ...grpc.CallOption) *v1.FindParticipatingProjectsResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.FindParticipatingProjectsRequest]) *connect.Response[apiv1.FindParticipatingProjectsResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.FindParticipatingProjectsResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.FindParticipatingProjectsResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.FindParticipatingProjectsRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.FindParticipatingProjectsRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -328,77 +277,62 @@ type MockTenantServiceClient_FindParticipatingProjects_Call struct {
 }
 
 // FindParticipatingProjects is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.FindParticipatingProjectsRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) FindParticipatingProjects(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_FindParticipatingProjects_Call {
-	return &MockTenantServiceClient_FindParticipatingProjects_Call{Call: _e.mock.On("FindParticipatingProjects",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.FindParticipatingProjectsRequest]
+func (_e *MockTenantServiceClient_Expecter) FindParticipatingProjects(context1 interface{}, request interface{}) *MockTenantServiceClient_FindParticipatingProjects_Call {
+	return &MockTenantServiceClient_FindParticipatingProjects_Call{Call: _e.mock.On("FindParticipatingProjects", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_FindParticipatingProjects_Call) Run(run func(ctx context.Context, in *v1.FindParticipatingProjectsRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_FindParticipatingProjects_Call {
+func (_c *MockTenantServiceClient_FindParticipatingProjects_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.FindParticipatingProjectsRequest])) *MockTenantServiceClient_FindParticipatingProjects_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.FindParticipatingProjectsRequest
+		var arg1 *connect.Request[apiv1.FindParticipatingProjectsRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.FindParticipatingProjectsRequest)
+			arg1 = args[1].(*connect.Request[apiv1.FindParticipatingProjectsRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_FindParticipatingProjects_Call) Return(findParticipatingProjectsResponse *v1.FindParticipatingProjectsResponse, err error) *MockTenantServiceClient_FindParticipatingProjects_Call {
-	_c.Call.Return(findParticipatingProjectsResponse, err)
+func (_c *MockTenantServiceClient_FindParticipatingProjects_Call) Return(response *connect.Response[apiv1.FindParticipatingProjectsResponse], err error) *MockTenantServiceClient_FindParticipatingProjects_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_FindParticipatingProjects_Call) RunAndReturn(run func(ctx context.Context, in *v1.FindParticipatingProjectsRequest, opts ...grpc.CallOption) (*v1.FindParticipatingProjectsResponse, error)) *MockTenantServiceClient_FindParticipatingProjects_Call {
+func (_c *MockTenantServiceClient_FindParticipatingProjects_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.FindParticipatingProjectsRequest]) (*connect.Response[apiv1.FindParticipatingProjectsResponse], error)) *MockTenantServiceClient_FindParticipatingProjects_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // FindParticipatingTenants provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) FindParticipatingTenants(ctx context.Context, in *v1.FindParticipatingTenantsRequest, opts ...grpc.CallOption) (*v1.FindParticipatingTenantsResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) FindParticipatingTenants(context1 context.Context, request *connect.Request[apiv1.FindParticipatingTenantsRequest]) (*connect.Response[apiv1.FindParticipatingTenantsResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindParticipatingTenants")
 	}
 
-	var r0 *v1.FindParticipatingTenantsResponse
+	var r0 *connect.Response[apiv1.FindParticipatingTenantsResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.FindParticipatingTenantsRequest, ...grpc.CallOption) (*v1.FindParticipatingTenantsResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.FindParticipatingTenantsRequest]) (*connect.Response[apiv1.FindParticipatingTenantsResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.FindParticipatingTenantsRequest, ...grpc.CallOption) *v1.FindParticipatingTenantsResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.FindParticipatingTenantsRequest]) *connect.Response[apiv1.FindParticipatingTenantsResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.FindParticipatingTenantsResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.FindParticipatingTenantsResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.FindParticipatingTenantsRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.FindParticipatingTenantsRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -411,77 +345,62 @@ type MockTenantServiceClient_FindParticipatingTenants_Call struct {
 }
 
 // FindParticipatingTenants is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.FindParticipatingTenantsRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) FindParticipatingTenants(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_FindParticipatingTenants_Call {
-	return &MockTenantServiceClient_FindParticipatingTenants_Call{Call: _e.mock.On("FindParticipatingTenants",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.FindParticipatingTenantsRequest]
+func (_e *MockTenantServiceClient_Expecter) FindParticipatingTenants(context1 interface{}, request interface{}) *MockTenantServiceClient_FindParticipatingTenants_Call {
+	return &MockTenantServiceClient_FindParticipatingTenants_Call{Call: _e.mock.On("FindParticipatingTenants", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_FindParticipatingTenants_Call) Run(run func(ctx context.Context, in *v1.FindParticipatingTenantsRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_FindParticipatingTenants_Call {
+func (_c *MockTenantServiceClient_FindParticipatingTenants_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.FindParticipatingTenantsRequest])) *MockTenantServiceClient_FindParticipatingTenants_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.FindParticipatingTenantsRequest
+		var arg1 *connect.Request[apiv1.FindParticipatingTenantsRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.FindParticipatingTenantsRequest)
+			arg1 = args[1].(*connect.Request[apiv1.FindParticipatingTenantsRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_FindParticipatingTenants_Call) Return(findParticipatingTenantsResponse *v1.FindParticipatingTenantsResponse, err error) *MockTenantServiceClient_FindParticipatingTenants_Call {
-	_c.Call.Return(findParticipatingTenantsResponse, err)
+func (_c *MockTenantServiceClient_FindParticipatingTenants_Call) Return(response *connect.Response[apiv1.FindParticipatingTenantsResponse], err error) *MockTenantServiceClient_FindParticipatingTenants_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_FindParticipatingTenants_Call) RunAndReturn(run func(ctx context.Context, in *v1.FindParticipatingTenantsRequest, opts ...grpc.CallOption) (*v1.FindParticipatingTenantsResponse, error)) *MockTenantServiceClient_FindParticipatingTenants_Call {
+func (_c *MockTenantServiceClient_FindParticipatingTenants_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.FindParticipatingTenantsRequest]) (*connect.Response[apiv1.FindParticipatingTenantsResponse], error)) *MockTenantServiceClient_FindParticipatingTenants_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Get provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) Get(ctx context.Context, in *v1.TenantGetRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) Get(context1 context.Context, request *connect.Request[apiv1.TenantGetRequest]) (*connect.Response[apiv1.TenantResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Get")
 	}
 
-	var r0 *v1.TenantResponse
+	var r0 *connect.Response[apiv1.TenantResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantGetRequest, ...grpc.CallOption) (*v1.TenantResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantGetRequest]) (*connect.Response[apiv1.TenantResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantGetRequest, ...grpc.CallOption) *v1.TenantResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantGetRequest]) *connect.Response[apiv1.TenantResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.TenantResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.TenantResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.TenantGetRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.TenantGetRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -494,77 +413,62 @@ type MockTenantServiceClient_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.TenantGetRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) Get(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_Get_Call {
-	return &MockTenantServiceClient_Get_Call{Call: _e.mock.On("Get",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.TenantGetRequest]
+func (_e *MockTenantServiceClient_Expecter) Get(context1 interface{}, request interface{}) *MockTenantServiceClient_Get_Call {
+	return &MockTenantServiceClient_Get_Call{Call: _e.mock.On("Get", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_Get_Call) Run(run func(ctx context.Context, in *v1.TenantGetRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_Get_Call {
+func (_c *MockTenantServiceClient_Get_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.TenantGetRequest])) *MockTenantServiceClient_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.TenantGetRequest
+		var arg1 *connect.Request[apiv1.TenantGetRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.TenantGetRequest)
+			arg1 = args[1].(*connect.Request[apiv1.TenantGetRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Get_Call) Return(tenantResponse *v1.TenantResponse, err error) *MockTenantServiceClient_Get_Call {
-	_c.Call.Return(tenantResponse, err)
+func (_c *MockTenantServiceClient_Get_Call) Return(response *connect.Response[apiv1.TenantResponse], err error) *MockTenantServiceClient_Get_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Get_Call) RunAndReturn(run func(ctx context.Context, in *v1.TenantGetRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error)) *MockTenantServiceClient_Get_Call {
+func (_c *MockTenantServiceClient_Get_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.TenantGetRequest]) (*connect.Response[apiv1.TenantResponse], error)) *MockTenantServiceClient_Get_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetHistory provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) GetHistory(ctx context.Context, in *v1.TenantGetHistoryRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) GetHistory(context1 context.Context, request *connect.Request[apiv1.TenantGetHistoryRequest]) (*connect.Response[apiv1.TenantResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetHistory")
 	}
 
-	var r0 *v1.TenantResponse
+	var r0 *connect.Response[apiv1.TenantResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantGetHistoryRequest, ...grpc.CallOption) (*v1.TenantResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantGetHistoryRequest]) (*connect.Response[apiv1.TenantResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantGetHistoryRequest, ...grpc.CallOption) *v1.TenantResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantGetHistoryRequest]) *connect.Response[apiv1.TenantResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.TenantResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.TenantResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.TenantGetHistoryRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.TenantGetHistoryRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -577,77 +481,62 @@ type MockTenantServiceClient_GetHistory_Call struct {
 }
 
 // GetHistory is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.TenantGetHistoryRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) GetHistory(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_GetHistory_Call {
-	return &MockTenantServiceClient_GetHistory_Call{Call: _e.mock.On("GetHistory",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.TenantGetHistoryRequest]
+func (_e *MockTenantServiceClient_Expecter) GetHistory(context1 interface{}, request interface{}) *MockTenantServiceClient_GetHistory_Call {
+	return &MockTenantServiceClient_GetHistory_Call{Call: _e.mock.On("GetHistory", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_GetHistory_Call) Run(run func(ctx context.Context, in *v1.TenantGetHistoryRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_GetHistory_Call {
+func (_c *MockTenantServiceClient_GetHistory_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.TenantGetHistoryRequest])) *MockTenantServiceClient_GetHistory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.TenantGetHistoryRequest
+		var arg1 *connect.Request[apiv1.TenantGetHistoryRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.TenantGetHistoryRequest)
+			arg1 = args[1].(*connect.Request[apiv1.TenantGetHistoryRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_GetHistory_Call) Return(tenantResponse *v1.TenantResponse, err error) *MockTenantServiceClient_GetHistory_Call {
-	_c.Call.Return(tenantResponse, err)
+func (_c *MockTenantServiceClient_GetHistory_Call) Return(response *connect.Response[apiv1.TenantResponse], err error) *MockTenantServiceClient_GetHistory_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_GetHistory_Call) RunAndReturn(run func(ctx context.Context, in *v1.TenantGetHistoryRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error)) *MockTenantServiceClient_GetHistory_Call {
+func (_c *MockTenantServiceClient_GetHistory_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.TenantGetHistoryRequest]) (*connect.Response[apiv1.TenantResponse], error)) *MockTenantServiceClient_GetHistory_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // ListTenantMembers provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) ListTenantMembers(ctx context.Context, in *v1.ListTenantMembersRequest, opts ...grpc.CallOption) (*v1.ListTenantMembersResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) ListTenantMembers(context1 context.Context, request *connect.Request[apiv1.ListTenantMembersRequest]) (*connect.Response[apiv1.ListTenantMembersResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListTenantMembers")
 	}
 
-	var r0 *v1.ListTenantMembersResponse
+	var r0 *connect.Response[apiv1.ListTenantMembersResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ListTenantMembersRequest, ...grpc.CallOption) (*v1.ListTenantMembersResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ListTenantMembersRequest]) (*connect.Response[apiv1.ListTenantMembersResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ListTenantMembersRequest, ...grpc.CallOption) *v1.ListTenantMembersResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ListTenantMembersRequest]) *connect.Response[apiv1.ListTenantMembersResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.ListTenantMembersResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.ListTenantMembersResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.ListTenantMembersRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.ListTenantMembersRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -660,77 +549,62 @@ type MockTenantServiceClient_ListTenantMembers_Call struct {
 }
 
 // ListTenantMembers is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.ListTenantMembersRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) ListTenantMembers(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_ListTenantMembers_Call {
-	return &MockTenantServiceClient_ListTenantMembers_Call{Call: _e.mock.On("ListTenantMembers",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.ListTenantMembersRequest]
+func (_e *MockTenantServiceClient_Expecter) ListTenantMembers(context1 interface{}, request interface{}) *MockTenantServiceClient_ListTenantMembers_Call {
+	return &MockTenantServiceClient_ListTenantMembers_Call{Call: _e.mock.On("ListTenantMembers", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_ListTenantMembers_Call) Run(run func(ctx context.Context, in *v1.ListTenantMembersRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_ListTenantMembers_Call {
+func (_c *MockTenantServiceClient_ListTenantMembers_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.ListTenantMembersRequest])) *MockTenantServiceClient_ListTenantMembers_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.ListTenantMembersRequest
+		var arg1 *connect.Request[apiv1.ListTenantMembersRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.ListTenantMembersRequest)
+			arg1 = args[1].(*connect.Request[apiv1.ListTenantMembersRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_ListTenantMembers_Call) Return(listTenantMembersResponse *v1.ListTenantMembersResponse, err error) *MockTenantServiceClient_ListTenantMembers_Call {
-	_c.Call.Return(listTenantMembersResponse, err)
+func (_c *MockTenantServiceClient_ListTenantMembers_Call) Return(response *connect.Response[apiv1.ListTenantMembersResponse], err error) *MockTenantServiceClient_ListTenantMembers_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_ListTenantMembers_Call) RunAndReturn(run func(ctx context.Context, in *v1.ListTenantMembersRequest, opts ...grpc.CallOption) (*v1.ListTenantMembersResponse, error)) *MockTenantServiceClient_ListTenantMembers_Call {
+func (_c *MockTenantServiceClient_ListTenantMembers_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.ListTenantMembersRequest]) (*connect.Response[apiv1.ListTenantMembersResponse], error)) *MockTenantServiceClient_ListTenantMembers_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Update provides a mock function for the type MockTenantServiceClient
-func (_mock *MockTenantServiceClient) Update(ctx context.Context, in *v1.TenantUpdateRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockTenantServiceClient) Update(context1 context.Context, request *connect.Request[apiv1.TenantUpdateRequest]) (*connect.Response[apiv1.TenantResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
 	}
 
-	var r0 *v1.TenantResponse
+	var r0 *connect.Response[apiv1.TenantResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantUpdateRequest, ...grpc.CallOption) (*v1.TenantResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantUpdateRequest]) (*connect.Response[apiv1.TenantResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.TenantUpdateRequest, ...grpc.CallOption) *v1.TenantResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.TenantUpdateRequest]) *connect.Response[apiv1.TenantResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.TenantResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.TenantResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.TenantUpdateRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.TenantUpdateRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -743,45 +617,36 @@ type MockTenantServiceClient_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.TenantUpdateRequest
-//   - opts ...grpc.CallOption
-func (_e *MockTenantServiceClient_Expecter) Update(ctx interface{}, in interface{}, opts ...interface{}) *MockTenantServiceClient_Update_Call {
-	return &MockTenantServiceClient_Update_Call{Call: _e.mock.On("Update",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.TenantUpdateRequest]
+func (_e *MockTenantServiceClient_Expecter) Update(context1 interface{}, request interface{}) *MockTenantServiceClient_Update_Call {
+	return &MockTenantServiceClient_Update_Call{Call: _e.mock.On("Update", context1, request)}
 }
 
-func (_c *MockTenantServiceClient_Update_Call) Run(run func(ctx context.Context, in *v1.TenantUpdateRequest, opts ...grpc.CallOption)) *MockTenantServiceClient_Update_Call {
+func (_c *MockTenantServiceClient_Update_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.TenantUpdateRequest])) *MockTenantServiceClient_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.TenantUpdateRequest
+		var arg1 *connect.Request[apiv1.TenantUpdateRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.TenantUpdateRequest)
+			arg1 = args[1].(*connect.Request[apiv1.TenantUpdateRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Update_Call) Return(tenantResponse *v1.TenantResponse, err error) *MockTenantServiceClient_Update_Call {
-	_c.Call.Return(tenantResponse, err)
+func (_c *MockTenantServiceClient_Update_Call) Return(response *connect.Response[apiv1.TenantResponse], err error) *MockTenantServiceClient_Update_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockTenantServiceClient_Update_Call) RunAndReturn(run func(ctx context.Context, in *v1.TenantUpdateRequest, opts ...grpc.CallOption) (*v1.TenantResponse, error)) *MockTenantServiceClient_Update_Call {
+func (_c *MockTenantServiceClient_Update_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.TenantUpdateRequest]) (*connect.Response[apiv1.TenantResponse], error)) *MockTenantServiceClient_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }

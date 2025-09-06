@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.8
 // 	protoc        (unknown)
-// source: v1/quota.proto
+// source: api/v1/quota.proto
 
-package v1
+package apiv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -42,7 +42,7 @@ type QuotaSet struct {
 
 func (x *QuotaSet) Reset() {
 	*x = QuotaSet{}
-	mi := &file_v1_quota_proto_msgTypes[0]
+	mi := &file_api_v1_quota_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -54,7 +54,7 @@ func (x *QuotaSet) String() string {
 func (*QuotaSet) ProtoMessage() {}
 
 func (x *QuotaSet) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_quota_proto_msgTypes[0]
+	mi := &file_api_v1_quota_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -67,7 +67,7 @@ func (x *QuotaSet) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QuotaSet.ProtoReflect.Descriptor instead.
 func (*QuotaSet) Descriptor() ([]byte, []int) {
-	return file_v1_quota_proto_rawDescGZIP(), []int{0}
+	return file_api_v1_quota_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *QuotaSet) GetCluster() *Quota {
@@ -103,7 +103,7 @@ type Quota struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// TODO: remove in next release:
 	//
-	// Deprecated: Marked as deprecated in v1/quota.proto.
+	// Deprecated: Marked as deprecated in api/v1/quota.proto.
 	Quota *wrapperspb.Int32Value `protobuf:"bytes,1,opt,name=quota,proto3" json:"quota,omitempty"`
 	// max is the maximum amount for the current QuotaSet, can be nil
 	Max           *int32 `protobuf:"varint,2,opt,name=max,proto3,oneof" json:"max,omitempty"`
@@ -113,7 +113,7 @@ type Quota struct {
 
 func (x *Quota) Reset() {
 	*x = Quota{}
-	mi := &file_v1_quota_proto_msgTypes[1]
+	mi := &file_api_v1_quota_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -125,7 +125,7 @@ func (x *Quota) String() string {
 func (*Quota) ProtoMessage() {}
 
 func (x *Quota) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_quota_proto_msgTypes[1]
+	mi := &file_api_v1_quota_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -138,10 +138,10 @@ func (x *Quota) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Quota.ProtoReflect.Descriptor instead.
 func (*Quota) Descriptor() ([]byte, []int) {
-	return file_v1_quota_proto_rawDescGZIP(), []int{1}
+	return file_api_v1_quota_proto_rawDescGZIP(), []int{1}
 }
 
-// Deprecated: Marked as deprecated in v1/quota.proto.
+// Deprecated: Marked as deprecated in api/v1/quota.proto.
 func (x *Quota) GetQuota() *wrapperspb.Int32Value {
 	if x != nil {
 		return x.Quota
@@ -156,47 +156,48 @@ func (x *Quota) GetMax() int32 {
 	return 0
 }
 
-var File_v1_quota_proto protoreflect.FileDescriptor
+var File_api_v1_quota_proto protoreflect.FileDescriptor
 
-const file_v1_quota_proto_rawDesc = "" +
+const file_api_v1_quota_proto_rawDesc = "" +
 	"\n" +
-	"\x0ev1/quota.proto\x12\x02v1\x1a\x1egoogle/protobuf/wrappers.proto\"\x94\x01\n" +
-	"\bQuotaSet\x12#\n" +
-	"\acluster\x18\x01 \x01(\v2\t.v1.QuotaR\acluster\x12#\n" +
-	"\amachine\x18\x02 \x01(\v2\t.v1.QuotaR\amachine\x12\x19\n" +
-	"\x02ip\x18\x03 \x01(\v2\t.v1.QuotaR\x02ip\x12#\n" +
-	"\aproject\x18\x04 \x01(\v2\t.v1.QuotaR\aproject\"]\n" +
+	"\x12api/v1/quota.proto\x12\x06api.v1\x1a\x1egoogle/protobuf/wrappers.proto\"\xa4\x01\n" +
+	"\bQuotaSet\x12'\n" +
+	"\acluster\x18\x01 \x01(\v2\r.api.v1.QuotaR\acluster\x12'\n" +
+	"\amachine\x18\x02 \x01(\v2\r.api.v1.QuotaR\amachine\x12\x1d\n" +
+	"\x02ip\x18\x03 \x01(\v2\r.api.v1.QuotaR\x02ip\x12'\n" +
+	"\aproject\x18\x04 \x01(\v2\r.api.v1.QuotaR\aproject\"]\n" +
 	"\x05Quota\x125\n" +
 	"\x05quota\x18\x01 \x01(\v2\x1b.google.protobuf.Int32ValueB\x02\x18\x01R\x05quota\x12\x15\n" +
 	"\x03max\x18\x02 \x01(\x05H\x00R\x03max\x88\x01\x01B\x06\n" +
-	"\x04_maxBf\n" +
-	"\x06com.v1B\n" +
-	"QuotaProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
+	"\x04_maxB\x85\x01\n" +
+	"\n" +
+	"com.api.v1B\n" +
+	"QuotaProtoP\x01Z2github.com/metal-stack/masterdata-api/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
 var (
-	file_v1_quota_proto_rawDescOnce sync.Once
-	file_v1_quota_proto_rawDescData []byte
+	file_api_v1_quota_proto_rawDescOnce sync.Once
+	file_api_v1_quota_proto_rawDescData []byte
 )
 
-func file_v1_quota_proto_rawDescGZIP() []byte {
-	file_v1_quota_proto_rawDescOnce.Do(func() {
-		file_v1_quota_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_v1_quota_proto_rawDesc), len(file_v1_quota_proto_rawDesc)))
+func file_api_v1_quota_proto_rawDescGZIP() []byte {
+	file_api_v1_quota_proto_rawDescOnce.Do(func() {
+		file_api_v1_quota_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_v1_quota_proto_rawDesc), len(file_api_v1_quota_proto_rawDesc)))
 	})
-	return file_v1_quota_proto_rawDescData
+	return file_api_v1_quota_proto_rawDescData
 }
 
-var file_v1_quota_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_v1_quota_proto_goTypes = []any{
-	(*QuotaSet)(nil),              // 0: v1.QuotaSet
-	(*Quota)(nil),                 // 1: v1.Quota
+var file_api_v1_quota_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_api_v1_quota_proto_goTypes = []any{
+	(*QuotaSet)(nil),              // 0: api.v1.QuotaSet
+	(*Quota)(nil),                 // 1: api.v1.Quota
 	(*wrapperspb.Int32Value)(nil), // 2: google.protobuf.Int32Value
 }
-var file_v1_quota_proto_depIdxs = []int32{
-	1, // 0: v1.QuotaSet.cluster:type_name -> v1.Quota
-	1, // 1: v1.QuotaSet.machine:type_name -> v1.Quota
-	1, // 2: v1.QuotaSet.ip:type_name -> v1.Quota
-	1, // 3: v1.QuotaSet.project:type_name -> v1.Quota
-	2, // 4: v1.Quota.quota:type_name -> google.protobuf.Int32Value
+var file_api_v1_quota_proto_depIdxs = []int32{
+	1, // 0: api.v1.QuotaSet.cluster:type_name -> api.v1.Quota
+	1, // 1: api.v1.QuotaSet.machine:type_name -> api.v1.Quota
+	1, // 2: api.v1.QuotaSet.ip:type_name -> api.v1.Quota
+	1, // 3: api.v1.QuotaSet.project:type_name -> api.v1.Quota
+	2, // 4: api.v1.Quota.quota:type_name -> google.protobuf.Int32Value
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
@@ -204,27 +205,27 @@ var file_v1_quota_proto_depIdxs = []int32{
 	0, // [0:5] is the sub-list for field type_name
 }
 
-func init() { file_v1_quota_proto_init() }
-func file_v1_quota_proto_init() {
-	if File_v1_quota_proto != nil {
+func init() { file_api_v1_quota_proto_init() }
+func file_api_v1_quota_proto_init() {
+	if File_api_v1_quota_proto != nil {
 		return
 	}
-	file_v1_quota_proto_msgTypes[1].OneofWrappers = []any{}
+	file_api_v1_quota_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_quota_proto_rawDesc), len(file_v1_quota_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_quota_proto_rawDesc), len(file_api_v1_quota_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_v1_quota_proto_goTypes,
-		DependencyIndexes: file_v1_quota_proto_depIdxs,
-		MessageInfos:      file_v1_quota_proto_msgTypes,
+		GoTypes:           file_api_v1_quota_proto_goTypes,
+		DependencyIndexes: file_api_v1_quota_proto_depIdxs,
+		MessageInfos:      file_api_v1_quota_proto_msgTypes,
 	}.Build()
-	File_v1_quota_proto = out.File
-	file_v1_quota_proto_goTypes = nil
-	file_v1_quota_proto_depIdxs = nil
+	File_api_v1_quota_proto = out.File
+	file_api_v1_quota_proto_goTypes = nil
+	file_api_v1_quota_proto_depIdxs = nil
 }

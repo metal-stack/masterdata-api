@@ -98,6 +98,7 @@ func (g *Generator) generate(packageName, typeName string) error {
 
 	info := map[string]string{
 		"packageName":   packageName,
+		"apiversion":    "v1", // THIS is kept to v1 to stay compatible with existing database entries
 		"typeName":      typeName,
 		"typeVariable":  strings.ToLower(string(typeName[0])),
 		"typeNameLower": strings.ToLower(typeName),
@@ -180,7 +181,7 @@ func ({{ .typeVariable }} *{{ .typeName }}) Kind() string {
 }
 
 func ({{ .typeVariable }} *{{ .typeName }}) APIVersion() string {
-	return "{{ .packageName }}"
+	return "{{ .apiversion }}"
 }
 
 // Value make the {{ .typeName }} struct implement the driver.Valuer interface. This method

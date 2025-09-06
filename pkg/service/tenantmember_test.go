@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
@@ -37,11 +38,11 @@ func TestCreateTenantMember(t *testing.T) {
 	tenantStorageMock.On("Get", ctx, pm1.GetTenantId()).Return(t1, nil)
 	tenantStorageMock.On("Get", ctx, pm1.GetMemberId()).Return(m1, nil)
 	storageMock.On("Create", ctx, pm1).Return(nil)
-	resp, err := ts.Create(ctx, pmcr)
+	resp, err := ts.Create(ctx, connect.NewRequest(pmcr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenantMember())
-	assert.Equal(t, pmcr.TenantMember.TenantId, resp.GetTenantMember().GetTenantId())
+	assert.NotNil(t, resp.Msg.TenantMember)
+	assert.Equal(t, pmcr.TenantMember.TenantId, resp.Msg.TenantMember.GetTenantId())
 }
 
 func TestUpdateTenantMember(t *testing.T) {
@@ -70,11 +71,11 @@ func TestUpdateTenantMember(t *testing.T) {
 	}
 
 	storageMock.On("Update", ctx, pm1).Return(nil)
-	resp, err := ts.Update(ctx, pmur)
+	resp, err := ts.Update(ctx, connect.NewRequest(pmur))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenantMember())
-	assert.Equal(t, pmur.GetTenantMember().Meta.Annotations, resp.GetTenantMember().Meta.Annotations)
+	assert.NotNil(t, resp.Msg.TenantMember)
+	assert.Equal(t, pmur.TenantMember.Meta.Annotations, resp.Msg.TenantMember.Meta.Annotations)
 }
 
 func TestDeleteTenantMember(t *testing.T) {
@@ -94,11 +95,11 @@ func TestDeleteTenantMember(t *testing.T) {
 	}
 
 	storageMock.On("Delete", ctx, t3.Meta.Id).Return(nil)
-	resp, err := ts.Delete(ctx, tdr)
+	resp, err := ts.Delete(ctx, connect.NewRequest(tdr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenantMember())
-	assert.Equal(t, tdr.Id, resp.GetTenantMember().GetMeta().GetId())
+	assert.NotNil(t, resp.Msg.TenantMember)
+	assert.Equal(t, tdr.Id, resp.Msg.TenantMember.GetMeta().GetId())
 }
 
 func TestGetTenantMember(t *testing.T) {
@@ -118,11 +119,11 @@ func TestGetTenantMember(t *testing.T) {
 	}
 
 	storageMock.On("Get", ctx, "p4").Return(t4, nil)
-	resp, err := ts.Get(ctx, tgr)
+	resp, err := ts.Get(ctx, connect.NewRequest(tgr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenantMember())
-	assert.Equal(t, tgr.Id, resp.GetTenantMember().GetMeta().GetId())
+	assert.NotNil(t, resp.Msg.TenantMember)
+	assert.Equal(t, tgr.Id, resp.Msg.TenantMember.GetMeta().GetId())
 }
 
 func TestFindTenantMemberByTenant(t *testing.T) {
@@ -143,8 +144,8 @@ func TestFindTenantMemberByTenant(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["tenantmember ->> 'tenant_id'"] = pointer.Pointer("p1")
-	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	storageMock.On("Find", ctx, mock.Anything, []any{f2}).Return(t6s, nil, nil)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }
@@ -167,8 +168,8 @@ func TestFindTenantMemberByMember(t *testing.T) {
 
 	f2 := make(map[string]any)
 	f2["tenantmember ->> 'member_id'"] = pointer.Pointer("t1")
-	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
+	storageMock.On("Find", ctx, mock.Anything, []any{f2}).Return(t6s, nil, nil)
+	resp, err := ts.Find(ctx, connect.NewRequest(tfr))
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
 }

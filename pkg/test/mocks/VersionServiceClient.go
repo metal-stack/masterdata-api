@@ -7,9 +7,9 @@ package mocks
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/metal-stack/masterdata-api/api/v1"
 	mock "github.com/stretchr/testify/mock"
-	"google.golang.org/grpc"
 )
 
 // NewMockVersionServiceClient creates a new instance of MockVersionServiceClient. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
@@ -40,33 +40,27 @@ func (_m *MockVersionServiceClient) EXPECT() *MockVersionServiceClient_Expecter 
 }
 
 // Get provides a mock function for the type MockVersionServiceClient
-func (_mock *MockVersionServiceClient) Get(ctx context.Context, in *v1.GetVersionRequest, opts ...grpc.CallOption) (*v1.GetVersionResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockVersionServiceClient) Get(context1 context.Context, request *connect.Request[apiv1.GetVersionRequest]) (*connect.Response[apiv1.GetVersionResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Get")
 	}
 
-	var r0 *v1.GetVersionResponse
+	var r0 *connect.Response[apiv1.GetVersionResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.GetVersionRequest, ...grpc.CallOption) (*v1.GetVersionResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.GetVersionRequest]) (*connect.Response[apiv1.GetVersionResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.GetVersionRequest, ...grpc.CallOption) *v1.GetVersionResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.GetVersionRequest]) *connect.Response[apiv1.GetVersionResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.GetVersionResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.GetVersionResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.GetVersionRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.GetVersionRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -79,45 +73,36 @@ type MockVersionServiceClient_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.GetVersionRequest
-//   - opts ...grpc.CallOption
-func (_e *MockVersionServiceClient_Expecter) Get(ctx interface{}, in interface{}, opts ...interface{}) *MockVersionServiceClient_Get_Call {
-	return &MockVersionServiceClient_Get_Call{Call: _e.mock.On("Get",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.GetVersionRequest]
+func (_e *MockVersionServiceClient_Expecter) Get(context1 interface{}, request interface{}) *MockVersionServiceClient_Get_Call {
+	return &MockVersionServiceClient_Get_Call{Call: _e.mock.On("Get", context1, request)}
 }
 
-func (_c *MockVersionServiceClient_Get_Call) Run(run func(ctx context.Context, in *v1.GetVersionRequest, opts ...grpc.CallOption)) *MockVersionServiceClient_Get_Call {
+func (_c *MockVersionServiceClient_Get_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.GetVersionRequest])) *MockVersionServiceClient_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.GetVersionRequest
+		var arg1 *connect.Request[apiv1.GetVersionRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.GetVersionRequest)
+			arg1 = args[1].(*connect.Request[apiv1.GetVersionRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockVersionServiceClient_Get_Call) Return(getVersionResponse *v1.GetVersionResponse, err error) *MockVersionServiceClient_Get_Call {
-	_c.Call.Return(getVersionResponse, err)
+func (_c *MockVersionServiceClient_Get_Call) Return(response *connect.Response[apiv1.GetVersionResponse], err error) *MockVersionServiceClient_Get_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockVersionServiceClient_Get_Call) RunAndReturn(run func(ctx context.Context, in *v1.GetVersionRequest, opts ...grpc.CallOption) (*v1.GetVersionResponse, error)) *MockVersionServiceClient_Get_Call {
+func (_c *MockVersionServiceClient_Get_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.GetVersionRequest]) (*connect.Response[apiv1.GetVersionResponse], error)) *MockVersionServiceClient_Get_Call {
 	_c.Call.Return(run)
 	return _c
 }

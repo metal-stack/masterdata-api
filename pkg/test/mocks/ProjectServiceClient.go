@@ -7,9 +7,9 @@ package mocks
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/metal-stack/masterdata-api/api/v1"
 	mock "github.com/stretchr/testify/mock"
-	"google.golang.org/grpc"
 )
 
 // NewMockProjectServiceClient creates a new instance of MockProjectServiceClient. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
@@ -40,33 +40,27 @@ func (_m *MockProjectServiceClient) EXPECT() *MockProjectServiceClient_Expecter 
 }
 
 // Create provides a mock function for the type MockProjectServiceClient
-func (_mock *MockProjectServiceClient) Create(ctx context.Context, in *v1.ProjectCreateRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockProjectServiceClient) Create(context1 context.Context, request *connect.Request[apiv1.ProjectCreateRequest]) (*connect.Response[apiv1.ProjectResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
 	}
 
-	var r0 *v1.ProjectResponse
+	var r0 *connect.Response[apiv1.ProjectResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectCreateRequest, ...grpc.CallOption) (*v1.ProjectResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectCreateRequest]) (*connect.Response[apiv1.ProjectResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectCreateRequest, ...grpc.CallOption) *v1.ProjectResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectCreateRequest]) *connect.Response[apiv1.ProjectResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.ProjectResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.ProjectResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.ProjectCreateRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.ProjectCreateRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -79,77 +73,62 @@ type MockProjectServiceClient_Create_Call struct {
 }
 
 // Create is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.ProjectCreateRequest
-//   - opts ...grpc.CallOption
-func (_e *MockProjectServiceClient_Expecter) Create(ctx interface{}, in interface{}, opts ...interface{}) *MockProjectServiceClient_Create_Call {
-	return &MockProjectServiceClient_Create_Call{Call: _e.mock.On("Create",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.ProjectCreateRequest]
+func (_e *MockProjectServiceClient_Expecter) Create(context1 interface{}, request interface{}) *MockProjectServiceClient_Create_Call {
+	return &MockProjectServiceClient_Create_Call{Call: _e.mock.On("Create", context1, request)}
 }
 
-func (_c *MockProjectServiceClient_Create_Call) Run(run func(ctx context.Context, in *v1.ProjectCreateRequest, opts ...grpc.CallOption)) *MockProjectServiceClient_Create_Call {
+func (_c *MockProjectServiceClient_Create_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.ProjectCreateRequest])) *MockProjectServiceClient_Create_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.ProjectCreateRequest
+		var arg1 *connect.Request[apiv1.ProjectCreateRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.ProjectCreateRequest)
+			arg1 = args[1].(*connect.Request[apiv1.ProjectCreateRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Create_Call) Return(projectResponse *v1.ProjectResponse, err error) *MockProjectServiceClient_Create_Call {
-	_c.Call.Return(projectResponse, err)
+func (_c *MockProjectServiceClient_Create_Call) Return(response *connect.Response[apiv1.ProjectResponse], err error) *MockProjectServiceClient_Create_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Create_Call) RunAndReturn(run func(ctx context.Context, in *v1.ProjectCreateRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error)) *MockProjectServiceClient_Create_Call {
+func (_c *MockProjectServiceClient_Create_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.ProjectCreateRequest]) (*connect.Response[apiv1.ProjectResponse], error)) *MockProjectServiceClient_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Delete provides a mock function for the type MockProjectServiceClient
-func (_mock *MockProjectServiceClient) Delete(ctx context.Context, in *v1.ProjectDeleteRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockProjectServiceClient) Delete(context1 context.Context, request *connect.Request[apiv1.ProjectDeleteRequest]) (*connect.Response[apiv1.ProjectResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Delete")
 	}
 
-	var r0 *v1.ProjectResponse
+	var r0 *connect.Response[apiv1.ProjectResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectDeleteRequest, ...grpc.CallOption) (*v1.ProjectResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectDeleteRequest]) (*connect.Response[apiv1.ProjectResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectDeleteRequest, ...grpc.CallOption) *v1.ProjectResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectDeleteRequest]) *connect.Response[apiv1.ProjectResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.ProjectResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.ProjectResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.ProjectDeleteRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.ProjectDeleteRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -162,77 +141,62 @@ type MockProjectServiceClient_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.ProjectDeleteRequest
-//   - opts ...grpc.CallOption
-func (_e *MockProjectServiceClient_Expecter) Delete(ctx interface{}, in interface{}, opts ...interface{}) *MockProjectServiceClient_Delete_Call {
-	return &MockProjectServiceClient_Delete_Call{Call: _e.mock.On("Delete",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.ProjectDeleteRequest]
+func (_e *MockProjectServiceClient_Expecter) Delete(context1 interface{}, request interface{}) *MockProjectServiceClient_Delete_Call {
+	return &MockProjectServiceClient_Delete_Call{Call: _e.mock.On("Delete", context1, request)}
 }
 
-func (_c *MockProjectServiceClient_Delete_Call) Run(run func(ctx context.Context, in *v1.ProjectDeleteRequest, opts ...grpc.CallOption)) *MockProjectServiceClient_Delete_Call {
+func (_c *MockProjectServiceClient_Delete_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.ProjectDeleteRequest])) *MockProjectServiceClient_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.ProjectDeleteRequest
+		var arg1 *connect.Request[apiv1.ProjectDeleteRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.ProjectDeleteRequest)
+			arg1 = args[1].(*connect.Request[apiv1.ProjectDeleteRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Delete_Call) Return(projectResponse *v1.ProjectResponse, err error) *MockProjectServiceClient_Delete_Call {
-	_c.Call.Return(projectResponse, err)
+func (_c *MockProjectServiceClient_Delete_Call) Return(response *connect.Response[apiv1.ProjectResponse], err error) *MockProjectServiceClient_Delete_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Delete_Call) RunAndReturn(run func(ctx context.Context, in *v1.ProjectDeleteRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error)) *MockProjectServiceClient_Delete_Call {
+func (_c *MockProjectServiceClient_Delete_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.ProjectDeleteRequest]) (*connect.Response[apiv1.ProjectResponse], error)) *MockProjectServiceClient_Delete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Find provides a mock function for the type MockProjectServiceClient
-func (_mock *MockProjectServiceClient) Find(ctx context.Context, in *v1.ProjectFindRequest, opts ...grpc.CallOption) (*v1.ProjectListResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockProjectServiceClient) Find(context1 context.Context, request *connect.Request[apiv1.ProjectFindRequest]) (*connect.Response[apiv1.ProjectListResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Find")
 	}
 
-	var r0 *v1.ProjectListResponse
+	var r0 *connect.Response[apiv1.ProjectListResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectFindRequest, ...grpc.CallOption) (*v1.ProjectListResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectFindRequest]) (*connect.Response[apiv1.ProjectListResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectFindRequest, ...grpc.CallOption) *v1.ProjectListResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectFindRequest]) *connect.Response[apiv1.ProjectListResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.ProjectListResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.ProjectListResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.ProjectFindRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.ProjectFindRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -245,77 +209,62 @@ type MockProjectServiceClient_Find_Call struct {
 }
 
 // Find is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.ProjectFindRequest
-//   - opts ...grpc.CallOption
-func (_e *MockProjectServiceClient_Expecter) Find(ctx interface{}, in interface{}, opts ...interface{}) *MockProjectServiceClient_Find_Call {
-	return &MockProjectServiceClient_Find_Call{Call: _e.mock.On("Find",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.ProjectFindRequest]
+func (_e *MockProjectServiceClient_Expecter) Find(context1 interface{}, request interface{}) *MockProjectServiceClient_Find_Call {
+	return &MockProjectServiceClient_Find_Call{Call: _e.mock.On("Find", context1, request)}
 }
 
-func (_c *MockProjectServiceClient_Find_Call) Run(run func(ctx context.Context, in *v1.ProjectFindRequest, opts ...grpc.CallOption)) *MockProjectServiceClient_Find_Call {
+func (_c *MockProjectServiceClient_Find_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.ProjectFindRequest])) *MockProjectServiceClient_Find_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.ProjectFindRequest
+		var arg1 *connect.Request[apiv1.ProjectFindRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.ProjectFindRequest)
+			arg1 = args[1].(*connect.Request[apiv1.ProjectFindRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Find_Call) Return(projectListResponse *v1.ProjectListResponse, err error) *MockProjectServiceClient_Find_Call {
-	_c.Call.Return(projectListResponse, err)
+func (_c *MockProjectServiceClient_Find_Call) Return(response *connect.Response[apiv1.ProjectListResponse], err error) *MockProjectServiceClient_Find_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Find_Call) RunAndReturn(run func(ctx context.Context, in *v1.ProjectFindRequest, opts ...grpc.CallOption) (*v1.ProjectListResponse, error)) *MockProjectServiceClient_Find_Call {
+func (_c *MockProjectServiceClient_Find_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.ProjectFindRequest]) (*connect.Response[apiv1.ProjectListResponse], error)) *MockProjectServiceClient_Find_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Get provides a mock function for the type MockProjectServiceClient
-func (_mock *MockProjectServiceClient) Get(ctx context.Context, in *v1.ProjectGetRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockProjectServiceClient) Get(context1 context.Context, request *connect.Request[apiv1.ProjectGetRequest]) (*connect.Response[apiv1.ProjectResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Get")
 	}
 
-	var r0 *v1.ProjectResponse
+	var r0 *connect.Response[apiv1.ProjectResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectGetRequest, ...grpc.CallOption) (*v1.ProjectResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectGetRequest]) (*connect.Response[apiv1.ProjectResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectGetRequest, ...grpc.CallOption) *v1.ProjectResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectGetRequest]) *connect.Response[apiv1.ProjectResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.ProjectResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.ProjectResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.ProjectGetRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.ProjectGetRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -328,77 +277,62 @@ type MockProjectServiceClient_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.ProjectGetRequest
-//   - opts ...grpc.CallOption
-func (_e *MockProjectServiceClient_Expecter) Get(ctx interface{}, in interface{}, opts ...interface{}) *MockProjectServiceClient_Get_Call {
-	return &MockProjectServiceClient_Get_Call{Call: _e.mock.On("Get",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.ProjectGetRequest]
+func (_e *MockProjectServiceClient_Expecter) Get(context1 interface{}, request interface{}) *MockProjectServiceClient_Get_Call {
+	return &MockProjectServiceClient_Get_Call{Call: _e.mock.On("Get", context1, request)}
 }
 
-func (_c *MockProjectServiceClient_Get_Call) Run(run func(ctx context.Context, in *v1.ProjectGetRequest, opts ...grpc.CallOption)) *MockProjectServiceClient_Get_Call {
+func (_c *MockProjectServiceClient_Get_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.ProjectGetRequest])) *MockProjectServiceClient_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.ProjectGetRequest
+		var arg1 *connect.Request[apiv1.ProjectGetRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.ProjectGetRequest)
+			arg1 = args[1].(*connect.Request[apiv1.ProjectGetRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Get_Call) Return(projectResponse *v1.ProjectResponse, err error) *MockProjectServiceClient_Get_Call {
-	_c.Call.Return(projectResponse, err)
+func (_c *MockProjectServiceClient_Get_Call) Return(response *connect.Response[apiv1.ProjectResponse], err error) *MockProjectServiceClient_Get_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Get_Call) RunAndReturn(run func(ctx context.Context, in *v1.ProjectGetRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error)) *MockProjectServiceClient_Get_Call {
+func (_c *MockProjectServiceClient_Get_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.ProjectGetRequest]) (*connect.Response[apiv1.ProjectResponse], error)) *MockProjectServiceClient_Get_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetHistory provides a mock function for the type MockProjectServiceClient
-func (_mock *MockProjectServiceClient) GetHistory(ctx context.Context, in *v1.ProjectGetHistoryRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockProjectServiceClient) GetHistory(context1 context.Context, request *connect.Request[apiv1.ProjectGetHistoryRequest]) (*connect.Response[apiv1.ProjectResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetHistory")
 	}
 
-	var r0 *v1.ProjectResponse
+	var r0 *connect.Response[apiv1.ProjectResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectGetHistoryRequest, ...grpc.CallOption) (*v1.ProjectResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectGetHistoryRequest]) (*connect.Response[apiv1.ProjectResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectGetHistoryRequest, ...grpc.CallOption) *v1.ProjectResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectGetHistoryRequest]) *connect.Response[apiv1.ProjectResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.ProjectResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.ProjectResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.ProjectGetHistoryRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.ProjectGetHistoryRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -411,77 +345,62 @@ type MockProjectServiceClient_GetHistory_Call struct {
 }
 
 // GetHistory is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.ProjectGetHistoryRequest
-//   - opts ...grpc.CallOption
-func (_e *MockProjectServiceClient_Expecter) GetHistory(ctx interface{}, in interface{}, opts ...interface{}) *MockProjectServiceClient_GetHistory_Call {
-	return &MockProjectServiceClient_GetHistory_Call{Call: _e.mock.On("GetHistory",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.ProjectGetHistoryRequest]
+func (_e *MockProjectServiceClient_Expecter) GetHistory(context1 interface{}, request interface{}) *MockProjectServiceClient_GetHistory_Call {
+	return &MockProjectServiceClient_GetHistory_Call{Call: _e.mock.On("GetHistory", context1, request)}
 }
 
-func (_c *MockProjectServiceClient_GetHistory_Call) Run(run func(ctx context.Context, in *v1.ProjectGetHistoryRequest, opts ...grpc.CallOption)) *MockProjectServiceClient_GetHistory_Call {
+func (_c *MockProjectServiceClient_GetHistory_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.ProjectGetHistoryRequest])) *MockProjectServiceClient_GetHistory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.ProjectGetHistoryRequest
+		var arg1 *connect.Request[apiv1.ProjectGetHistoryRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.ProjectGetHistoryRequest)
+			arg1 = args[1].(*connect.Request[apiv1.ProjectGetHistoryRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockProjectServiceClient_GetHistory_Call) Return(projectResponse *v1.ProjectResponse, err error) *MockProjectServiceClient_GetHistory_Call {
-	_c.Call.Return(projectResponse, err)
+func (_c *MockProjectServiceClient_GetHistory_Call) Return(response *connect.Response[apiv1.ProjectResponse], err error) *MockProjectServiceClient_GetHistory_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockProjectServiceClient_GetHistory_Call) RunAndReturn(run func(ctx context.Context, in *v1.ProjectGetHistoryRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error)) *MockProjectServiceClient_GetHistory_Call {
+func (_c *MockProjectServiceClient_GetHistory_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.ProjectGetHistoryRequest]) (*connect.Response[apiv1.ProjectResponse], error)) *MockProjectServiceClient_GetHistory_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Update provides a mock function for the type MockProjectServiceClient
-func (_mock *MockProjectServiceClient) Update(ctx context.Context, in *v1.ProjectUpdateRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
+func (_mock *MockProjectServiceClient) Update(context1 context.Context, request *connect.Request[apiv1.ProjectUpdateRequest]) (*connect.Response[apiv1.ProjectResponse], error) {
+	ret := _mock.Called(context1, request)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
 	}
 
-	var r0 *v1.ProjectResponse
+	var r0 *connect.Response[apiv1.ProjectResponse]
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectUpdateRequest, ...grpc.CallOption) (*v1.ProjectResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectUpdateRequest]) (*connect.Response[apiv1.ProjectResponse], error)); ok {
+		return returnFunc(context1, request)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *v1.ProjectUpdateRequest, ...grpc.CallOption) *v1.ProjectResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *connect.Request[apiv1.ProjectUpdateRequest]) *connect.Response[apiv1.ProjectResponse]); ok {
+		r0 = returnFunc(context1, request)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*v1.ProjectResponse)
+			r0 = ret.Get(0).(*connect.Response[apiv1.ProjectResponse])
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *v1.ProjectUpdateRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *connect.Request[apiv1.ProjectUpdateRequest]) error); ok {
+		r1 = returnFunc(context1, request)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -494,45 +413,36 @@ type MockProjectServiceClient_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *v1.ProjectUpdateRequest
-//   - opts ...grpc.CallOption
-func (_e *MockProjectServiceClient_Expecter) Update(ctx interface{}, in interface{}, opts ...interface{}) *MockProjectServiceClient_Update_Call {
-	return &MockProjectServiceClient_Update_Call{Call: _e.mock.On("Update",
-		append([]interface{}{ctx, in}, opts...)...)}
+//   - context1 context.Context
+//   - request *connect.Request[apiv1.ProjectUpdateRequest]
+func (_e *MockProjectServiceClient_Expecter) Update(context1 interface{}, request interface{}) *MockProjectServiceClient_Update_Call {
+	return &MockProjectServiceClient_Update_Call{Call: _e.mock.On("Update", context1, request)}
 }
 
-func (_c *MockProjectServiceClient_Update_Call) Run(run func(ctx context.Context, in *v1.ProjectUpdateRequest, opts ...grpc.CallOption)) *MockProjectServiceClient_Update_Call {
+func (_c *MockProjectServiceClient_Update_Call) Run(run func(context1 context.Context, request *connect.Request[apiv1.ProjectUpdateRequest])) *MockProjectServiceClient_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *v1.ProjectUpdateRequest
+		var arg1 *connect.Request[apiv1.ProjectUpdateRequest]
 		if args[1] != nil {
-			arg1 = args[1].(*v1.ProjectUpdateRequest)
+			arg1 = args[1].(*connect.Request[apiv1.ProjectUpdateRequest])
 		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
 		run(
 			arg0,
 			arg1,
-			arg2...,
 		)
 	})
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Update_Call) Return(projectResponse *v1.ProjectResponse, err error) *MockProjectServiceClient_Update_Call {
-	_c.Call.Return(projectResponse, err)
+func (_c *MockProjectServiceClient_Update_Call) Return(response *connect.Response[apiv1.ProjectResponse], err error) *MockProjectServiceClient_Update_Call {
+	_c.Call.Return(response, err)
 	return _c
 }
 
-func (_c *MockProjectServiceClient_Update_Call) RunAndReturn(run func(ctx context.Context, in *v1.ProjectUpdateRequest, opts ...grpc.CallOption) (*v1.ProjectResponse, error)) *MockProjectServiceClient_Update_Call {
+func (_c *MockProjectServiceClient_Update_Call) RunAndReturn(run func(context1 context.Context, request *connect.Request[apiv1.ProjectUpdateRequest]) (*connect.Response[apiv1.ProjectResponse], error)) *MockProjectServiceClient_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }

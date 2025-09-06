@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.8
 // 	protoc        (unknown)
-// source: v1/meta.proto
+// source: api/v1/meta.proto
 
-package v1
+package apiv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -38,7 +38,7 @@ type Meta struct {
 
 func (x *Meta) Reset() {
 	*x = Meta{}
-	mi := &file_v1_meta_proto_msgTypes[0]
+	mi := &file_api_v1_meta_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -50,7 +50,7 @@ func (x *Meta) String() string {
 func (*Meta) ProtoMessage() {}
 
 func (x *Meta) ProtoReflect() protoreflect.Message {
-	mi := &file_v1_meta_proto_msgTypes[0]
+	mi := &file_api_v1_meta_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -63,7 +63,7 @@ func (x *Meta) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Meta.ProtoReflect.Descriptor instead.
 func (*Meta) Descriptor() ([]byte, []int) {
-	return file_v1_meta_proto_rawDescGZIP(), []int{0}
+	return file_api_v1_meta_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Meta) GetId() string {
@@ -122,11 +122,11 @@ func (x *Meta) GetLabels() []string {
 	return nil
 }
 
-var File_v1_meta_proto protoreflect.FileDescriptor
+var File_api_v1_meta_proto protoreflect.FileDescriptor
 
-const file_v1_meta_proto_rawDesc = "" +
+const file_api_v1_meta_proto_rawDesc = "" +
 	"\n" +
-	"\rv1/meta.proto\x12\x02v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf7\x02\n" +
+	"\x11api/v1/meta.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfb\x02\n" +
 	"\x04Meta\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x1e\n" +
@@ -135,36 +135,37 @@ const file_v1_meta_proto_rawDesc = "" +
 	"apiversion\x12\x18\n" +
 	"\aversion\x18\x04 \x01(\x03R\aversion\x12=\n" +
 	"\fcreated_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vcreatedTime\x12=\n" +
-	"\fupdated_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\vupdatedTime\x12;\n" +
-	"\vannotations\x18\a \x03(\v2\x19.v1.Meta.AnnotationsEntryR\vannotations\x12\x16\n" +
+	"\fupdated_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\vupdatedTime\x12?\n" +
+	"\vannotations\x18\a \x03(\v2\x1d.api.v1.Meta.AnnotationsEntryR\vannotations\x12\x16\n" +
 	"\x06labels\x18\b \x03(\tR\x06labels\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01Be\n" +
-	"\x06com.v1B\tMetaProtoP\x01Z(github.com/metal-stack/masterdata-api/v1\xa2\x02\x03VXX\xaa\x02\x02V1\xca\x02\x02V1\xe2\x02\x0eV1\\GPBMetadata\xea\x02\x02V1b\x06proto3"
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x84\x01\n" +
+	"\n" +
+	"com.api.v1B\tMetaProtoP\x01Z2github.com/metal-stack/masterdata-api/api/v1;apiv1\xa2\x02\x03AXX\xaa\x02\x06Api.V1\xca\x02\x06Api\\V1\xe2\x02\x12Api\\V1\\GPBMetadata\xea\x02\aApi::V1b\x06proto3"
 
 var (
-	file_v1_meta_proto_rawDescOnce sync.Once
-	file_v1_meta_proto_rawDescData []byte
+	file_api_v1_meta_proto_rawDescOnce sync.Once
+	file_api_v1_meta_proto_rawDescData []byte
 )
 
-func file_v1_meta_proto_rawDescGZIP() []byte {
-	file_v1_meta_proto_rawDescOnce.Do(func() {
-		file_v1_meta_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_v1_meta_proto_rawDesc), len(file_v1_meta_proto_rawDesc)))
+func file_api_v1_meta_proto_rawDescGZIP() []byte {
+	file_api_v1_meta_proto_rawDescOnce.Do(func() {
+		file_api_v1_meta_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_v1_meta_proto_rawDesc), len(file_api_v1_meta_proto_rawDesc)))
 	})
-	return file_v1_meta_proto_rawDescData
+	return file_api_v1_meta_proto_rawDescData
 }
 
-var file_v1_meta_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_v1_meta_proto_goTypes = []any{
-	(*Meta)(nil),                  // 0: v1.Meta
-	nil,                           // 1: v1.Meta.AnnotationsEntry
+var file_api_v1_meta_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_api_v1_meta_proto_goTypes = []any{
+	(*Meta)(nil),                  // 0: api.v1.Meta
+	nil,                           // 1: api.v1.Meta.AnnotationsEntry
 	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
 }
-var file_v1_meta_proto_depIdxs = []int32{
-	2, // 0: v1.Meta.created_time:type_name -> google.protobuf.Timestamp
-	2, // 1: v1.Meta.updated_time:type_name -> google.protobuf.Timestamp
-	1, // 2: v1.Meta.annotations:type_name -> v1.Meta.AnnotationsEntry
+var file_api_v1_meta_proto_depIdxs = []int32{
+	2, // 0: api.v1.Meta.created_time:type_name -> google.protobuf.Timestamp
+	2, // 1: api.v1.Meta.updated_time:type_name -> google.protobuf.Timestamp
+	1, // 2: api.v1.Meta.annotations:type_name -> api.v1.Meta.AnnotationsEntry
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -172,26 +173,26 @@ var file_v1_meta_proto_depIdxs = []int32{
 	0, // [0:3] is the sub-list for field type_name
 }
 
-func init() { file_v1_meta_proto_init() }
-func file_v1_meta_proto_init() {
-	if File_v1_meta_proto != nil {
+func init() { file_api_v1_meta_proto_init() }
+func file_api_v1_meta_proto_init() {
+	if File_api_v1_meta_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_v1_meta_proto_rawDesc), len(file_v1_meta_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_v1_meta_proto_rawDesc), len(file_api_v1_meta_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_v1_meta_proto_goTypes,
-		DependencyIndexes: file_v1_meta_proto_depIdxs,
-		MessageInfos:      file_v1_meta_proto_msgTypes,
+		GoTypes:           file_api_v1_meta_proto_goTypes,
+		DependencyIndexes: file_api_v1_meta_proto_depIdxs,
+		MessageInfos:      file_api_v1_meta_proto_msgTypes,
 	}.Build()
-	File_v1_meta_proto = out.File
-	file_v1_meta_proto_goTypes = nil
-	file_v1_meta_proto_depIdxs = nil
+	File_api_v1_meta_proto = out.File
+	file_api_v1_meta_proto_goTypes = nil
+	file_api_v1_meta_proto_depIdxs = nil
 }

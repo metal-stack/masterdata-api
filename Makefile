@@ -44,7 +44,7 @@ server: protoc generate
 								   -X 'github.com/metal-stack/v.Revision=$(GITVERSION)' \
 								   -X 'github.com/metal-stack/v.GitSHA1=$(SHA)' \
 								   -X 'github.com/metal-stack/v.BuildDate=$(BUILDDATE)'" \
-						 -o bin/server server/main.go
+						 -o bin/server github.com/metal-stack/masterdata-api/cmd/server
 	strip bin/server
 
 .PHONY: client
@@ -63,17 +63,11 @@ mocks:
 
 .PHONY: postgres-up
 postgres-up: postgres-rm
-	docker run -d --name masterdatadb -p 5432:5432 -e POSTGRES_PASSWORD="password" -e POSTGRES_USER="masterdata" -e POSTGRES_DB="masterdata" postgres:16-alpine
+	docker run -d --name masterdatadb -p 5432:5432 -e POSTGRES_PASSWORD="password" -e POSTGRES_USER="masterdata" -e POSTGRES_DB="masterdata" postgres:17-alpine
 
 .PHONY: postgres-rm
 postgres-rm:
 	docker rm -f masterdatadb || true
-
-.PHONY: certs
-certs:
-	cd certs && cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
-	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client-server server.json | cfssljson -bare server -
-	cd certs && cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile client client.json | cfssljson -bare client -
 
 .PHONY: mini-lab-push
 mini-lab-push:

@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "api/v1/common.proto";
+import "api/v1/meta.proto";
+import "api/v1/quota.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+service ProjectService {
+  rpc Create(ProjectCreateRequest) returns (ProjectResponse);
+  rpc Update(ProjectUpdateRequest) returns (ProjectResponse);
+  rpc Delete(ProjectDeleteRequest) returns (ProjectResponse);
+  rpc Get(ProjectGetRequest) returns (ProjectResponse);
+  rpc GetHistory(ProjectGetHistoryRequest) returns (ProjectResponse);
+  rpc Find(ProjectFindRequest) returns (ProjectListResponse);
+}
+
+// Project is the database model
+message Project {
+  Meta meta = 1;
+  string name = 2;
+  string description = 3;
+  string tenant_id = 4;
+  QuotaSet quotas = 5;
+}
+
+message ProjectCreateRequest {
+  Project project = 1;
+}
+
+message ProjectUpdateRequest {
+  Project project = 1;
+}
+
+message ProjectDeleteRequest {
+  string id = 1;
+}
+
+message ProjectGetRequest {
+  string id = 1;
+}
+
+message ProjectGetHistoryRequest {
+  string id = 1;
+  google.protobuf.Timestamp at = 2;
+}
+
+message ProjectFindRequest {
+  // TODO: remove in next release:
+  google.protobuf.StringValue deprecated_id = 1 [deprecated = true];
+  google.protobuf.StringValue deprecated_name = 2 [deprecated = true];
+  google.protobuf.StringValue deprecated_description = 3 [deprecated = true];
+  google.protobuf.StringValue deprecated_tenant_id = 4 [deprecated = true];
+
+  Paging paging = 5;
+  map<string, string> annotations = 6;
+
+  optional string id = 7;
+  optional string name = 8;
+  optional string description = 9;
+  optional string tenant_id = 10;
+  repeated string labels = 11;
+}
+
+message ProjectResponse {
+  Project project = 1;
+}
+
+message ProjectListResponse {
+  repeated Project projects = 1;
+  // next_page_token is used for pagination, returns the next page to be fetched and must then be provided in the list request.
+  optional uint64 next_page = 2;
+}
