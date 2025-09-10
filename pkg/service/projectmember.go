@@ -76,6 +76,7 @@ func (s *projectMemberService) Delete(ctx context.Context, req *v1.ProjectMember
 	err := s.projectMemberStore.Delete(ctx, projectMember.Meta.Id)
 	return projectMember.NewProjectMemberResponse(), err
 }
+
 func (s *projectMemberService) Get(ctx context.Context, req *v1.ProjectMemberGetRequest) (*v1.ProjectMemberResponse, error) {
 	projectMember, err := s.projectMemberStore.Get(ctx, req.Id)
 	if err != nil {
@@ -83,6 +84,7 @@ func (s *projectMemberService) Get(ctx context.Context, req *v1.ProjectMemberGet
 	}
 	return projectMember.NewProjectMemberResponse(), nil
 }
+
 func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFindRequest) (*v1.ProjectMemberListResponse, error) {
 	filter := map[string]any{
 		"COALESCE(projectmember ->> 'namespace', '')": req.Namespace,
@@ -101,11 +103,14 @@ func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFi
 		f := fmt.Sprintf("projectmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
 	}
+
 	res, _, err := s.projectMemberStore.Find(ctx, nil, filter)
 	if err != nil {
 		return nil, err
 	}
+
 	resp := new(v1.ProjectMemberListResponse)
 	resp.ProjectMembers = append(resp.ProjectMembers, res...)
+
 	return resp, nil
 }
