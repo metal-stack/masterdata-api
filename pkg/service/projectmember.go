@@ -101,9 +101,6 @@ func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFi
 	if req.TenantId != nil {
 		filter["projectmember ->> 'tenant_id'"] = req.TenantId
 	}
-	if req.TenantId != nil {
-		filter["projectmember ->> 'tenant_id'"] = req.TenantId
-	}
 	for key, value := range req.Annotations {
 		// select * from projectMember where projectMember -> 'meta' -> 'annotations' ->>  'metal-stack.io/role' = 'owner';
 		f := fmt.Sprintf("projectmember -> 'meta' -> 'annotations' ->> '%s'", key)
