@@ -11,8 +11,9 @@ import (
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/metal-stack/metal-lib/pkg/testcommon"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/runtime/protoimpl"
 
 	"testing"
@@ -50,42 +51,6 @@ func TestCreateProjectMember(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProjectMember())
 	assert.Equal(t, pmcr.ProjectMember.ProjectId, resp.GetProjectMember().GetProjectId())
-}
-
-func TestUpdateProjectMember(t *testing.T) {
-	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
-	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
-	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
-	ts := &projectMemberService{
-		projectMemberStore: storageMock,
-		tenantStore:        tenantStorageMock,
-		projectStore:       projectStorageMock,
-		log:                slog.Default(),
-	}
-	ctx := context.Background()
-
-	meta := &v1.Meta{Id: "p2", Annotations: map[string]string{"key": "value"}}
-	pm1 := &v1.ProjectMember{
-		Meta:      meta,
-		ProjectId: "p1",
-		TenantId:  "t1",
-	}
-	meta.Annotations = map[string]string{"key": "value2"}
-	pmur := &v1.ProjectMemberUpdateRequest{
-		ProjectMember: &v1.ProjectMember{
-			Meta:      meta,
-			ProjectId: "p1",
-			TenantId:  "t1",
-		},
-	}
-
-	storageMock.On("Get", ctx, pm1.Meta.Id).Return(pm1, nil)
-	storageMock.On("Update", ctx, pm1).Return(nil)
-	resp, err := ts.Update(ctx, pmur)
-	require.NoError(t, err)
-	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetProjectMember())
-	assert.Equal(t, pmur.GetProjectMember().Meta.Annotations, resp.GetProjectMember().Meta.Annotations)
 }
 
 func TestDeleteProjectMember(t *testing.T) {
@@ -138,62 +103,6 @@ func TestGetProjectMember(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetProjectMember())
 	assert.Equal(t, tgr.Id, resp.GetProjectMember().GetMeta().GetId())
-}
-
-func TestFindProjectMemberByProject(t *testing.T) {
-	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
-	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
-	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
-	ts := &projectMemberService{
-		projectMemberStore: storageMock,
-		tenantStore:        tenantStorageMock,
-		projectStore:       projectStorageMock,
-		log:                slog.Default(),
-	}
-	ctx := context.Background()
-
-	// filter by name
-	var t6s []*v1.ProjectMember
-	tfr := &v1.ProjectMemberFindRequest{
-		ProjectId: pointer.Pointer("p1"),
-		Namespace: "a",
-	}
-
-	f2 := make(map[string]any)
-	f2["projectmember ->> 'project_id'"] = pointer.Pointer("p1")
-	f2["COALESCE(projectmember ->> 'namespace', '')"] = "a"
-	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
-	require.NoError(t, err)
-	assert.NotNil(t, resp)
-}
-
-func TestFindProjectMemberByTenant(t *testing.T) {
-	storageMock := mocks.NewMockStorage[*v1.ProjectMember](t)
-	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
-	projectStorageMock := mocks.NewMockStorage[*v1.Project](t)
-	ts := &projectMemberService{
-		projectMemberStore: storageMock,
-		tenantStore:        tenantStorageMock,
-		projectStore:       projectStorageMock,
-		log:                slog.Default(),
-	}
-	ctx := context.Background()
-
-	// filter by name
-	var t6s []*v1.ProjectMember
-	tfr := &v1.ProjectMemberFindRequest{
-		TenantId:  pointer.Pointer("t1"),
-		Namespace: "a",
-	}
-
-	f2 := make(map[string]any)
-	f2["projectmember ->> 'tenant_id'"] = pointer.Pointer("t1")
-	f2["COALESCE(projectmember ->> 'namespace', '')"] = "a"
-	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
-	require.NoError(t, err)
-	assert.NotNil(t, resp)
 }
 
 func TestFindProjectMember(t *testing.T) {
@@ -459,6 +368,207 @@ func TestFindProjectMember(t *testing.T) {
 			})
 
 			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestUpdateProjectMember(t *testing.T) {
+	ctx := t.Context()
+	ves := []datastore.Entity{
+		&v1.Project{},
+		&v1.ProjectMember{},
+		&v1.Tenant{},
+		&v1.TenantMember{},
+	}
+
+	container, db, err := StartPostgres(ctx, ves...)
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, db.Close())
+		require.NoError(t, container.Terminate(ctx))
+	}()
+
+	var (
+		projectMemberStore = datastore.New(log, db, &v1.ProjectMember{})
+		projectStore       = datastore.New(log, db, &v1.Project{})
+		tenantStore        = datastore.New(log, db, &v1.Tenant{})
+
+		service = &projectMemberService{
+			log:                log,
+			projectMemberStore: projectMemberStore,
+			tenantStore:        tenantStore,
+			projectStore:       projectStore,
+		}
+	)
+
+	tests := []struct {
+		name    string
+		prepare func()
+		req     *v1.ProjectMemberUpdateRequest
+		want    *v1.ProjectMemberResponse
+		wantErr error
+	}{
+		{
+			name: "update mutable fields",
+			req: &v1.ProjectMemberUpdateRequest{
+				ProjectMember: &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:      "1",
+						Version: 1,
+						Annotations: map[string]string{
+							"role": "owner",
+						},
+						Labels: []string{"a", "b"},
+					},
+					ProjectId: "project-1",
+					TenantId:  "tenant-1",
+					Namespace: "a",
+				},
+			},
+			prepare: func() {
+				require.NoError(t, projectMemberStore.Create(ctx, &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "ProjectMember",
+						Apiversion: "v1",
+						Version:    1,
+					},
+					ProjectId: "project-1",
+					TenantId:  "tenant-1",
+					Namespace: "a",
+				}))
+			},
+			want: &v1.ProjectMemberResponse{
+				ProjectMember: &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "ProjectMember",
+						Apiversion: "v1",
+						Version:    2,
+						Annotations: map[string]string{
+							"role": "owner",
+						},
+						Labels: []string{"a", "b"},
+					},
+					ProjectId: "project-1",
+					TenantId:  "tenant-1",
+					Namespace: "a",
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "unable to update namespace",
+			req: &v1.ProjectMemberUpdateRequest{
+				ProjectMember: &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:      "1",
+						Version: 1,
+					},
+					ProjectId: "project-1",
+					TenantId:  "tenant-1",
+					Namespace: "b",
+				},
+			},
+			prepare: func() {
+				require.NoError(t, projectMemberStore.Create(ctx, &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "ProjectMember",
+						Apiversion: "v1",
+						Version:    1,
+					},
+					ProjectId: "project-1",
+					TenantId:  "tenant-1",
+					Namespace: "a",
+				}))
+			},
+			want:    nil,
+			wantErr: status.Error(codes.InvalidArgument, "updating the namespace of a project member is not allowed"),
+		},
+		{
+			name: "unable to update project",
+			req: &v1.ProjectMemberUpdateRequest{
+				ProjectMember: &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:      "1",
+						Version: 1,
+					},
+					ProjectId: "project-2",
+					TenantId:  "tenant-1",
+					Namespace: "a",
+				},
+			},
+			prepare: func() {
+				require.NoError(t, projectMemberStore.Create(ctx, &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "ProjectMember",
+						Apiversion: "v1",
+						Version:    1,
+					},
+					ProjectId: "project-1",
+					TenantId:  "tenant-1",
+					Namespace: "a",
+				}))
+			},
+			want:    nil,
+			wantErr: status.Error(codes.InvalidArgument, "updating the project id of a project member is not allowed"),
+		},
+		{
+			name: "unable to update tenant",
+			req: &v1.ProjectMemberUpdateRequest{
+				ProjectMember: &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:      "1",
+						Version: 1,
+					},
+					ProjectId: "project-1",
+					TenantId:  "tenant-2",
+					Namespace: "a",
+				},
+			},
+			prepare: func() {
+				require.NoError(t, projectMemberStore.Create(ctx, &v1.ProjectMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "ProjectMember",
+						Apiversion: "v1",
+						Version:    1,
+					},
+					ProjectId: "project-1",
+					TenantId:  "tenant-1",
+					Namespace: "a",
+				}))
+			},
+			want:    nil,
+			wantErr: status.Error(codes.InvalidArgument, "updating the tenant id of a project member is not allowed"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, ve := range ves {
+				_, err := db.ExecContext(ctx, "TRUNCATE TABLE "+ve.TableName())
+				require.NoError(t, err)
+			}
+
+			if tt.prepare != nil {
+				tt.prepare()
+			}
+
+			got, err := service.Update(ctx, tt.req)
+			if diff := cmp.Diff(err, tt.wantErr, cmpopts.EquateErrors()); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+				return
+			}
+
+			if err == nil {
+				assert.NotNil(t, got.ProjectMember.Meta.UpdatedTime)
+			}
+
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime", "UpdatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})

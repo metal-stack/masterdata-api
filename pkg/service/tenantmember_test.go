@@ -11,8 +11,9 @@ import (
 	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/metal-stack/metal-lib/pkg/testcommon"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/runtime/protoimpl"
 
 	"testing"
@@ -48,40 +49,6 @@ func TestCreateTenantMember(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetTenantMember())
 	assert.Equal(t, pmcr.TenantMember.TenantId, resp.GetTenantMember().GetTenantId())
-}
-
-func TestUpdateTenantMember(t *testing.T) {
-	storageMock := mocks.NewMockStorage[*v1.TenantMember](t)
-	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
-	ts := &tenantMemberService{
-		tenantMemberStore: storageMock,
-		tenantStore:       tenantStorageMock,
-		log:               slog.Default(),
-	}
-	ctx := context.Background()
-
-	meta := &v1.Meta{Id: "p2", Annotations: map[string]string{"key": "value"}}
-	pm1 := &v1.TenantMember{
-		Meta:     meta,
-		TenantId: "p1",
-		MemberId: "t1",
-	}
-	meta.Annotations = map[string]string{"key": "value2"}
-	pmur := &v1.TenantMemberUpdateRequest{
-		TenantMember: &v1.TenantMember{
-			Meta:     meta,
-			TenantId: "p1",
-			MemberId: "t1",
-		},
-	}
-
-	storageMock.On("Get", ctx, pm1.Meta.Id).Return(pm1, nil)
-	storageMock.On("Update", ctx, pm1).Return(nil)
-	resp, err := ts.Update(ctx, pmur)
-	require.NoError(t, err)
-	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.GetTenantMember())
-	assert.Equal(t, pmur.GetTenantMember().Meta.Annotations, resp.GetTenantMember().Meta.Annotations)
 }
 
 func TestDeleteTenantMember(t *testing.T) {
@@ -130,58 +97,6 @@ func TestGetTenantMember(t *testing.T) {
 	assert.NotNil(t, resp)
 	assert.NotNil(t, resp.GetTenantMember())
 	assert.Equal(t, tgr.Id, resp.GetTenantMember().GetMeta().GetId())
-}
-
-func TestFindTenantMemberByTenant(t *testing.T) {
-	storageMock := mocks.NewMockStorage[*v1.TenantMember](t)
-	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
-	ts := &tenantMemberService{
-		tenantMemberStore: storageMock,
-		tenantStore:       tenantStorageMock,
-		log:               slog.Default(),
-	}
-	ctx := context.Background()
-
-	// filter by name
-	var t6s []*v1.TenantMember
-	tfr := &v1.TenantMemberFindRequest{
-		TenantId:  pointer.Pointer("p1"),
-		Namespace: "a",
-	}
-
-	f2 := make(map[string]any)
-	f2["tenantmember ->> 'tenant_id'"] = pointer.Pointer("p1")
-	f2["COALESCE(tenantmember ->> 'namespace', '')"] = "a"
-	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
-	require.NoError(t, err)
-	assert.NotNil(t, resp)
-}
-
-func TestFindTenantMemberByMember(t *testing.T) {
-	storageMock := mocks.NewMockStorage[*v1.TenantMember](t)
-	tenantStorageMock := mocks.NewMockStorage[*v1.Tenant](t)
-	ts := &tenantMemberService{
-		tenantMemberStore: storageMock,
-		tenantStore:       tenantStorageMock,
-		log:               slog.Default(),
-	}
-	ctx := context.Background()
-
-	// filter by name
-	var t6s []*v1.TenantMember
-	tfr := &v1.TenantMemberFindRequest{
-		MemberId:  pointer.Pointer("t1"),
-		Namespace: "a",
-	}
-
-	f2 := make(map[string]any)
-	f2["tenantmember ->> 'member_id'"] = pointer.Pointer("t1")
-	f2["COALESCE(tenantmember ->> 'namespace', '')"] = "a"
-	storageMock.On("Find", ctx, mock.AnythingOfType("*v1.Paging"), []any{f2}).Return(t6s, nil, nil)
-	resp, err := ts.Find(ctx, tfr)
-	require.NoError(t, err)
-	assert.NotNil(t, resp)
 }
 
 func TestFindTenantMember(t *testing.T) {
@@ -427,6 +342,203 @@ func TestFindTenantMember(t *testing.T) {
 			})
 
 			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestUpdateTenantMember(t *testing.T) {
+	ctx := t.Context()
+	ves := []datastore.Entity{
+		&v1.Tenant{},
+		&v1.TenantMember{},
+	}
+
+	container, db, err := StartPostgres(ctx, ves...)
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, db.Close())
+		require.NoError(t, container.Terminate(ctx))
+	}()
+
+	var (
+		tenantMemberStore = datastore.New(log, db, &v1.TenantMember{})
+		tenantStore       = datastore.New(log, db, &v1.Tenant{})
+
+		service = &tenantMemberService{
+			log:               log,
+			tenantMemberStore: tenantMemberStore,
+			tenantStore:       tenantStore,
+		}
+	)
+
+	tests := []struct {
+		name    string
+		prepare func()
+		req     *v1.TenantMemberUpdateRequest
+		want    *v1.TenantMemberResponse
+		wantErr error
+	}{
+		{
+			name: "update mutable fields",
+			req: &v1.TenantMemberUpdateRequest{
+				TenantMember: &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:      "1",
+						Version: 1,
+						Annotations: map[string]string{
+							"role": "owner",
+						},
+						Labels: []string{"a", "b"},
+					},
+					TenantId:  "tenant-1",
+					MemberId:  "tenant-1",
+					Namespace: "a",
+				},
+			},
+			prepare: func() {
+				require.NoError(t, tenantMemberStore.Create(ctx, &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "TenantMember",
+						Apiversion: "v1",
+						Version:    1,
+					},
+					TenantId:  "tenant-1",
+					MemberId:  "tenant-1",
+					Namespace: "a",
+				}))
+			},
+			want: &v1.TenantMemberResponse{
+				TenantMember: &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "TenantMember",
+						Apiversion: "v1",
+						Version:    2,
+						Annotations: map[string]string{
+							"role": "owner",
+						},
+						Labels: []string{"a", "b"},
+					},
+					TenantId:  "tenant-1",
+					MemberId:  "tenant-1",
+					Namespace: "a",
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "unable to update namespace",
+			req: &v1.TenantMemberUpdateRequest{
+				TenantMember: &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:      "1",
+						Version: 1,
+					},
+					TenantId:  "tenant-1",
+					MemberId:  "tenant-1",
+					Namespace: "b",
+				},
+			},
+			prepare: func() {
+				require.NoError(t, tenantMemberStore.Create(ctx, &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "TenantMember",
+						Apiversion: "v1",
+						Version:    1,
+					},
+					TenantId:  "tenant-1",
+					MemberId:  "tenant-1",
+					Namespace: "a",
+				}))
+			},
+			want:    nil,
+			wantErr: status.Error(codes.InvalidArgument, "updating the namespace of a tenant member is not allowed"),
+		},
+		{
+			name: "unable to update tenant id",
+			req: &v1.TenantMemberUpdateRequest{
+				TenantMember: &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:      "1",
+						Version: 1,
+					},
+					TenantId:  "tenant-2",
+					MemberId:  "tenant-1",
+					Namespace: "a",
+				},
+			},
+			prepare: func() {
+				require.NoError(t, tenantMemberStore.Create(ctx, &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "TenantMember",
+						Apiversion: "v1",
+						Version:    1,
+					},
+					TenantId:  "tenant-1",
+					MemberId:  "tenant-1",
+					Namespace: "a",
+				}))
+			},
+			want:    nil,
+			wantErr: status.Error(codes.InvalidArgument, "updating the tenant id of a tenant member is not allowed"),
+		},
+		{
+			name: "unable to update member id",
+			req: &v1.TenantMemberUpdateRequest{
+				TenantMember: &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:      "1",
+						Version: 1,
+					},
+					TenantId:  "tenant-1",
+					MemberId:  "tenant-2",
+					Namespace: "a",
+				},
+			},
+			prepare: func() {
+				require.NoError(t, tenantMemberStore.Create(ctx, &v1.TenantMember{
+					Meta: &v1.Meta{
+						Id:         "1",
+						Kind:       "TenantMember",
+						Apiversion: "v1",
+						Version:    1,
+					},
+					TenantId:  "tenant-1",
+					MemberId:  "tenant-1",
+					Namespace: "a",
+				}))
+			},
+			want:    nil,
+			wantErr: status.Error(codes.InvalidArgument, "updating the member id of a tenant member is not allowed"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, ve := range ves {
+				_, err := db.ExecContext(ctx, "TRUNCATE TABLE "+ve.TableName())
+				require.NoError(t, err)
+			}
+
+			if tt.prepare != nil {
+				tt.prepare()
+			}
+
+			got, err := service.Update(ctx, tt.req)
+			if diff := cmp.Diff(err, tt.wantErr, cmpopts.EquateErrors()); diff != "" {
+				t.Errorf("(-want +got):\n%s", diff)
+				return
+			}
+
+			if err == nil {
+				assert.NotNil(t, got.TenantMember.Meta.UpdatedTime)
+			}
+
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime", "UpdatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})

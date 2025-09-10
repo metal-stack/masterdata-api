@@ -60,6 +60,12 @@ func (s *tenantMemberService) Update(ctx context.Context, req *v1.TenantMemberUp
 		return nil, err
 	}
 
+	if old.TenantId != tenantMember.TenantId {
+		return nil, status.Error(codes.InvalidArgument, "updating the tenant id of a tenant member is not allowed")
+	}
+	if old.MemberId != tenantMember.MemberId {
+		return nil, status.Error(codes.InvalidArgument, "updating the member id of a tenant member is not allowed")
+	}
 	if old.Namespace != tenantMember.Namespace {
 		return nil, status.Error(codes.InvalidArgument, "updating the namespace of a tenant member is not allowed")
 	}

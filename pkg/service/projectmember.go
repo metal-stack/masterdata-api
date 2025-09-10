@@ -62,6 +62,12 @@ func (s *projectMemberService) Update(ctx context.Context, req *v1.ProjectMember
 		return nil, err
 	}
 
+	if old.ProjectId != projectMember.ProjectId {
+		return nil, status.Error(codes.InvalidArgument, "updating the project id of a project member is not allowed")
+	}
+	if old.TenantId != projectMember.TenantId {
+		return nil, status.Error(codes.InvalidArgument, "updating the tenant id of a project member is not allowed")
+	}
 	if old.Namespace != projectMember.Namespace {
 		return nil, status.Error(codes.InvalidArgument, "updating the namespace of a project member is not allowed")
 	}
