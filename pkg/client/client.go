@@ -33,16 +33,62 @@ type GRPCClient struct {
 	hmacKey string
 }
 
+type Config struct {
+	Logger *slog.Logger
+
+	Hostname string
+	Port     int
+
+	CertFile string
+	KeyFile  string
+	CaFile   string
+	Insecure bool
+
+	HmacKey string
+
+	// Namespace if set adds this namespace to namespaced requests such that it does not need to be passed all the time
+	Namespace string
+}
+
+func (c *Config) validate() error {
+	if c == nil {
+		return fmt.Errorf("config must not be nil")
+	}
+
+	if c.Hostname == "" {
+		return fmt.Errorf("hostname must be specified")
+	}
+	if c.Port < 0 {
+		return fmt.Errorf("port must not be a negative number")
+	}
+
+	if c.KeyFile != "" || c.CertFile != "" {
+		if c.KeyFile == "" || c.CertFile == "" {
+			return fmt.Errorf("either both key and cert file must be specified or none of them")
+		}
+	}
+
+	return nil
+}
+
 // NewClient creates a new client for the services for the given address, with the certificate and hmac.
-func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, insecure bool, logger *slog.Logger, namespace string) (Client, error) {
-	address := fmt.Sprintf("%s:%d", hostname, port)
+func NewClient(config *Config) (Client, error) {
+	if err := config.validate(); err != nil {
+		return nil, err
+	}
+
+	if config.Logger == nil {
+		config.Logger = slog.Default()
+	}
+
+	address := fmt.Sprintf("%s:%d", config.Hostname, config.Port)
 
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load system credentials: %w", err)
 	}
 
-	if caFile != "" {
+	if caFile := config.CaFile; caFile != "" {
 		ca, err := os.ReadFile(caFile)
 		if err != nil {
 			return nil, fmt.Errorf("could not read ca certificate: %w", err)
@@ -59,8 +105,8 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		opts         []grpc.DialOption
 	)
 
-	if certFile != "" && keyFile != "" {
-		clientCertificate, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if config.CertFile != "" && config.KeyFile != "" {
+		clientCertificate, err := tls.LoadX509KeyPair(config.CertFile, config.KeyFile)
 		if err != nil {
 			return nil, fmt.Errorf("could not load client key pair: %w", err)
 		}
@@ -68,11 +114,11 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		certificates = append(certificates, clientCertificate)
 
 		creds := credentials.NewTLS(&tls.Config{
-			ServerName:         hostname,
+			ServerName:         config.Hostname,
 			Certificates:       certificates,
 			RootCAs:            certPool,
 			MinVersion:         tls.VersionTLS12,
-			InsecureSkipVerify: insecure, // nolint:gosec
+			InsecureSkipVerify: config.Insecure, // nolint:gosec
 		})
 
 		opts = append(opts,
@@ -86,9 +132,15 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		)
 	}
 
-	if hmacKey != "" {
+	client := GRPCClient{
+		log: config.Logger,
+	}
+
+	if config.HmacKey != "" {
+		client.hmacKey = config.HmacKey
+
 		// Set up the credentials for the connection.
-		perRPCHMACAuthenticator, err := auth.NewHMACAuther(hmacKey, auth.EditUser)
+		perRPCHMACAuthenticator, err := auth.NewHMACAuther(config.HmacKey, auth.EditUser)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create hmac-authenticator: %w", err)
 		}
@@ -101,13 +153,8 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 			grpc.WithPerRPCCredentials(perRPCHMACAuthenticator))
 	}
 
-	client := GRPCClient{
-		log:     logger,
-		hmacKey: hmacKey,
-	}
-
-	if namespace != "" {
-		opts = append(opts, NamespaceInterceptor(namespace))
+	if config.Namespace != "" {
+		opts = append(opts, NamespaceInterceptor(config.Namespace))
 	}
 
 	// Set up a connection to the server.

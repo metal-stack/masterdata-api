@@ -48,7 +48,13 @@ func Test_Client(t *testing.T) {
 	port, err := strconv.Atoi(portString)
 	require.NoError(t, err)
 
-	client, err := NewClient(t.Context(), "localhost", port, "", "", "", "", true, log, namespace)
+	client, err := NewClient(&Config{
+		Hostname:  "localhost",
+		Port:      port,
+		Insecure:  true,
+		Logger:    log,
+		Namespace: namespace,
+	})
 	require.NoError(t, err)
 
 	t.Run("check namespace interceptor sets missing namespace", func(t *testing.T) {
