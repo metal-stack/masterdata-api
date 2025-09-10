@@ -1208,12 +1208,10 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
 								Apiversion: "v1",
-								Id:         "github",
+								Id:         "azure",
 							},
 						},
-						TenantAnnotations: map[string]string{"tenant-role": "owner"},
 						ProjectIds: []string{
-							"1",
 							"2",
 						},
 					},
@@ -1222,10 +1220,12 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 							Meta: &v1.Meta{
 								Kind:       "Tenant",
 								Apiversion: "v1",
-								Id:         "azure",
+								Id:         "github",
 							},
 						},
+						TenantAnnotations: map[string]string{"tenant-role": "owner"},
 						ProjectIds: []string{
+							"1",
 							"2",
 						},
 					},
@@ -1250,6 +1250,15 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
+
+			slices.SortFunc(got.Tenants, func(i, j *v1.TenantWithMembershipAnnotations) int {
+				if i.Tenant.Meta.Id < j.Tenant.Meta.Id {
+					return -1
+				} else {
+					return 1
+				}
+			})
+
 			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
