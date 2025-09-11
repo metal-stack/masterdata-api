@@ -50,7 +50,7 @@ func Test_Client(t *testing.T) {
 
 	client, err := NewClient(&Config{
 		Hostname:  "localhost",
-		Port:      port,
+		Port:      uint(port),
 		Insecure:  true,
 		Logger:    log,
 		Namespace: namespace,

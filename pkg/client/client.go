@@ -37,7 +37,7 @@ type Config struct {
 	Logger *slog.Logger
 
 	Hostname string
-	Port     int
+	Port     uint
 
 	CertFile string
 	KeyFile  string
@@ -57,9 +57,6 @@ func (c *Config) validate() error {
 
 	if c.Hostname == "" {
 		return fmt.Errorf("hostname must be specified")
-	}
-	if c.Port < 0 {
-		return fmt.Errorf("port must not be a negative number")
 	}
 
 	if c.KeyFile != "" || c.CertFile != "" {
