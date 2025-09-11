@@ -28,7 +28,9 @@ type TenantMember struct {
 	// TenantId is the id of the parent tenant
 	TenantId string `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	// MemberId is the id of the member tenant
-	MemberId      string `protobuf:"bytes,3,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	MemberId string `protobuf:"bytes,3,opt,name=member_id,json=memberId,proto3" json:"member_id,omitempty"`
+	// Namespace introduces the possibility to associate memberships for different applications that use the masterdata-api as a backend.
+	Namespace     string `protobuf:"bytes,4,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -80,6 +82,13 @@ func (x *TenantMember) GetTenantId() string {
 func (x *TenantMember) GetMemberId() string {
 	if x != nil {
 		return x.MemberId
+	}
+	return ""
+}
+
+func (x *TenantMember) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
 	}
 	return ""
 }
@@ -265,6 +274,7 @@ type TenantMemberFindRequest struct {
 	TenantId      *string                `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
 	MemberId      *string                `protobuf:"bytes,2,opt,name=member_id,json=memberId,proto3,oneof" json:"member_id,omitempty"`
 	Annotations   map[string]string      `protobuf:"bytes,6,rep,name=annotations,proto3" json:"annotations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Namespace     string                 `protobuf:"bytes,7,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -318,6 +328,13 @@ func (x *TenantMemberFindRequest) GetAnnotations() map[string]string {
 		return x.Annotations
 	}
 	return nil
+}
+
+func (x *TenantMemberFindRequest) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
+	}
+	return ""
 }
 
 type TenantMemberResponse struct {
@@ -412,11 +429,12 @@ var File_v1_tenant_member_proto protoreflect.FileDescriptor
 
 const file_v1_tenant_member_proto_rawDesc = "" +
 	"\n" +
-	"\x16v1/tenant_member.proto\x12\x02v1\x1a\rv1/meta.proto\"f\n" +
+	"\x16v1/tenant_member.proto\x12\x02v1\x1a\rv1/meta.proto\"\x84\x01\n" +
 	"\fTenantMember\x12\x1c\n" +
 	"\x04meta\x18\x01 \x01(\v2\b.v1.MetaR\x04meta\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x1b\n" +
-	"\tmember_id\x18\x03 \x01(\tR\bmemberId\"R\n" +
+	"\tmember_id\x18\x03 \x01(\tR\bmemberId\x12\x1c\n" +
+	"\tnamespace\x18\x04 \x01(\tR\tnamespace\"R\n" +
 	"\x19TenantMemberCreateRequest\x125\n" +
 	"\rtenant_member\x18\x01 \x01(\v2\x10.v1.TenantMemberR\ftenantMember\"R\n" +
 	"\x19TenantMemberUpdateRequest\x125\n" +
@@ -424,11 +442,12 @@ const file_v1_tenant_member_proto_rawDesc = "" +
 	"\x19TenantMemberDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"(\n" +
 	"\x16TenantMemberGetRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x89\x02\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xa7\x02\n" +
 	"\x17TenantMemberFindRequest\x12 \n" +
 	"\ttenant_id\x18\x01 \x01(\tH\x00R\btenantId\x88\x01\x01\x12 \n" +
 	"\tmember_id\x18\x02 \x01(\tH\x01R\bmemberId\x88\x01\x01\x12N\n" +
-	"\vannotations\x18\x06 \x03(\v2,.v1.TenantMemberFindRequest.AnnotationsEntryR\vannotations\x1a>\n" +
+	"\vannotations\x18\x06 \x03(\v2,.v1.TenantMemberFindRequest.AnnotationsEntryR\vannotations\x12\x1c\n" +
+	"\tnamespace\x18\a \x01(\tR\tnamespace\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\f\n" +

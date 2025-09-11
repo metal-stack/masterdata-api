@@ -19,6 +19,8 @@ message TenantMember {
   string tenant_id = 2;
   // MemberId is the id of the member tenant
   string member_id = 3;
+  // Namespace introduces the possibility to associate memberships for different applications that use the masterdata-api as a backend.
+  string namespace = 4;
 }
 
 message TenantMemberCreateRequest {
@@ -41,6 +43,7 @@ message TenantMemberFindRequest {
   optional string tenant_id = 1;
   optional string member_id = 2;
   map<string, string> annotations = 6;
+  string namespace = 7;
 }
 
 message TenantMemberResponse {

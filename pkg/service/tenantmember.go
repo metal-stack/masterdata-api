@@ -51,25 +51,50 @@ func (s *tenantMemberService) Create(ctx context.Context, req *v1.TenantMemberCr
 	err = s.tenantMemberStore.Create(ctx, tenantMember)
 	return tenantMember.NewTenantMemberResponse(), err
 }
+
 func (s *tenantMemberService) Update(ctx context.Context, req *v1.TenantMemberUpdateRequest) (*v1.TenantMemberResponse, error) {
 	tenantMember := req.TenantMember
-	err := s.tenantMemberStore.Update(ctx, tenantMember)
+
+	old, err := s.tenantMemberStore.Get(ctx, tenantMember.Meta.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if old.TenantId != tenantMember.TenantId {
+		return nil, status.Error(codes.InvalidArgument, "updating the tenant id of a tenant member is not allowed")
+	}
+	if old.MemberId != tenantMember.MemberId {
+		return nil, status.Error(codes.InvalidArgument, "updating the member id of a tenant member is not allowed")
+	}
+	if old.Namespace != tenantMember.Namespace {
+		return nil, status.Error(codes.InvalidArgument, "updating the namespace of a tenant member is not allowed")
+	}
+
+	err = s.tenantMemberStore.Update(ctx, tenantMember)
+
 	return tenantMember.NewTenantMemberResponse(), err
 }
+
 func (s *tenantMemberService) Delete(ctx context.Context, req *v1.TenantMemberDeleteRequest) (*v1.TenantMemberResponse, error) {
 	tenantMember := req.NewTenantMember()
 	err := s.tenantMemberStore.Delete(ctx, tenantMember.Meta.Id)
 	return tenantMember.NewTenantMemberResponse(), err
 }
+
 func (s *tenantMemberService) Get(ctx context.Context, req *v1.TenantMemberGetRequest) (*v1.TenantMemberResponse, error) {
 	tenantMember, err := s.tenantMemberStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
+
 	return tenantMember.NewTenantMemberResponse(), nil
 }
+
 func (s *tenantMemberService) Find(ctx context.Context, req *v1.TenantMemberFindRequest) (*v1.TenantMemberListResponse, error) {
-	filter := make(map[string]any)
+	filter := map[string]any{
+		"COALESCE(tenantmember ->> 'namespace', '')": req.Namespace,
+	}
+
 	if req.TenantId != nil {
 		filter["tenantmember ->> 'tenant_id'"] = req.TenantId
 	}
@@ -81,11 +106,14 @@ func (s *tenantMemberService) Find(ctx context.Context, req *v1.TenantMemberFind
 		f := fmt.Sprintf("tenantmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
 	}
+
 	res, _, err := s.tenantMemberStore.Find(ctx, nil, filter)
 	if err != nil {
 		return nil, err
 	}
+
 	resp := new(v1.TenantMemberListResponse)
 	resp.TenantMembers = append(resp.TenantMembers, res...)
+
 	return resp, nil
 }

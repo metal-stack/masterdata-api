@@ -15,7 +15,7 @@ func RunQuery[E any](ctx context.Context, log *slog.Logger, db *sqlx.DB, builder
 	}
 
 	if log.Enabled(ctx, slog.LevelDebug) {
-		log.Debug("query", "sql", query, "values", vals)
+		log.Debug("query", "sql", query, "values", vals, "input", input)
 	}
 
 	rows, err := db.NamedQueryContext(ctx, query, input)

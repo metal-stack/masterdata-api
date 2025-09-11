@@ -4,16 +4,16 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 
-	"github.com/metal-stack/masterdata-api/pkg/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
+	"github.com/metal-stack/masterdata-api/pkg/auth"
 )
 
 // Client defines the client API
@@ -33,17 +33,59 @@ type GRPCClient struct {
 	hmacKey string
 }
 
-// NewClient creates a new client for the services for the given address, with the certificate and hmac.
-func NewClient(ctx context.Context, hostname string, port int, certFile string, keyFile string, caFile string, hmacKey string, insecure bool, logger *slog.Logger) (Client, error) {
+type Config struct {
+	Logger *slog.Logger
 
-	address := fmt.Sprintf("%s:%d", hostname, port)
+	Hostname string
+	Port     uint
+
+	CertFile string
+	KeyFile  string
+	CaFile   string
+	Insecure bool
+
+	HmacKey string
+
+	// Namespace if set adds this namespace to namespaced requests such that it does not need to be passed all the time
+	Namespace string
+}
+
+func (c *Config) validate() error {
+	if c == nil {
+		return fmt.Errorf("config must not be nil")
+	}
+
+	if c.Hostname == "" {
+		return fmt.Errorf("hostname must be specified")
+	}
+
+	if c.KeyFile != "" || c.CertFile != "" {
+		if c.KeyFile == "" || c.CertFile == "" {
+			return fmt.Errorf("either both key and cert file must be specified or none of them")
+		}
+	}
+
+	return nil
+}
+
+// NewClient creates a new client for the services for the given address, with the certificate and hmac.
+func NewClient(config *Config) (Client, error) {
+	if err := config.validate(); err != nil {
+		return nil, err
+	}
+
+	if config.Logger == nil {
+		config.Logger = slog.Default()
+	}
+
+	address := fmt.Sprintf("%s:%d", config.Hostname, config.Port)
 
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load system credentials: %w", err)
 	}
 
-	if caFile != "" {
+	if caFile := config.CaFile; caFile != "" {
 		ca, err := os.ReadFile(caFile)
 		if err != nil {
 			return nil, fmt.Errorf("could not read ca certificate: %w", err)
@@ -55,54 +97,108 @@ func NewClient(ctx context.Context, hostname string, port int, certFile string, 
 		}
 	}
 
-	clientCertificate, err := tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		return nil, fmt.Errorf("could not load client key pair: %w", err)
-	}
+	var (
+		certificates []tls.Certificate
+		opts         []grpc.DialOption
+	)
 
-	creds := credentials.NewTLS(&tls.Config{
-		ServerName:         hostname,
-		Certificates:       []tls.Certificate{clientCertificate},
-		RootCAs:            certPool,
-		MinVersion:         tls.VersionTLS12,
-		InsecureSkipVerify: insecure, // nolint:gosec
-	})
+	if config.CertFile != "" && config.KeyFile != "" {
+		clientCertificate, err := tls.LoadX509KeyPair(config.CertFile, config.KeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("could not load client key pair: %w", err)
+		}
 
-	if hmacKey == "" {
-		return nil, errors.New("no hmac-key specified")
+		certificates = append(certificates, clientCertificate)
+
+		creds := credentials.NewTLS(&tls.Config{
+			ServerName:         config.Hostname,
+			Certificates:       certificates,
+			RootCAs:            certPool,
+			MinVersion:         tls.VersionTLS12,
+			InsecureSkipVerify: config.Insecure, // nolint:gosec
+		})
+
+		opts = append(opts,
+			// oauth.NewOauthAccess requires the configuration of transport
+			// credentials.
+			grpc.WithTransportCredentials(creds),
+		)
+	} else {
+		opts = append(opts,
+			grpc.WithTransportCredentials(grpcinsecure.NewCredentials()),
+		)
 	}
 
 	client := GRPCClient{
-		log:     logger,
-		hmacKey: hmacKey,
+		log: config.Logger,
 	}
 
-	// Set up the credentials for the connection.
-	perRPCHMACAuthenticator, err := auth.NewHMACAuther(hmacKey, auth.EditUser)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create hmac-authenticator: %w", err)
+	if config.HmacKey != "" {
+		client.hmacKey = config.HmacKey
+
+		// Set up the credentials for the connection.
+		perRPCHMACAuthenticator, err := auth.NewHMACAuther(config.HmacKey, auth.EditUser)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create hmac-authenticator: %w", err)
+		}
+
+		opts = append(opts,
+			// In addition to the following grpc.DialOption, callers may also use
+			// the grpc.CallOption grpc.PerRPCCredentials with the RPC invocation
+			// itself.
+			// See: https://godoc.org/google.golang.org/grpc#PerRPCCredentials
+			grpc.WithPerRPCCredentials(perRPCHMACAuthenticator))
 	}
 
-	opts := []grpc.DialOption{
-		// In addition to the following grpc.DialOption, callers may also use
-		// the grpc.CallOption grpc.PerRPCCredentials with the RPC invocation
-		// itself.
-		// See: https://godoc.org/google.golang.org/grpc#PerRPCCredentials
-		grpc.WithPerRPCCredentials(perRPCHMACAuthenticator),
-		// oauth.NewOauthAccess requires the configuration of transport
-		// credentials.
-		grpc.WithTransportCredentials(creds),
-
-		// grpc.WithInsecure(),
+	if config.Namespace != "" {
+		opts = append(opts, NamespaceInterceptor(config.Namespace))
 	}
+
 	// Set up a connection to the server.
 	conn, err := grpc.NewClient(address, opts...)
 	if err != nil {
 		return nil, err
 	}
+
 	client.conn = conn
 
 	return client, nil
+}
+
+func NamespaceInterceptor(namespace string) grpc.DialOption {
+	return grpc.WithChainUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		switch r := req.(type) {
+		case *v1.TenantMemberCreateRequest:
+			if r.TenantMember.Namespace == "" {
+				r.TenantMember.Namespace = namespace
+			}
+		case *v1.ProjectMemberCreateRequest:
+			if r.ProjectMember.Namespace == "" {
+				r.ProjectMember.Namespace = namespace
+			}
+		case *v1.TenantMemberFindRequest:
+			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
+		case *v1.ProjectMemberFindRequest:
+			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
+		case *v1.FindParticipatingProjectsRequest:
+			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
+		case *v1.FindParticipatingTenantsRequest:
+			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
+		case *v1.ListTenantMembersRequest:
+			if r.Namespace == "" {
+				r.Namespace = namespace
+			}
+		}
+		return invoker(ctx, method, req, reply, cc, opts...)
+	})
 }
 
 // Close the underlying connection

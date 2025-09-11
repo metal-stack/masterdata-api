@@ -29,9 +29,17 @@ func main() {
 		hmacKey = auth.HmacDefaultKey
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	c, err := client.NewClient(ctx, "localhost", 50051, "certs/client.pem", "certs/client-key.pem", "certs/ca.pem", hmacKey, true, logger)
+	c, err := client.NewClient(&client.Config{
+		Logger:    logger,
+		Hostname:  "localhost",
+		Port:      50051,
+		CertFile:  "certs/client.pem",
+		KeyFile:   "certs/client-key.pem",
+		CaFile:    "certs/ca.pem",
+		Insecure:  true,
+		HmacKey:   hmacKey,
+		Namespace: "test",
+	})
 	if err != nil {
 		logger.Error(err.Error())
 		panic(err)
