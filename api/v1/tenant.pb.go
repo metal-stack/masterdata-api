@@ -27,6 +27,7 @@ type FindParticipatingProjectsRequest struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	TenantId         string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	IncludeInherited *bool                  `protobuf:"varint,2,opt,name=include_inherited,json=includeInherited,proto3,oneof" json:"include_inherited,omitempty"`
+	Namespace        string                 `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -75,10 +76,18 @@ func (x *FindParticipatingProjectsRequest) GetIncludeInherited() bool {
 	return false
 }
 
+func (x *FindParticipatingProjectsRequest) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
+	}
+	return ""
+}
+
 type FindParticipatingTenantsRequest struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	TenantId         string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	IncludeInherited *bool                  `protobuf:"varint,2,opt,name=include_inherited,json=includeInherited,proto3,oneof" json:"include_inherited,omitempty"`
+	Namespace        string                 `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -127,10 +136,18 @@ func (x *FindParticipatingTenantsRequest) GetIncludeInherited() bool {
 	return false
 }
 
+func (x *FindParticipatingTenantsRequest) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
+	}
+	return ""
+}
+
 type ListTenantMembersRequest struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	TenantId         string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
 	IncludeInherited *bool                  `protobuf:"varint,2,opt,name=include_inherited,json=includeInherited,proto3,oneof" json:"include_inherited,omitempty"`
+	Namespace        string                 `protobuf:"bytes,3,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -177,6 +194,13 @@ func (x *ListTenantMembersRequest) GetIncludeInherited() bool {
 		return *x.IncludeInherited
 	}
 	return false
+}
+
+func (x *ListTenantMembersRequest) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
+	}
+	return ""
 }
 
 type ListTenantMembersResponse struct {
@@ -951,18 +975,21 @@ var File_v1_tenant_proto protoreflect.FileDescriptor
 
 const file_v1_tenant_proto_rawDesc = "" +
 	"\n" +
-	"\x0fv1/tenant.proto\x12\x02v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x0fv1/common.proto\x1a\fv1/iam.proto\x1a\rv1/meta.proto\x1a\x10v1/project.proto\x1a\x0ev1/quota.proto\"\x87\x01\n" +
+	"\x0fv1/tenant.proto\x12\x02v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x0fv1/common.proto\x1a\fv1/iam.proto\x1a\rv1/meta.proto\x1a\x10v1/project.proto\x1a\x0ev1/quota.proto\"\xa5\x01\n" +
 	" FindParticipatingProjectsRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x120\n" +
-	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01B\x14\n" +
-	"\x12_include_inherited\"\x86\x01\n" +
+	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01\x12\x1c\n" +
+	"\tnamespace\x18\x03 \x01(\tR\tnamespaceB\x14\n" +
+	"\x12_include_inherited\"\xa4\x01\n" +
 	"\x1fFindParticipatingTenantsRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x120\n" +
-	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01B\x14\n" +
-	"\x12_include_inherited\"\x7f\n" +
+	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01\x12\x1c\n" +
+	"\tnamespace\x18\x03 \x01(\tR\tnamespaceB\x14\n" +
+	"\x12_include_inherited\"\x9d\x01\n" +
 	"\x18ListTenantMembersRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x120\n" +
-	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01B\x14\n" +
+	"\x11include_inherited\x18\x02 \x01(\bH\x00R\x10includeInherited\x88\x01\x01\x12\x1c\n" +
+	"\tnamespace\x18\x03 \x01(\tR\tnamespaceB\x14\n" +
 	"\x12_include_inherited\"Z\n" +
 	"\x19ListTenantMembersResponse\x12=\n" +
 	"\atenants\x18\x01 \x03(\v2#.v1.TenantWithMembershipAnnotationsR\atenants\"e\n" +
