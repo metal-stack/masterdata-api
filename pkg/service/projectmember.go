@@ -55,29 +55,57 @@ func (s *projectMemberService) Create(ctx context.Context, rq *connect.Request[v
 	err = s.projectMemberStore.Create(ctx, projectMember)
 	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
 }
+
 func (s *projectMemberService) Update(ctx context.Context, rq *connect.Request[v1.ProjectMemberUpdateRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
 	req := rq.Msg
 	projectMember := req.ProjectMember
-	err := s.projectMemberStore.Update(ctx, projectMember)
+
+	old, err := s.projectMemberStore.Get(ctx, projectMember.Meta.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if old.ProjectId != projectMember.ProjectId {
+		return nil, status.Error(codes.InvalidArgument, "updating the project id of a project member is not allowed")
+	}
+	if old.TenantId != projectMember.TenantId {
+		return nil, status.Error(codes.InvalidArgument, "updating the tenant id of a project member is not allowed")
+	}
+	if old.Namespace != projectMember.Namespace {
+		return nil, status.Error(codes.InvalidArgument, "updating the namespace of a project member is not allowed")
+	}
+
+	err = s.projectMemberStore.Update(ctx, projectMember)
+
 	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
 }
+
 func (s *projectMemberService) Delete(ctx context.Context, rq *connect.Request[v1.ProjectMemberDeleteRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
 	req := rq.Msg
+
 	projectMember := req.NewProjectMember()
+
 	err := s.projectMemberStore.Delete(ctx, projectMember.Meta.Id)
+
 	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
 }
+
 func (s *projectMemberService) Get(ctx context.Context, rq *connect.Request[v1.ProjectMemberGetRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
 	req := rq.Msg
+
 	projectMember, err := s.projectMemberStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
+
 	return connect.NewResponse(projectMember.NewProjectMemberResponse()), nil
 }
+
 func (s *projectMemberService) Find(ctx context.Context, rq *connect.Request[v1.ProjectMemberFindRequest]) (*connect.Response[v1.ProjectMemberListResponse], error) {
 	req := rq.Msg
-	filter := make(map[string]any)
+	filter := map[string]any{
+		"COALESCE(projectmember ->> 'namespace', '')": req.Namespace,
+	}
 	if req.ProjectId != nil {
 		filter["projectmember ->> 'project_id'"] = req.ProjectId
 	}
@@ -89,11 +117,14 @@ func (s *projectMemberService) Find(ctx context.Context, rq *connect.Request[v1.
 		f := fmt.Sprintf("projectmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
 	}
+
 	res, _, err := s.projectMemberStore.Find(ctx, nil, filter)
 	if err != nil {
 		return nil, err
 	}
+
 	resp := new(v1.ProjectMemberListResponse)
 	resp.ProjectMembers = append(resp.ProjectMembers, res...)
+
 	return connect.NewResponse(resp), nil
 }

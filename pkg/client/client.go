@@ -1,7 +1,11 @@
 package client
 
 import (
+	"context"
+
+	"connectrpc.com/connect"
 	compress "github.com/klauspost/connect-compress/v2"
+	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/api/v1/apiv1connect"
 )
 
@@ -16,12 +20,12 @@ type (
 	}
 
 	client struct {
-		config DialConfig
+		config *Config
 	}
 )
 
 // GRPCClient is a Client implementation with grpc transport.
-func New(config DialConfig) Client {
+func New(config *Config) Client {
 	return &client{
 		config: config,
 	}
@@ -42,6 +46,7 @@ func (c client) ProjectMember() apiv1connect.ProjectMemberServiceClient {
 		c.config.HttpClient(),
 		c.config.BaseURL,
 		compress.WithAll(compress.LevelBalanced),
+		connect.WithInterceptors(NamespaceInterceptor(c.config.Namespace)),
 	)
 }
 
@@ -51,6 +56,7 @@ func (c client) Tenant() apiv1connect.TenantServiceClient {
 		c.config.HttpClient(),
 		c.config.BaseURL,
 		compress.WithAll(compress.LevelBalanced),
+		connect.WithInterceptors(NamespaceInterceptor(c.config.Namespace)),
 	)
 }
 
@@ -60,6 +66,7 @@ func (c client) TenantMember() apiv1connect.TenantMemberServiceClient {
 		c.config.HttpClient(),
 		c.config.BaseURL,
 		compress.WithAll(compress.LevelBalanced),
+		connect.WithInterceptors(NamespaceInterceptor(c.config.Namespace)),
 	)
 }
 
@@ -69,4 +76,42 @@ func (c client) Version() apiv1connect.VersionServiceClient {
 		c.config.BaseURL,
 		compress.WithAll(compress.LevelBalanced),
 	)
+}
+
+func NamespaceInterceptor(namespace string) connect.UnaryInterceptorFunc {
+	return func(uf connect.UnaryFunc) connect.UnaryFunc {
+		return func(ctx context.Context, ar connect.AnyRequest) (connect.AnyResponse, error) {
+			switch r := ar.Any().(type) {
+			case *v1.TenantMemberCreateRequest:
+				if r.TenantMember.Namespace == "" {
+					r.TenantMember.Namespace = namespace
+				}
+			case *v1.ProjectMemberCreateRequest:
+				if r.ProjectMember.Namespace == "" {
+					r.ProjectMember.Namespace = namespace
+				}
+			case *v1.TenantMemberFindRequest:
+				if r.Namespace == "" {
+					r.Namespace = namespace
+				}
+			case *v1.ProjectMemberFindRequest:
+				if r.Namespace == "" {
+					r.Namespace = namespace
+				}
+			case *v1.FindParticipatingProjectsRequest:
+				if r.Namespace == "" {
+					r.Namespace = namespace
+				}
+			case *v1.FindParticipatingTenantsRequest:
+				if r.Namespace == "" {
+					r.Namespace = namespace
+				}
+			case *v1.ListTenantMembersRequest:
+				if r.Namespace == "" {
+					r.Namespace = namespace
+				}
+			}
+			return uf(ctx, ar)
+		}
+	}
 }

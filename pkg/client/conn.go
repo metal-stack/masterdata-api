@@ -6,16 +6,19 @@ import (
 	"net/http/httputil"
 )
 
-// DialConfig is the configuration to create a api-server connection
-type DialConfig struct {
+// Config is the configuration to create a api-server connection
+type Config struct {
 	BaseURL string
 	Token   string
 	Debug   bool
 
 	UserAgent string
+
+	// Namespace if set adds this namespace to namespaced requests such that it does not need to be passed all the time
+	Namespace string
 }
 
-func (d *DialConfig) HttpClient() *http.Client {
+func (d *Config) HttpClient() *http.Client {
 	return &http.Client{
 		Transport: &AddHeaderTransport{
 			debug: d.Debug,

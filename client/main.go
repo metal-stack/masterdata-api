@@ -23,7 +23,7 @@ func main() {
 	logger := slog.New(jsonHandler)
 	logger.Info("Starting Client")
 
-	c := client.New(client.DialConfig{
+	c := client.New(&client.Config{
 		BaseURL:   "http://localhost:9090",
 		Debug:     true,
 		UserAgent: "sample-client",

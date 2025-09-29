@@ -25,16 +25,19 @@ service TenantService {
 message FindParticipatingProjectsRequest {
   string tenant_id = 1;
   optional bool include_inherited = 2;
+  string namespace = 3;
 }
 
 message FindParticipatingTenantsRequest {
   string tenant_id = 1;
   optional bool include_inherited = 2;
+  string namespace = 3;
 }
 
 message ListTenantMembersRequest {
   string tenant_id = 1;
   optional bool include_inherited = 2;
+  string namespace = 3;
 }
 
 message ListTenantMembersResponse {
