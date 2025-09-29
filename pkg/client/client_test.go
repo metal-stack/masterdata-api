@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"testing"
@@ -36,6 +37,9 @@ func Test_Client(t *testing.T) {
 	lis, err := net.Listen("tcp", "")
 	require.NoError(t, err)
 
+	_, portString, err := net.SplitHostPort(lis.Addr().String())
+	require.NoError(t, err)
+
 	server := http.Server{
 		Addr: lis.Addr().String(),
 		// For gRPC clients, it's convenient to support HTTP/2 without TLS. You can
@@ -45,17 +49,18 @@ func Test_Client(t *testing.T) {
 	}
 
 	go func() {
-		err = server.Serve(lis)
-		require.NoError(t, err)
+		_ = server.Serve(lis)
 	}()
 	defer func() {
-		server.Close()
+		err := server.Close()
+		require.NoError(t, err)
 	}()
 
 	client := New(&Config{
-		BaseURL:   lis.Addr().String(),
+		BaseURL:   fmt.Sprintf("http://localhost:%s", portString),
 		Debug:     true,
 		UserAgent: "sample-client",
+		Namespace: namespace,
 	})
 	require.NoError(t, err)
 

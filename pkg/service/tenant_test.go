@@ -982,6 +982,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 					return 1
 				}
 			})
+
 			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
@@ -1260,7 +1261,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				}
 			})
 
-			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, pointer.SafeDeref(got).Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
