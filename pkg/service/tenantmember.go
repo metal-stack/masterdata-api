@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
@@ -26,9 +25,8 @@ func NewTenantMemberService(l *slog.Logger, tds TenantDataStore, tmds TenantMemb
 	}
 }
 
-func (s *tenantMemberService) Create(ctx context.Context, rq *connect.Request[v1.TenantMemberCreateRequest]) (*connect.Response[v1.TenantMemberResponse], error) {
-	req := rq.Msg
-	tenantMember := req.TenantMember
+func (s *tenantMemberService) Create(ctx context.Context, rq *v1.TenantMemberCreateRequest) (*v1.TenantMemberResponse, error) {
+	tenantMember := rq.TenantMember
 
 	_, err := s.tenantStore.Get(ctx, tenantMember.GetTenantId())
 	if err != nil && v1.IsNotFound(err) {
@@ -45,12 +43,11 @@ func (s *tenantMemberService) Create(ctx context.Context, rq *connect.Request[v1
 
 	err = s.tenantMemberStore.Create(ctx, tenantMember)
 
-	return connect.NewResponse(tenantMember.NewTenantMemberResponse()), err
+	return tenantMember.NewTenantMemberResponse(), err
 }
 
-func (s *tenantMemberService) Update(ctx context.Context, rq *connect.Request[v1.TenantMemberUpdateRequest]) (*connect.Response[v1.TenantMemberResponse], error) {
-	req := rq.Msg
-	tenantMember := req.TenantMember
+func (s *tenantMemberService) Update(ctx context.Context, rq *v1.TenantMemberUpdateRequest) (*v1.TenantMemberResponse, error) {
+	tenantMember := rq.TenantMember
 
 	old, err := s.tenantMemberStore.Get(ctx, tenantMember.Meta.Id)
 	if err != nil {
@@ -69,43 +66,38 @@ func (s *tenantMemberService) Update(ctx context.Context, rq *connect.Request[v1
 
 	err = s.tenantMemberStore.Update(ctx, tenantMember)
 
-	return connect.NewResponse(tenantMember.NewTenantMemberResponse()), err
+	return tenantMember.NewTenantMemberResponse(), err
 }
 
-func (s *tenantMemberService) Delete(ctx context.Context, rq *connect.Request[v1.TenantMemberDeleteRequest]) (*connect.Response[v1.TenantMemberResponse], error) {
-	req := rq.Msg
-
-	tenantMember := req.NewTenantMember()
+func (s *tenantMemberService) Delete(ctx context.Context, rq *v1.TenantMemberDeleteRequest) (*v1.TenantMemberResponse, error) {
+	tenantMember := rq.NewTenantMember()
 
 	err := s.tenantMemberStore.Delete(ctx, tenantMember.Meta.Id)
 
-	return connect.NewResponse(tenantMember.NewTenantMemberResponse()), err
+	return tenantMember.NewTenantMemberResponse(), err
 }
 
-func (s *tenantMemberService) Get(ctx context.Context, rq *connect.Request[v1.TenantMemberGetRequest]) (*connect.Response[v1.TenantMemberResponse], error) {
-	req := rq.Msg
-
-	tenantMember, err := s.tenantMemberStore.Get(ctx, req.Id)
+func (s *tenantMemberService) Get(ctx context.Context, rq *v1.TenantMemberGetRequest) (*v1.TenantMemberResponse, error) {
+	tenantMember, err := s.tenantMemberStore.Get(ctx, rq.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	return connect.NewResponse(tenantMember.NewTenantMemberResponse()), nil
+	return tenantMember.NewTenantMemberResponse(), nil
 }
 
-func (s *tenantMemberService) Find(ctx context.Context, rq *connect.Request[v1.TenantMemberFindRequest]) (*connect.Response[v1.TenantMemberListResponse], error) {
-	req := rq.Msg
+func (s *tenantMemberService) Find(ctx context.Context, rq *v1.TenantMemberFindRequest) (*v1.TenantMemberListResponse, error) {
 	filter := map[string]any{
-		"COALESCE(tenantmember ->> 'namespace', '')": req.Namespace,
+		"COALESCE(tenantmember ->> 'namespace', '')": rq.Namespace,
 	}
 
-	if req.TenantId != nil {
-		filter["tenantmember ->> 'tenant_id'"] = req.TenantId
+	if rq.TenantId != nil {
+		filter["tenantmember ->> 'tenant_id'"] = rq.TenantId
 	}
-	if req.MemberId != nil {
-		filter["tenantmember ->> 'member_id'"] = req.MemberId
+	if rq.MemberId != nil {
+		filter["tenantmember ->> 'member_id'"] = rq.MemberId
 	}
-	for key, value := range req.Annotations {
+	for key, value := range rq.Annotations {
 		// select * from tenantMember where tenantMember -> 'meta' -> 'annotations' ->>  'metal-stack.io/role' = 'owner';
 		f := fmt.Sprintf("tenantmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
@@ -119,5 +111,5 @@ func (s *tenantMemberService) Find(ctx context.Context, rq *connect.Request[v1.T
 	resp := new(v1.TenantMemberListResponse)
 	resp.TenantMembers = append(resp.TenantMembers, res...)
 
-	return connect.NewResponse(resp), nil
+	return resp, nil
 }

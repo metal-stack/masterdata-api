@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"slices"
 
-	"connectrpc.com/connect"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
@@ -51,11 +50,11 @@ func TestCreateProject(t *testing.T) {
 	}
 	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
-	resp, err := ts.Create(ctx, connect.NewRequest(tcr))
+	resp, err := ts.Create(ctx, tcr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Project)
-	assert.Equal(t, tcr.Project.GetName(), resp.Msg.Project.GetName())
+	assert.NotNil(t, resp.Project)
+	assert.Equal(t, tcr.Project.GetName(), resp.Project.GetName())
 }
 
 func TestCreateProjectWithQuotaCheck(t *testing.T) {
@@ -90,11 +89,11 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	tenantStorageMock.On("Get", ctx, p1.GetTenantId()).Return(t1, nil)
 	storageMock.On("Find", ctx, mock.Anything, []any{filter}).Return(projects, nil, nil)
 	storageMock.On("Create", ctx, p1).Return(nil)
-	resp, err := ts.Create(ctx, connect.NewRequest(tcr))
+	resp, err := ts.Create(ctx, tcr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Project)
-	assert.Equal(t, tcr.Project.GetName(), resp.Msg.Project.GetName())
+	assert.NotNil(t, resp.Project)
+	assert.Equal(t, tcr.Project.GetName(), resp.Project.GetName())
 }
 
 func TestUpdateProject(t *testing.T) {
@@ -123,11 +122,11 @@ func TestUpdateProject(t *testing.T) {
 	storageMock.On("Get", ctx, t1.Meta.Id).Return(t1, nil)
 
 	storageMock.On("Update", ctx, t1).Return(nil)
-	resp, err := ts.Update(ctx, connect.NewRequest(tur))
+	resp, err := ts.Update(ctx, tur)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Project)
-	assert.Equal(t, tur.GetProject().GetName(), resp.Msg.Project.GetName())
+	assert.NotNil(t, resp.Project)
+	assert.Equal(t, tur.GetProject().GetName(), resp.Project.GetName())
 }
 
 func TestDeleteProject(t *testing.T) {
@@ -157,11 +156,11 @@ func TestDeleteProject(t *testing.T) {
 	}, nil, nil)
 	projectMemberStorageMock.On("DeleteAll", ctx, []string{p3.Meta.Id}).Return(nil)
 	storageMock.On("Delete", ctx, p3.Meta.Id).Return(nil)
-	resp, err := ps.Delete(ctx, connect.NewRequest(pdr))
+	resp, err := ps.Delete(ctx, pdr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Project)
-	assert.Equal(t, pdr.Id, resp.Msg.Project.GetMeta().GetId())
+	assert.NotNil(t, resp.Project)
+	assert.Equal(t, pdr.Id, resp.Project.GetMeta().GetId())
 }
 
 func TestGetProject(t *testing.T) {
@@ -181,11 +180,11 @@ func TestGetProject(t *testing.T) {
 	}
 
 	storageMock.On("Get", ctx, "p4").Return(t4, nil)
-	resp, err := ts.Get(ctx, connect.NewRequest(tgr))
+	resp, err := ts.Get(ctx, tgr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Project)
-	assert.Equal(t, tgr.Id, resp.Msg.Project.GetMeta().GetId())
+	assert.NotNil(t, resp.Project)
+	assert.Equal(t, tgr.Id, resp.Project.GetMeta().GetId())
 }
 
 func TestFindProject(t *testing.T) {
@@ -431,19 +430,19 @@ func TestFindProject(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := service.Find(ctx, connect.NewRequest(tt.req))
+			got, err := service.Find(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			slices.SortFunc(got.Msg.Projects, func(i, j *v1.Project) int {
+			slices.SortFunc(got.Projects, func(i, j *v1.Project) int {
 				if i.Meta.Id < j.Meta.Id {
 					return -1
 				} else {
 					return 1
 				}
 			})
-			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})

@@ -7,7 +7,6 @@ import (
 	"slices"
 	"testing"
 
-	"connectrpc.com/connect"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
@@ -57,11 +56,11 @@ func TestCreateTenant(t *testing.T) {
 	}
 
 	storageMock.On("Create", ctx, t1).Return(nil)
-	resp, err := ts.Create(ctx, connect.NewRequest(tcr))
+	resp, err := ts.Create(ctx, tcr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Tenant)
-	assert.Equal(t, tcr.Tenant.GetName(), resp.Msg.Tenant.GetName())
+	assert.NotNil(t, resp.Tenant)
+	assert.Equal(t, tcr.Tenant.GetName(), resp.Tenant.GetName())
 }
 
 func TestUpdateTenant(t *testing.T) {
@@ -81,11 +80,11 @@ func TestUpdateTenant(t *testing.T) {
 	}
 
 	storageMock.On("Update", ctx, t1).Return(nil)
-	resp, err := ts.Update(ctx, connect.NewRequest(tur))
+	resp, err := ts.Update(ctx, tur)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Tenant)
-	assert.Equal(t, tur.Tenant.GetName(), resp.Msg.Tenant.GetName())
+	assert.NotNil(t, resp.Tenant)
+	assert.Equal(t, tur.Tenant.GetName(), resp.Tenant.GetName())
 }
 
 func TestDeleteTenant(t *testing.T) {
@@ -131,11 +130,11 @@ func TestDeleteTenant(t *testing.T) {
 		},
 	}, nil, nil)
 	memberStorageMock.On("DeleteAll", ctx, []string{"t3"}).Return(nil)
-	resp, err := ts.Delete(ctx, connect.NewRequest(tdr))
+	resp, err := ts.Delete(ctx, tdr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Tenant)
-	assert.Equal(t, tdr.Id, resp.Msg.Tenant.GetMeta().GetId())
+	assert.NotNil(t, resp.Tenant)
+	assert.Equal(t, tdr.Id, resp.Tenant.GetMeta().GetId())
 }
 
 func TestGetTenant(t *testing.T) {
@@ -153,11 +152,11 @@ func TestGetTenant(t *testing.T) {
 	}
 
 	storageMock.On("Get", ctx, "t4").Return(t4, nil)
-	resp, err := ts.Get(ctx, connect.NewRequest(tgr))
+	resp, err := ts.Get(ctx, tgr)
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
-	assert.NotNil(t, resp.Msg.Tenant)
-	assert.Equal(t, tgr.Id, resp.Msg.Tenant.GetMeta().GetId())
+	assert.NotNil(t, resp.Tenant)
+	assert.Equal(t, tgr.Id, resp.Tenant.GetMeta().GetId())
 }
 
 func TestFindTenant(t *testing.T) {
@@ -387,19 +386,19 @@ func TestFindTenant(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := service.Find(ctx, connect.NewRequest(tt.req))
+			got, err := service.Find(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			slices.SortFunc(got.Msg.Tenants, func(i, j *v1.Tenant) int {
+			slices.SortFunc(got.Tenants, func(i, j *v1.Tenant) int {
 				if i.Meta.Id < j.Meta.Id {
 					return -1
 				} else {
 					return 1
 				}
 			})
-			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -687,19 +686,19 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.FindParticipatingProjects(ctx, connect.NewRequest(tt.req))
+			got, err := s.FindParticipatingProjects(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
-			slices.SortFunc(got.Msg.Projects, func(i, j *v1.ProjectWithMembershipAnnotations) int {
+			slices.SortFunc(got.Projects, func(i, j *v1.ProjectWithMembershipAnnotations) int {
 				if i.Project.Meta.Id < j.Project.Meta.Id {
 					return -1
 				} else {
 					return 1
 				}
 			})
-			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -969,13 +968,13 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.FindParticipatingTenants(ctx, connect.NewRequest(tt.req))
+			got, err := s.FindParticipatingTenants(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
 
-			slices.SortFunc(got.Msg.Tenants, func(i, j *v1.TenantWithMembershipAnnotations) int {
+			slices.SortFunc(got.Tenants, func(i, j *v1.TenantWithMembershipAnnotations) int {
 				if i.Tenant.Meta.Id < j.Tenant.Meta.Id {
 					return -1
 				} else {
@@ -983,7 +982,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 				}
 			})
 
-			if diff := cmp.Diff(tt.want, got.Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -1247,13 +1246,13 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				tt.prepare()
 			}
 
-			got, err := s.ListTenantMembers(ctx, connect.NewRequest(tt.req))
+			got, err := s.ListTenantMembers(ctx, tt.req)
 			if diff := cmp.Diff(err, tt.wantErr); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 				return
 			}
 
-			slices.SortFunc(got.Msg.Tenants, func(i, j *v1.TenantWithMembershipAnnotations) int {
+			slices.SortFunc(got.Tenants, func(i, j *v1.TenantWithMembershipAnnotations) int {
 				if i.Tenant.Meta.Id < j.Tenant.Meta.Id {
 					return -1
 				} else {
@@ -1261,7 +1260,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				}
 			})
 
-			if diff := cmp.Diff(tt.want, pointer.SafeDeref(got).Msg, cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(tt.want, pointer.SafeDeref(got), cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})

@@ -39,7 +39,7 @@ const (
 
 // VersionServiceClient is a client for the api.v1.VersionService service.
 type VersionServiceClient interface {
-	Get(context.Context, *connect.Request[v1.GetVersionRequest]) (*connect.Response[v1.GetVersionResponse], error)
+	Get(context.Context, *v1.GetVersionRequest) (*v1.GetVersionResponse, error)
 }
 
 // NewVersionServiceClient constructs a client for the api.v1.VersionService service. By default, it
@@ -68,13 +68,17 @@ type versionServiceClient struct {
 }
 
 // Get calls api.v1.VersionService.Get.
-func (c *versionServiceClient) Get(ctx context.Context, req *connect.Request[v1.GetVersionRequest]) (*connect.Response[v1.GetVersionResponse], error) {
-	return c.get.CallUnary(ctx, req)
+func (c *versionServiceClient) Get(ctx context.Context, req *v1.GetVersionRequest) (*v1.GetVersionResponse, error) {
+	response, err := c.get.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
 }
 
 // VersionServiceHandler is an implementation of the api.v1.VersionService service.
 type VersionServiceHandler interface {
-	Get(context.Context, *connect.Request[v1.GetVersionRequest]) (*connect.Response[v1.GetVersionResponse], error)
+	Get(context.Context, *v1.GetVersionRequest) (*v1.GetVersionResponse, error)
 }
 
 // NewVersionServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -84,7 +88,7 @@ type VersionServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewVersionServiceHandler(svc VersionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	versionServiceMethods := v1.File_api_v1_version_proto.Services().ByName("VersionService").Methods()
-	versionServiceGetHandler := connect.NewUnaryHandler(
+	versionServiceGetHandler := connect.NewUnaryHandlerSimple(
 		VersionServiceGetProcedure,
 		svc.Get,
 		connect.WithSchema(versionServiceMethods.ByName("Get")),
@@ -103,6 +107,6 @@ func NewVersionServiceHandler(svc VersionServiceHandler, opts ...connect.Handler
 // UnimplementedVersionServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedVersionServiceHandler struct{}
 
-func (UnimplementedVersionServiceHandler) Get(context.Context, *connect.Request[v1.GetVersionRequest]) (*connect.Response[v1.GetVersionResponse], error) {
+func (UnimplementedVersionServiceHandler) Get(context.Context, *v1.GetVersionRequest) (*v1.GetVersionResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("api.v1.VersionService.Get is not implemented"))
 }

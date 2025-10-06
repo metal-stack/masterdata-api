@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
@@ -30,9 +29,8 @@ func NewProjectService(l *slog.Logger, pds ProjectDataStore, pmds ProjectMemberD
 	}
 }
 
-func (s *projectService) Create(ctx context.Context, rq *connect.Request[v1.ProjectCreateRequest]) (*connect.Response[v1.ProjectResponse], error) {
-	req := rq.Msg
-	project := req.Project
+func (s *projectService) Create(ctx context.Context, rq *v1.ProjectCreateRequest) (*v1.ProjectResponse, error) {
+	project := rq.Project
 
 	tenant, err := s.tenantStore.Get(ctx, project.GetTenantId())
 	if err != nil && v1.IsNotFound(err) {
@@ -69,24 +67,22 @@ func (s *projectService) Create(ctx context.Context, rq *connect.Request[v1.Proj
 		project.Meta = &v1.Meta{}
 	}
 	err = s.projectStore.Create(ctx, project)
-	return connect.NewResponse(project.NewProjectResponse()), err
+	return project.NewProjectResponse(), err
 }
-func (s *projectService) Update(ctx context.Context, rq *connect.Request[v1.ProjectUpdateRequest]) (*connect.Response[v1.ProjectResponse], error) {
-	req := rq.Msg
-	old, err := s.projectStore.Get(ctx, req.Project.Meta.Id)
+func (s *projectService) Update(ctx context.Context, rq *v1.ProjectUpdateRequest) (*v1.ProjectResponse, error) {
+	old, err := s.projectStore.Get(ctx, rq.Project.Meta.Id)
 	if err != nil {
 		return nil, err
 	}
-	project := req.Project
+	project := rq.Project
 	if old.TenantId != project.TenantId {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("update tenant of project:%s is not allowed", project.Meta.Id))
 	}
 	err = s.projectStore.Update(ctx, project)
-	return connect.NewResponse(project.NewProjectResponse()), err
+	return project.NewProjectResponse(), err
 }
-func (s *projectService) Delete(ctx context.Context, rq *connect.Request[v1.ProjectDeleteRequest]) (*connect.Response[v1.ProjectResponse], error) {
-	req := rq.Msg
-	project := req.NewProject()
+func (s *projectService) Delete(ctx context.Context, rq *v1.ProjectDeleteRequest) (*v1.ProjectResponse, error) {
+	project := rq.NewProject()
 	filter := map[string]any{
 		"projectmember ->> 'project_id'": project.Meta.Id,
 	}
@@ -110,58 +106,55 @@ func (s *projectService) Delete(ctx context.Context, rq *connect.Request[v1.Proj
 	if err != nil {
 		return nil, err
 	}
-	return connect.NewResponse(project.NewProjectResponse()), nil
+	return project.NewProjectResponse(), nil
 }
-func (s *projectService) Get(ctx context.Context, rq *connect.Request[v1.ProjectGetRequest]) (*connect.Response[v1.ProjectResponse], error) {
-	req := rq.Msg
-	project, err := s.projectStore.Get(ctx, req.Id)
+func (s *projectService) Get(ctx context.Context, rq *v1.ProjectGetRequest) (*v1.ProjectResponse, error) {
+	project, err := s.projectStore.Get(ctx, rq.Id)
 	if err != nil {
 		return nil, err
 	}
-	return connect.NewResponse(project.NewProjectResponse()), nil
+	return project.NewProjectResponse(), nil
 }
-func (s *projectService) GetHistory(ctx context.Context, rq *connect.Request[v1.ProjectGetHistoryRequest]) (*connect.Response[v1.ProjectResponse], error) {
-	req := rq.Msg
+func (s *projectService) GetHistory(ctx context.Context, rq *v1.ProjectGetHistoryRequest) (*v1.ProjectResponse, error) {
 	project := &v1.Project{}
-	at := req.At.AsTime()
-	err := s.projectStore.GetHistory(ctx, req.Id, at, project)
+	at := rq.At.AsTime()
+	err := s.projectStore.GetHistory(ctx, rq.Id, at, project)
 	if err != nil {
 		return nil, err
 	}
-	return connect.NewResponse(project.NewProjectResponse()), nil
+	return project.NewProjectResponse(), nil
 }
-func (s *projectService) Find(ctx context.Context, rq *connect.Request[v1.ProjectFindRequest]) (*connect.Response[v1.ProjectListResponse], error) {
-	req := rq.Msg
+func (s *projectService) Find(ctx context.Context, rq *v1.ProjectFindRequest) (*v1.ProjectListResponse, error) {
 	// TODO: remove in next release
-	if req.DeprecatedId != nil && req.Id == nil { // nolint:staticcheck
-		req.Id = &req.DeprecatedId.Value // nolint:staticcheck
+	if rq.DeprecatedId != nil && rq.Id == nil { // nolint:staticcheck
+		rq.Id = &rq.DeprecatedId.Value // nolint:staticcheck
 	}
-	if req.DeprecatedDescription != nil && req.Description == nil { // nolint:staticcheck
-		req.Description = &req.DeprecatedDescription.Value // nolint:staticcheck
+	if rq.DeprecatedDescription != nil && rq.Description == nil { // nolint:staticcheck
+		rq.Description = &rq.DeprecatedDescription.Value // nolint:staticcheck
 	}
-	if req.DeprecatedName != nil && req.Name == nil { // nolint:staticcheck
-		req.Name = &req.DeprecatedName.Value // nolint:staticcheck
+	if rq.DeprecatedName != nil && rq.Name == nil { // nolint:staticcheck
+		rq.Name = &rq.DeprecatedName.Value // nolint:staticcheck
 	}
-	if req.DeprecatedTenantId != nil && req.TenantId == nil { // nolint:staticcheck
-		req.TenantId = &req.DeprecatedTenantId.Value // nolint:staticcheck
+	if rq.DeprecatedTenantId != nil && rq.TenantId == nil { // nolint:staticcheck
+		rq.TenantId = &rq.DeprecatedTenantId.Value // nolint:staticcheck
 	}
 
 	var filters []any
 
 	mapFilter := make(map[string]any)
-	if req.Id != nil {
-		mapFilter["id"] = req.Id
+	if rq.Id != nil {
+		mapFilter["id"] = rq.Id
 	}
-	if req.Name != nil {
-		mapFilter["project ->> 'name'"] = req.Name
+	if rq.Name != nil {
+		mapFilter["project ->> 'name'"] = rq.Name
 	}
-	if req.Description != nil {
-		mapFilter["project ->> 'description'"] = req.Description
+	if rq.Description != nil {
+		mapFilter["project ->> 'description'"] = rq.Description
 	}
-	if req.TenantId != nil {
-		mapFilter["project ->> 'tenant_id'"] = req.TenantId
+	if rq.TenantId != nil {
+		mapFilter["project ->> 'tenant_id'"] = rq.TenantId
 	}
-	for key, value := range req.Annotations {
+	for key, value := range rq.Annotations {
 		// select * from project where project -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
 		f := fmt.Sprintf("project -> 'meta' -> 'annotations' ->> '%s'", key)
 		mapFilter[f] = value
@@ -171,10 +164,10 @@ func (s *projectService) Find(ctx context.Context, rq *connect.Request[v1.Projec
 		filters = append(filters, mapFilter)
 	}
 
-	if len(req.Labels) > 0 {
+	if len(rq.Labels) > 0 {
 		var contains []string
 
-		for _, label := range req.Labels {
+		for _, label := range rq.Labels {
 			contains = append(contains, strconv.Quote(label))
 		}
 
@@ -184,12 +177,12 @@ func (s *projectService) Find(ctx context.Context, rq *connect.Request[v1.Projec
 		filters = append(filters, labelFilter)
 	}
 
-	res, nextPage, err := s.projectStore.Find(ctx, req.Paging, filters...)
+	res, nextPage, err := s.projectStore.Find(ctx, rq.Paging, filters...)
 	if err != nil {
 		return nil, err
 	}
 	resp := new(v1.ProjectListResponse)
 	resp.Projects = append(resp.Projects, res...)
 	resp.NextPage = nextPage
-	return connect.NewResponse(resp), nil
+	return resp, nil
 }

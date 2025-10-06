@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"connectrpc.com/connect"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
 	"github.com/metal-stack/masterdata-api/pkg/datastore"
 	"google.golang.org/grpc/codes"
@@ -28,9 +27,8 @@ func NewProjectMemberService(l *slog.Logger, pds ProjectDataStore, pmds ProjectM
 	}
 }
 
-func (s *projectMemberService) Create(ctx context.Context, rq *connect.Request[v1.ProjectMemberCreateRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
-	req := rq.Msg
-	projectMember := req.ProjectMember
+func (s *projectMemberService) Create(ctx context.Context, rq *v1.ProjectMemberCreateRequest) (*v1.ProjectMemberResponse, error) {
+	projectMember := rq.ProjectMember
 
 	_, err := s.tenantStore.Get(ctx, projectMember.GetTenantId())
 	if err != nil && v1.IsNotFound(err) {
@@ -53,12 +51,11 @@ func (s *projectMemberService) Create(ctx context.Context, rq *connect.Request[v
 		projectMember.Meta = &v1.Meta{}
 	}
 	err = s.projectMemberStore.Create(ctx, projectMember)
-	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
+	return projectMember.NewProjectMemberResponse(), err
 }
 
-func (s *projectMemberService) Update(ctx context.Context, rq *connect.Request[v1.ProjectMemberUpdateRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
-	req := rq.Msg
-	projectMember := req.ProjectMember
+func (s *projectMemberService) Update(ctx context.Context, rq *v1.ProjectMemberUpdateRequest) (*v1.ProjectMemberResponse, error) {
+	projectMember := rq.ProjectMember
 
 	old, err := s.projectMemberStore.Get(ctx, projectMember.Meta.Id)
 	if err != nil {
@@ -77,42 +74,37 @@ func (s *projectMemberService) Update(ctx context.Context, rq *connect.Request[v
 
 	err = s.projectMemberStore.Update(ctx, projectMember)
 
-	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
+	return projectMember.NewProjectMemberResponse(), err
 }
 
-func (s *projectMemberService) Delete(ctx context.Context, rq *connect.Request[v1.ProjectMemberDeleteRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
-	req := rq.Msg
-
-	projectMember := req.NewProjectMember()
+func (s *projectMemberService) Delete(ctx context.Context, rq *v1.ProjectMemberDeleteRequest) (*v1.ProjectMemberResponse, error) {
+	projectMember := rq.NewProjectMember()
 
 	err := s.projectMemberStore.Delete(ctx, projectMember.Meta.Id)
 
-	return connect.NewResponse(projectMember.NewProjectMemberResponse()), err
+	return projectMember.NewProjectMemberResponse(), err
 }
 
-func (s *projectMemberService) Get(ctx context.Context, rq *connect.Request[v1.ProjectMemberGetRequest]) (*connect.Response[v1.ProjectMemberResponse], error) {
-	req := rq.Msg
-
-	projectMember, err := s.projectMemberStore.Get(ctx, req.Id)
+func (s *projectMemberService) Get(ctx context.Context, rq *v1.ProjectMemberGetRequest) (*v1.ProjectMemberResponse, error) {
+	projectMember, err := s.projectMemberStore.Get(ctx, rq.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	return connect.NewResponse(projectMember.NewProjectMemberResponse()), nil
+	return projectMember.NewProjectMemberResponse(), nil
 }
 
-func (s *projectMemberService) Find(ctx context.Context, rq *connect.Request[v1.ProjectMemberFindRequest]) (*connect.Response[v1.ProjectMemberListResponse], error) {
-	req := rq.Msg
+func (s *projectMemberService) Find(ctx context.Context, rq *v1.ProjectMemberFindRequest) (*v1.ProjectMemberListResponse, error) {
 	filter := map[string]any{
-		"COALESCE(projectmember ->> 'namespace', '')": req.Namespace,
+		"COALESCE(projectmember ->> 'namespace', '')": rq.Namespace,
 	}
-	if req.ProjectId != nil {
-		filter["projectmember ->> 'project_id'"] = req.ProjectId
+	if rq.ProjectId != nil {
+		filter["projectmember ->> 'project_id'"] = rq.ProjectId
 	}
-	if req.TenantId != nil {
-		filter["projectmember ->> 'tenant_id'"] = req.TenantId
+	if rq.TenantId != nil {
+		filter["projectmember ->> 'tenant_id'"] = rq.TenantId
 	}
-	for key, value := range req.Annotations {
+	for key, value := range rq.Annotations {
 		// select * from projectMember where projectMember -> 'meta' -> 'annotations' ->>  'metal-stack.io/role' = 'owner';
 		f := fmt.Sprintf("projectmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value
@@ -126,5 +118,5 @@ func (s *projectMemberService) Find(ctx context.Context, rq *connect.Request[v1.
 	resp := new(v1.ProjectMemberListResponse)
 	resp.ProjectMembers = append(resp.ProjectMembers, res...)
 
-	return connect.NewResponse(resp), nil
+	return resp, nil
 }
