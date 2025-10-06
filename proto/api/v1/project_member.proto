@@ -17,6 +17,8 @@ message ProjectMember {
   Meta meta = 1;
   string project_id = 2;
   string tenant_id = 4;
+  // Namespace introduces the possibility to associate memberships for different applications that use the masterdata-api as a backend.
+  string namespace = 5;
 }
 
 message ProjectMemberCreateRequest {
@@ -39,6 +41,7 @@ message ProjectMemberFindRequest {
   optional string project_id = 1;
   optional string tenant_id = 2;
   map<string, string> annotations = 6;
+  string namespace = 7;
 }
 
 message ProjectMemberResponse {

@@ -182,7 +182,9 @@ var (
 	).
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
-		Where(projectMembers.JSONField() + "->>'tenant_id' = :tenantId")
+		Where(projectMembers.JSONField() + "->>'tenant_id' = :tenantId").
+		// COALESCE is required to provide an empty string as default value in case the namespace field is not present
+		Where("COALESCE(" + projectMembers.JSONField() + "->> 'namespace', '') = :namespace")
 
 	queryInheritedProjectParticipations = sq.Select(
 		projects.JSONField(),
@@ -190,7 +192,9 @@ var (
 	).
 		From(tenantMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.JSONField() + "->>'tenant_id' = " + tenantMembers.JSONField() + "->>'tenant_id'").
-		Where(tenantMembers.JSONField() + "->>'member_id' = :tenantId")
+		Where(tenantMembers.JSONField() + "->>'member_id' = :tenantId").
+		// COALESCE is required to provide an empty string as default value in case the namespace field is not present
+		Where("COALESCE(" + tenantMembers.JSONField() + "->> 'namespace', '') = :namespace")
 )
 
 // FindParticipatingProjects returns all projects in which a member participates.
@@ -208,7 +212,7 @@ func (s *tenantService) FindParticipatingProjects(ctx context.Context, rq *conne
 		res       []*v1.ProjectWithMembershipAnnotations
 		resultMap = map[string]*v1.ProjectWithMembershipAnnotations{}
 
-		input = map[string]any{"tenantId": req.TenantId}
+		input = map[string]any{"tenantId": req.TenantId, "namespace": req.Namespace}
 
 		resultFn = func(e result) error {
 			p, ok := resultMap[e.Project.Meta.Id]
@@ -269,7 +273,9 @@ var (
 	).
 		From(tenantMembers.TableName()).
 		Join(tenants.TableName() + " ON " + tenants.TableName() + ".id = " + tenantMembers.JSONField() + "->>'tenant_id'").
-		Where(tenantMembers.JSONField() + "->>'member_id' = :tenantId")
+		Where(tenantMembers.JSONField() + "->>'member_id' = :tenantId").
+		// COALESCE is required to provide an empty string as default value in case the namespace field is not present
+		Where("COALESCE(" + tenantMembers.JSONField() + "->> 'namespace', '') = :namespace")
 
 	queryInheritedTenantParticipations = sq.Select(
 		tenants.JSONField(),
@@ -278,7 +284,9 @@ var (
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
 		Join(tenants.TableName() + " ON " + tenants.TableName() + ".id = " + projects.JSONField() + "->>'tenant_id'").
-		Where(projectMembers.JSONField() + "->>'tenant_id' = :tenantId")
+		Where(projectMembers.JSONField() + "->>'tenant_id' = :tenantId").
+		// COALESCE is required to provide an empty string as default value in case the namespace field is not present
+		Where("COALESCE(" + projectMembers.JSONField() + "->> 'namespace', '') = :namespace")
 )
 
 // FindParticipatingTenants returns all tenants in which a member participates.
@@ -293,7 +301,7 @@ func (s *tenantService) FindParticipatingTenants(ctx context.Context, rq *connec
 	}
 
 	var (
-		input = map[string]any{"tenantId": req.TenantId}
+		input = map[string]any{"tenantId": req.TenantId, "namespace": req.Namespace}
 
 		res       []*v1.TenantWithMembershipAnnotations
 		resultMap = map[string]*v1.TenantWithMembershipAnnotations{}
@@ -357,7 +365,9 @@ var (
 	).
 		From(tenantMembers.TableName()).
 		Join(tenants.TableName() + " ON " + tenants.TableName() + ".id = " + tenantMembers.JSONField() + "->>'member_id'").
-		Where(tenantMembers.JSONField() + "->>'tenant_id' = :tenantId")
+		Where(tenantMembers.JSONField() + "->>'tenant_id' = :tenantId").
+		// COALESCE is required to provide an empty string as default value in case the namespace field is not present
+		Where("COALESCE(" + tenantMembers.JSONField() + "->> 'namespace', '') = :namespace")
 
 	queryInheritedTenantMembers = sq.Select(
 		tenants.JSONField(),
@@ -366,7 +376,9 @@ var (
 		From(projectMembers.TableName()).
 		Join(projects.TableName() + " ON " + projects.TableName() + ".id = " + projectMembers.JSONField() + "->>'project_id'").
 		Join(tenants.TableName() + " ON " + tenants.TableName() + ".id = " + projectMembers.JSONField() + "->>'tenant_id'").
-		Where(projects.JSONField() + "->>'tenant_id' = :tenantId")
+		Where(projects.JSONField() + "->>'tenant_id' = :tenantId").
+		// COALESCE is required to provide an empty string as default value in case the namespace field is not present
+		Where("COALESCE(" + projectMembers.JSONField() + "->> 'namespace', '') = :namespace")
 )
 
 // ListTenantMembers returns all members of a tenant.
@@ -384,7 +396,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, rq *connect.Reque
 		res       []*v1.TenantWithMembershipAnnotations
 		resultMap = map[string]*v1.TenantWithMembershipAnnotations{}
 
-		input = map[string]any{"tenantId": req.TenantId}
+		input = map[string]any{"tenantId": req.TenantId, "namespace": req.Namespace}
 
 		resultFn = func(e result) error {
 			t, ok := resultMap[e.Tenant.Meta.Id]

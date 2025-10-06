@@ -23,10 +23,12 @@ const (
 
 // ProjectMember is the database model
 type ProjectMember struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Meta          *Meta                  `protobuf:"bytes,1,opt,name=meta,proto3" json:"meta,omitempty"`
-	ProjectId     string                 `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	TenantId      string                 `protobuf:"bytes,4,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	Meta      *Meta                  `protobuf:"bytes,1,opt,name=meta,proto3" json:"meta,omitempty"`
+	ProjectId string                 `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	TenantId  string                 `protobuf:"bytes,4,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	// Namespace introduces the possibility to associate memberships for different applications that use the masterdata-api as a backend.
+	Namespace     string `protobuf:"bytes,5,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -78,6 +80,13 @@ func (x *ProjectMember) GetProjectId() string {
 func (x *ProjectMember) GetTenantId() string {
 	if x != nil {
 		return x.TenantId
+	}
+	return ""
+}
+
+func (x *ProjectMember) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
 	}
 	return ""
 }
@@ -263,6 +272,7 @@ type ProjectMemberFindRequest struct {
 	ProjectId     *string                `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	TenantId      *string                `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
 	Annotations   map[string]string      `protobuf:"bytes,6,rep,name=annotations,proto3" json:"annotations,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Namespace     string                 `protobuf:"bytes,7,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -316,6 +326,13 @@ func (x *ProjectMemberFindRequest) GetAnnotations() map[string]string {
 		return x.Annotations
 	}
 	return nil
+}
+
+func (x *ProjectMemberFindRequest) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
+	}
+	return ""
 }
 
 type ProjectMemberResponse struct {
@@ -410,12 +427,13 @@ var File_api_v1_project_member_proto protoreflect.FileDescriptor
 
 const file_api_v1_project_member_proto_rawDesc = "" +
 	"\n" +
-	"\x1bapi/v1/project_member.proto\x12\x06api.v1\x1a\x11api/v1/meta.proto\"m\n" +
+	"\x1bapi/v1/project_member.proto\x12\x06api.v1\x1a\x11api/v1/meta.proto\"\x8b\x01\n" +
 	"\rProjectMember\x12 \n" +
 	"\x04meta\x18\x01 \x01(\v2\f.api.v1.MetaR\x04meta\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x02 \x01(\tR\tprojectId\x12\x1b\n" +
-	"\ttenant_id\x18\x04 \x01(\tR\btenantId\"Z\n" +
+	"\ttenant_id\x18\x04 \x01(\tR\btenantId\x12\x1c\n" +
+	"\tnamespace\x18\x05 \x01(\tR\tnamespace\"Z\n" +
 	"\x1aProjectMemberCreateRequest\x12<\n" +
 	"\x0eproject_member\x18\x01 \x01(\v2\x15.api.v1.ProjectMemberR\rprojectMember\"Z\n" +
 	"\x1aProjectMemberUpdateRequest\x12<\n" +
@@ -423,12 +441,13 @@ const file_api_v1_project_member_proto_rawDesc = "" +
 	"\x1aProjectMemberDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\")\n" +
 	"\x17ProjectMemberGetRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x92\x02\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xb0\x02\n" +
 	"\x18ProjectMemberFindRequest\x12\"\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\tH\x00R\tprojectId\x88\x01\x01\x12 \n" +
 	"\ttenant_id\x18\x02 \x01(\tH\x01R\btenantId\x88\x01\x01\x12S\n" +
-	"\vannotations\x18\x06 \x03(\v21.api.v1.ProjectMemberFindRequest.AnnotationsEntryR\vannotations\x1a>\n" +
+	"\vannotations\x18\x06 \x03(\v21.api.v1.ProjectMemberFindRequest.AnnotationsEntryR\vannotations\x12\x1c\n" +
+	"\tnamespace\x18\a \x01(\tR\tnamespace\x1a>\n" +
 	"\x10AnnotationsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\r\n" +
