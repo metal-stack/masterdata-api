@@ -25,8 +25,8 @@ func NewTenantMemberService(l *slog.Logger, tds TenantDataStore, tmds TenantMemb
 	}
 }
 
-func (s *tenantMemberService) Create(ctx context.Context, rq *v1.TenantMemberCreateRequest) (*v1.TenantMemberResponse, error) {
-	tenantMember := rq.TenantMember
+func (s *tenantMemberService) Create(ctx context.Context, req *v1.TenantMemberCreateRequest) (*v1.TenantMemberResponse, error) {
+	tenantMember := req.TenantMember
 
 	_, err := s.tenantStore.Get(ctx, tenantMember.GetTenantId())
 	if err != nil && v1.IsNotFound(err) {
@@ -46,8 +46,8 @@ func (s *tenantMemberService) Create(ctx context.Context, rq *v1.TenantMemberCre
 	return tenantMember.NewTenantMemberResponse(), err
 }
 
-func (s *tenantMemberService) Update(ctx context.Context, rq *v1.TenantMemberUpdateRequest) (*v1.TenantMemberResponse, error) {
-	tenantMember := rq.TenantMember
+func (s *tenantMemberService) Update(ctx context.Context, req *v1.TenantMemberUpdateRequest) (*v1.TenantMemberResponse, error) {
+	tenantMember := req.TenantMember
 
 	old, err := s.tenantMemberStore.Get(ctx, tenantMember.Meta.Id)
 	if err != nil {
@@ -69,16 +69,16 @@ func (s *tenantMemberService) Update(ctx context.Context, rq *v1.TenantMemberUpd
 	return tenantMember.NewTenantMemberResponse(), err
 }
 
-func (s *tenantMemberService) Delete(ctx context.Context, rq *v1.TenantMemberDeleteRequest) (*v1.TenantMemberResponse, error) {
-	tenantMember := rq.NewTenantMember()
+func (s *tenantMemberService) Delete(ctx context.Context, req *v1.TenantMemberDeleteRequest) (*v1.TenantMemberResponse, error) {
+	tenantMember := req.NewTenantMember()
 
 	err := s.tenantMemberStore.Delete(ctx, tenantMember.Meta.Id)
 
 	return tenantMember.NewTenantMemberResponse(), err
 }
 
-func (s *tenantMemberService) Get(ctx context.Context, rq *v1.TenantMemberGetRequest) (*v1.TenantMemberResponse, error) {
-	tenantMember, err := s.tenantMemberStore.Get(ctx, rq.Id)
+func (s *tenantMemberService) Get(ctx context.Context, req *v1.TenantMemberGetRequest) (*v1.TenantMemberResponse, error) {
+	tenantMember, err := s.tenantMemberStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -86,18 +86,18 @@ func (s *tenantMemberService) Get(ctx context.Context, rq *v1.TenantMemberGetReq
 	return tenantMember.NewTenantMemberResponse(), nil
 }
 
-func (s *tenantMemberService) Find(ctx context.Context, rq *v1.TenantMemberFindRequest) (*v1.TenantMemberListResponse, error) {
+func (s *tenantMemberService) Find(ctx context.Context, req *v1.TenantMemberFindRequest) (*v1.TenantMemberListResponse, error) {
 	filter := map[string]any{
-		"COALESCE(tenantmember ->> 'namespace', '')": rq.Namespace,
+		"COALESCE(tenantmember ->> 'namespace', '')": req.Namespace,
 	}
 
-	if rq.TenantId != nil {
-		filter["tenantmember ->> 'tenant_id'"] = rq.TenantId
+	if req.TenantId != nil {
+		filter["tenantmember ->> 'tenant_id'"] = req.TenantId
 	}
-	if rq.MemberId != nil {
-		filter["tenantmember ->> 'member_id'"] = rq.MemberId
+	if req.MemberId != nil {
+		filter["tenantmember ->> 'member_id'"] = req.MemberId
 	}
-	for key, value := range rq.Annotations {
+	for key, value := range req.Annotations {
 		// select * from tenantMember where tenantMember -> 'meta' -> 'annotations' ->>  'metal-stack.io/role' = 'owner';
 		f := fmt.Sprintf("tenantmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value

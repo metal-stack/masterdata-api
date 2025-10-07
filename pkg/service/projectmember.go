@@ -27,8 +27,8 @@ func NewProjectMemberService(l *slog.Logger, pds ProjectDataStore, pmds ProjectM
 	}
 }
 
-func (s *projectMemberService) Create(ctx context.Context, rq *v1.ProjectMemberCreateRequest) (*v1.ProjectMemberResponse, error) {
-	projectMember := rq.ProjectMember
+func (s *projectMemberService) Create(ctx context.Context, req *v1.ProjectMemberCreateRequest) (*v1.ProjectMemberResponse, error) {
+	projectMember := req.ProjectMember
 
 	_, err := s.tenantStore.Get(ctx, projectMember.GetTenantId())
 	if err != nil && v1.IsNotFound(err) {
@@ -54,8 +54,8 @@ func (s *projectMemberService) Create(ctx context.Context, rq *v1.ProjectMemberC
 	return projectMember.NewProjectMemberResponse(), err
 }
 
-func (s *projectMemberService) Update(ctx context.Context, rq *v1.ProjectMemberUpdateRequest) (*v1.ProjectMemberResponse, error) {
-	projectMember := rq.ProjectMember
+func (s *projectMemberService) Update(ctx context.Context, req *v1.ProjectMemberUpdateRequest) (*v1.ProjectMemberResponse, error) {
+	projectMember := req.ProjectMember
 
 	old, err := s.projectMemberStore.Get(ctx, projectMember.Meta.Id)
 	if err != nil {
@@ -77,16 +77,16 @@ func (s *projectMemberService) Update(ctx context.Context, rq *v1.ProjectMemberU
 	return projectMember.NewProjectMemberResponse(), err
 }
 
-func (s *projectMemberService) Delete(ctx context.Context, rq *v1.ProjectMemberDeleteRequest) (*v1.ProjectMemberResponse, error) {
-	projectMember := rq.NewProjectMember()
+func (s *projectMemberService) Delete(ctx context.Context, req *v1.ProjectMemberDeleteRequest) (*v1.ProjectMemberResponse, error) {
+	projectMember := req.NewProjectMember()
 
 	err := s.projectMemberStore.Delete(ctx, projectMember.Meta.Id)
 
 	return projectMember.NewProjectMemberResponse(), err
 }
 
-func (s *projectMemberService) Get(ctx context.Context, rq *v1.ProjectMemberGetRequest) (*v1.ProjectMemberResponse, error) {
-	projectMember, err := s.projectMemberStore.Get(ctx, rq.Id)
+func (s *projectMemberService) Get(ctx context.Context, req *v1.ProjectMemberGetRequest) (*v1.ProjectMemberResponse, error) {
+	projectMember, err := s.projectMemberStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -94,17 +94,17 @@ func (s *projectMemberService) Get(ctx context.Context, rq *v1.ProjectMemberGetR
 	return projectMember.NewProjectMemberResponse(), nil
 }
 
-func (s *projectMemberService) Find(ctx context.Context, rq *v1.ProjectMemberFindRequest) (*v1.ProjectMemberListResponse, error) {
+func (s *projectMemberService) Find(ctx context.Context, req *v1.ProjectMemberFindRequest) (*v1.ProjectMemberListResponse, error) {
 	filter := map[string]any{
-		"COALESCE(projectmember ->> 'namespace', '')": rq.Namespace,
+		"COALESCE(projectmember ->> 'namespace', '')": req.Namespace,
 	}
-	if rq.ProjectId != nil {
-		filter["projectmember ->> 'project_id'"] = rq.ProjectId
+	if req.ProjectId != nil {
+		filter["projectmember ->> 'project_id'"] = req.ProjectId
 	}
-	if rq.TenantId != nil {
-		filter["projectmember ->> 'tenant_id'"] = rq.TenantId
+	if req.TenantId != nil {
+		filter["projectmember ->> 'tenant_id'"] = req.TenantId
 	}
-	for key, value := range rq.Annotations {
+	for key, value := range req.Annotations {
 		// select * from projectMember where projectMember -> 'meta' -> 'annotations' ->>  'metal-stack.io/role' = 'owner';
 		f := fmt.Sprintf("projectmember -> 'meta' -> 'annotations' ->> '%s'", key)
 		filter[f] = value

@@ -37,8 +37,8 @@ func NewTenantService(db *sqlx.DB, l *slog.Logger, tds TenantDataStore, tmds Ten
 	}
 }
 
-func (s *tenantService) Create(ctx context.Context, rq *v1.TenantCreateRequest) (*v1.TenantResponse, error) {
-	tenant := rq.Tenant
+func (s *tenantService) Create(ctx context.Context, req *v1.TenantCreateRequest) (*v1.TenantResponse, error) {
+	tenant := req.Tenant
 	// allow create without sending Meta
 	if tenant.Meta == nil {
 		tenant.Meta = &v1.Meta{}
@@ -46,14 +46,14 @@ func (s *tenantService) Create(ctx context.Context, rq *v1.TenantCreateRequest) 
 	err := s.tenantStore.Create(ctx, tenant)
 	return tenant.NewTenantResponse(), err
 }
-func (s *tenantService) Update(ctx context.Context, rq *v1.TenantUpdateRequest) (*v1.TenantResponse, error) {
-	tenant := rq.Tenant
+func (s *tenantService) Update(ctx context.Context, req *v1.TenantUpdateRequest) (*v1.TenantResponse, error) {
+	tenant := req.Tenant
 	err := s.tenantStore.Update(ctx, tenant)
 	return tenant.NewTenantResponse(), err
 }
 
-func (s *tenantService) Delete(ctx context.Context, rq *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
-	tenant := rq.NewTenant()
+func (s *tenantService) Delete(ctx context.Context, req *v1.TenantDeleteRequest) (*v1.TenantResponse, error) {
+	tenant := req.NewTenant()
 	tenantIsHostFilter := map[string]any{
 		"tenantmember ->> 'tenant_id'": tenant.Meta.Id,
 	}
@@ -95,8 +95,8 @@ func (s *tenantService) Delete(ctx context.Context, rq *v1.TenantDeleteRequest) 
 	return tenant.NewTenantResponse(), nil
 }
 
-func (s *tenantService) Get(ctx context.Context, rq *v1.TenantGetRequest) (*v1.TenantResponse, error) {
-	tenant, err := s.tenantStore.Get(ctx, rq.Id)
+func (s *tenantService) Get(ctx context.Context, req *v1.TenantGetRequest) (*v1.TenantResponse, error) {
+	tenant, err := s.tenantStore.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -105,11 +105,11 @@ func (s *tenantService) Get(ctx context.Context, rq *v1.TenantGetRequest) (*v1.T
 	return tenant.NewTenantResponse(), nil
 }
 
-func (s *tenantService) GetHistory(ctx context.Context, rq *v1.TenantGetHistoryRequest) (*v1.TenantResponse, error) {
+func (s *tenantService) GetHistory(ctx context.Context, req *v1.TenantGetHistoryRequest) (*v1.TenantResponse, error) {
 	tenant := &v1.Tenant{}
-	at := rq.At.AsTime()
-	s.log.Info("getHistory", "id", rq.Id, "at", at)
-	err := s.tenantStore.GetHistory(ctx, rq.Id, at, tenant)
+	at := req.At.AsTime()
+	s.log.Info("getHistory", "id", req.Id, "at", at)
+	err := s.tenantStore.GetHistory(ctx, req.Id, at, tenant)
 	if err != nil {
 		return nil, err
 	}
@@ -118,25 +118,25 @@ func (s *tenantService) GetHistory(ctx context.Context, rq *v1.TenantGetHistoryR
 	return tenant.NewTenantResponse(), nil
 }
 
-func (s *tenantService) Find(ctx context.Context, rq *v1.TenantFindRequest) (*v1.TenantListResponse, error) {
+func (s *tenantService) Find(ctx context.Context, req *v1.TenantFindRequest) (*v1.TenantListResponse, error) {
 	// TODO: remove in next release
-	if rq.DeprecatedId != nil && rq.Id == nil { // nolint:staticcheck
-		rq.Id = &rq.DeprecatedId.Value // nolint:staticcheck
+	if req.DeprecatedId != nil && req.Id == nil { // nolint:staticcheck
+		req.Id = &req.DeprecatedId.Value // nolint:staticcheck
 	}
-	if rq.DeprecatedName != nil && rq.Name == nil { // nolint:staticcheck
-		rq.Name = &rq.DeprecatedName.Value // nolint:staticcheck
+	if req.DeprecatedName != nil && req.Name == nil { // nolint:staticcheck
+		req.Name = &req.DeprecatedName.Value // nolint:staticcheck
 	}
 
 	var filters []any
 
 	mapFilter := make(map[string]any)
-	if rq.Id != nil {
-		mapFilter["id"] = rq.GetId()
+	if req.Id != nil {
+		mapFilter["id"] = req.GetId()
 	}
-	if rq.Name != nil {
-		mapFilter["tenant ->> 'name'"] = rq.GetName()
+	if req.Name != nil {
+		mapFilter["tenant ->> 'name'"] = req.GetName()
 	}
-	for key, value := range rq.Annotations {
+	for key, value := range req.Annotations {
 		// select * from tenants where tenant -> 'meta' -> 'annotations' ->>  'metal-stack.io/admitted' = 'true';
 		f := fmt.Sprintf("tenant -> 'meta' -> 'annotations' ->> '%s'", key)
 		mapFilter[f] = value
@@ -146,10 +146,10 @@ func (s *tenantService) Find(ctx context.Context, rq *v1.TenantFindRequest) (*v1
 		filters = append(filters, mapFilter)
 	}
 
-	if len(rq.Labels) > 0 {
+	if len(req.Labels) > 0 {
 		var contains []string
 
-		for _, label := range rq.Labels {
+		for _, label := range req.Labels {
 			contains = append(contains, strconv.Quote(label))
 		}
 
@@ -158,7 +158,7 @@ func (s *tenantService) Find(ctx context.Context, rq *v1.TenantFindRequest) (*v1
 
 		filters = append(filters, labelFilter)
 	}
-	res, nextPage, err := s.tenantStore.Find(ctx, rq.Paging, filters...)
+	res, nextPage, err := s.tenantStore.Find(ctx, req.Paging, filters...)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ var (
 // FindParticipatingProjects returns all projects in which a member participates.
 // This includes projects in which the member is explicitly participating through a project membership but may also
 // include memberships, which are inherited by the tenant membership.
-func (s *tenantService) FindParticipatingProjects(ctx context.Context, rq *v1.FindParticipatingProjectsRequest) (*v1.FindParticipatingProjectsResponse, error) {
+func (s *tenantService) FindParticipatingProjects(ctx context.Context, req *v1.FindParticipatingProjectsRequest) (*v1.FindParticipatingProjectsResponse, error) {
 	type result struct {
 		Project                      *v1.Project
 		TenantMembershipAnnotations  []byte `db:"tenant_membership_annotations"`
@@ -204,7 +204,7 @@ func (s *tenantService) FindParticipatingProjects(ctx context.Context, rq *v1.Fi
 		res       []*v1.ProjectWithMembershipAnnotations
 		resultMap = map[string]*v1.ProjectWithMembershipAnnotations{}
 
-		input = map[string]any{"tenantId": rq.TenantId, "namespace": rq.Namespace}
+		input = map[string]any{"tenantId": req.TenantId, "namespace": req.Namespace}
 
 		resultFn = func(e result) error {
 			p, ok := resultMap[e.Project.Meta.Id]
@@ -240,8 +240,8 @@ func (s *tenantService) FindParticipatingProjects(ctx context.Context, rq *v1.Fi
 	}
 
 	includeInherited := true
-	if rq.IncludeInherited != nil {
-		includeInherited = *rq.IncludeInherited
+	if req.IncludeInherited != nil {
+		includeInherited = *req.IncludeInherited
 	}
 
 	if includeInherited {
@@ -284,7 +284,7 @@ var (
 // FindParticipatingTenants returns all tenants in which a member participates.
 // This includes tenants in which the member is explicitly participating through a tenant membership but may also
 // include memberships, which are inherited by the project memberships (e.g. through project invites).
-func (s *tenantService) FindParticipatingTenants(ctx context.Context, rq *v1.FindParticipatingTenantsRequest) (*v1.FindParticipatingTenantsResponse, error) {
+func (s *tenantService) FindParticipatingTenants(ctx context.Context, req *v1.FindParticipatingTenantsRequest) (*v1.FindParticipatingTenantsResponse, error) {
 	type result struct {
 		Tenant                       *v1.Tenant
 		TenantMembershipAnnotations  []byte `db:"tenant_membership_annotations"`
@@ -292,7 +292,7 @@ func (s *tenantService) FindParticipatingTenants(ctx context.Context, rq *v1.Fin
 	}
 
 	var (
-		input = map[string]any{"tenantId": rq.TenantId, "namespace": rq.Namespace}
+		input = map[string]any{"tenantId": req.TenantId, "namespace": req.Namespace}
 
 		res       []*v1.TenantWithMembershipAnnotations
 		resultMap = map[string]*v1.TenantWithMembershipAnnotations{}
@@ -331,8 +331,8 @@ func (s *tenantService) FindParticipatingTenants(ctx context.Context, rq *v1.Fin
 	}
 
 	includeInherited := true
-	if rq.IncludeInherited != nil {
-		includeInherited = *rq.IncludeInherited
+	if req.IncludeInherited != nil {
+		includeInherited = *req.IncludeInherited
 	}
 
 	if includeInherited {
@@ -375,7 +375,7 @@ var (
 // ListTenantMembers returns all members of a tenant.
 // This includes members which are explicitly participating through a tenant membership but may also
 // include memberships, which are inherited by the project memberships (e.g. through project invites).
-func (s *tenantService) ListTenantMembers(ctx context.Context, rq *v1.ListTenantMembersRequest) (*v1.ListTenantMembersResponse, error) {
+func (s *tenantService) ListTenantMembers(ctx context.Context, req *v1.ListTenantMembersRequest) (*v1.ListTenantMembersResponse, error) {
 	type result struct {
 		Tenant                      *v1.Tenant
 		TenantMembershipAnnotations []byte `db:"tenant_membership_annotations"`
@@ -386,7 +386,7 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, rq *v1.ListTenant
 		res       []*v1.TenantWithMembershipAnnotations
 		resultMap = map[string]*v1.TenantWithMembershipAnnotations{}
 
-		input = map[string]any{"tenantId": rq.TenantId, "namespace": rq.Namespace}
+		input = map[string]any{"tenantId": req.TenantId, "namespace": req.Namespace}
 
 		resultFn = func(e result) error {
 			t, ok := resultMap[e.Tenant.Meta.Id]
@@ -419,8 +419,8 @@ func (s *tenantService) ListTenantMembers(ctx context.Context, rq *v1.ListTenant
 	}
 
 	includeInherited := true
-	if rq.IncludeInherited != nil {
-		includeInherited = *rq.IncludeInherited
+	if req.IncludeInherited != nil {
+		includeInherited = *req.IncludeInherited
 	}
 
 	if includeInherited {
