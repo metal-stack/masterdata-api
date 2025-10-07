@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/runtime/protoimpl"
 
 	"testing"
 
@@ -339,7 +338,11 @@ func TestFindTenantMember(t *testing.T) {
 				}
 			})
 
-			if diff := cmp.Diff(tt.want, pointer.SafeDeref(got), cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(
+				tt.want, got,
+				cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"),
+				testcommon.IgnoreUnexported(),
+			); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -536,7 +539,11 @@ func TestUpdateTenantMember(t *testing.T) {
 				assert.NotNil(t, got.TenantMember.Meta.UpdatedTime)
 			}
 
-			if diff := cmp.Diff(tt.want, pointer.SafeDeref(got), cmpopts.IgnoreTypes(protoimpl.MessageState{}), cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime", "UpdatedTime"), testcommon.IgnoreUnexported()); diff != "" {
+			if diff := cmp.Diff(
+				tt.want, got,
+				cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime", "UpdatedTime"),
+				testcommon.IgnoreUnexported(),
+			); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
