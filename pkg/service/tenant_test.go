@@ -1260,11 +1260,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 				}
 			})
 
-			if diff := cmp.Diff(
-				tt.want, got,
-				cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"),
-				testcommon.IgnoreUnexported(),
-			); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
