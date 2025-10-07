@@ -366,11 +366,7 @@ func TestFindProjectMember(t *testing.T) {
 				}
 			})
 
-			if diff := cmp.Diff(
-				tt.want, got,
-				cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"),
-				testcommon.IgnoreUnexported(),
-			); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
@@ -571,10 +567,7 @@ func TestUpdateProjectMember(t *testing.T) {
 				assert.NotNil(t, got.ProjectMember.Meta.UpdatedTime)
 			}
 
-			if diff := cmp.Diff(
-				tt.want, got, cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime", "UpdatedTime"),
-				testcommon.IgnoreUnexported(),
-			); diff != "" {
+			if diff := cmp.Diff(tt.want, got, cmpopts.IgnoreFields(v1.Meta{}, "CreatedTime", "UpdatedTime"), testcommon.IgnoreUnexported()); diff != "" {
 				t.Errorf("(-want +got):\n%s", diff)
 			}
 		})
