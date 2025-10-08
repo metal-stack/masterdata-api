@@ -63,7 +63,7 @@ mocks:
 
 .PHONY: postgres-up
 postgres-up: postgres-rm
-	docker run -d --name masterdatadb -p 5432:5432 -e POSTGRES_PASSWORD="password" -e POSTGRES_USER="masterdata" -e POSTGRES_DB="masterdata" postgres:17-alpine
+	docker run -d --name masterdatadb -p 5432:5432 -e POSTGRES_PASSWORD="password" -e POSTGRES_USER="masterdata" -e POSTGRES_DB="masterdata" postgres:18-alpine
 
 .PHONY: postgres-rm
 postgres-rm:

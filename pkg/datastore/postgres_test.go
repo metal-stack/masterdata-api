@@ -788,7 +788,7 @@ func createPostgresConnection() (testcontainers.Container, *sqlx.DB, error) {
 	ctx := context.Background()
 
 	postgres, err := postgres.Run(ctx,
-		"postgres:17-alpine",
+		"postgres:18-alpine",
 		postgres.WithPassword("password"),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
