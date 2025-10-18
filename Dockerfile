@@ -6,7 +6,7 @@ RUN apk -U add curl \
     ${GRPC_HEALTH_PROBE_URL}/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 \
  && chmod +x /bin/grpc_health_probe
 
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM gcr.io/distroless/static-debian13:nonroot
 WORKDIR /
 COPY --from=health-downloader /bin/grpc_health_probe /bin/grpc_health_probe
 COPY bin/server /masterdata-api
