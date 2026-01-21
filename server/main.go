@@ -104,7 +104,7 @@ func run() error {
 	}
 	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: lvl, AddSource: false})
 
-	logger := slog.New(jsonHandler)
+	logger = slog.New(jsonHandler)
 
 	port := viper.GetInt("port")
 	addr := fmt.Sprintf(":%d", port)
