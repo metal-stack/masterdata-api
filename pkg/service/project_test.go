@@ -8,7 +8,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/metal-stack/metal-lib/pkg/testcommon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -70,7 +69,7 @@ func TestCreateProjectWithQuotaCheck(t *testing.T) {
 	t1 := &v1.Tenant{
 		Quotas: &v1.QuotaSet{
 			Project: &v1.Quota{
-				Max: pointer.Pointer(int32(2)),
+				Max: new(int32(2)),
 			},
 		},
 	}
@@ -254,7 +253,7 @@ func TestFindProject(t *testing.T) {
 		{
 			name: "find by id",
 			req: &v1.ProjectFindRequest{
-				Id: pointer.Pointer("1"),
+				Id: new("1"),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, testProject1))
@@ -270,7 +269,7 @@ func TestFindProject(t *testing.T) {
 		{
 			name: "find by id (no results)",
 			req: &v1.ProjectFindRequest{
-				Id: pointer.Pointer("no-result"),
+				Id: new("no-result"),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, testProject1))
@@ -284,7 +283,7 @@ func TestFindProject(t *testing.T) {
 		{
 			name: "find by name",
 			req: &v1.ProjectFindRequest{
-				Name: pointer.Pointer("project-2"),
+				Name: new("project-2"),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, testProject1))
@@ -300,7 +299,7 @@ func TestFindProject(t *testing.T) {
 		{
 			name: "find by tenant",
 			req: &v1.ProjectFindRequest{
-				TenantId: pointer.Pointer("tenant-2"),
+				TenantId: new("tenant-2"),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, testProject1))

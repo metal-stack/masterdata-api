@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/metal-stack/masterdata-api/api/rest/mapper"
-	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
@@ -51,9 +50,9 @@ func projectExample(c client.Client, log *slog.Logger) error {
 		Description: "Demo Project",
 		TenantId:    "customer-1",
 		Quotas: &v1.QuotaSet{
-			Cluster: &v1.Quota{Max: pointer.Pointer(int32(3))},
-			Machine: &v1.Quota{Max: pointer.Pointer(int32(3))},
-			Ip:      &v1.Quota{Max: pointer.Pointer(int32(3))},
+			Cluster: &v1.Quota{Max: new(int32(3))},
+			Machine: &v1.Quota{Max: new(int32(3))},
+			Ip:      &v1.Quota{Max: new(int32(3))},
 		},
 		Meta: &v1.Meta{
 			Annotations: map[string]string{
@@ -163,9 +162,9 @@ func tenantExample(c client.Client, log *slog.Logger) error {
 		Name:        "myTenant",
 		Description: "myDesc",
 		DefaultQuotas: &v1.QuotaSet{
-			Cluster: &v1.Quota{Max: pointer.Pointer(int32(3))},
-			Machine: &v1.Quota{Max: pointer.Pointer(int32(3))},
-			Ip:      &v1.Quota{Max: pointer.Pointer(int32(3))},
+			Cluster: &v1.Quota{Max: new(int32(3))},
+			Machine: &v1.Quota{Max: new(int32(3))},
+			Ip:      &v1.Quota{Max: new(int32(3))},
 		},
 		IamConfig: &v1.IAMConfig{
 			IssuerConfig: &v1.IssuerConfig{
@@ -281,7 +280,7 @@ func tenantExample(c client.Client, log *slog.Logger) error {
 
 	log.Info("find tenant with id")
 	tfrqi := &v1.TenantFindRequest{
-		Id: pointer.Pointer(t.Tenant.Meta.Id),
+		Id: new(t.Tenant.Meta.Id),
 	}
 	tfrsi, err := c.Tenant().Find(ctx, tfrqi)
 	if err != nil {

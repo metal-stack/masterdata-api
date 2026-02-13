@@ -10,7 +10,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/metal-stack/metal-lib/pkg/testcommon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -226,7 +225,7 @@ func TestFindTenant(t *testing.T) {
 		{
 			name: "find by id",
 			req: &v1.TenantFindRequest{
-				Id: pointer.Pointer("1"),
+				Id: new("1"),
 			},
 			prepare: func() {
 				require.NoError(t, tenantStore.Create(ctx, testTenant1))
@@ -242,7 +241,7 @@ func TestFindTenant(t *testing.T) {
 		{
 			name: "find by id (no results)",
 			req: &v1.TenantFindRequest{
-				Id: pointer.Pointer("no-result"),
+				Id: new("no-result"),
 			},
 			prepare: func() {
 				require.NoError(t, tenantStore.Create(ctx, testTenant1))
@@ -256,7 +255,7 @@ func TestFindTenant(t *testing.T) {
 		{
 			name: "find by name",
 			req: &v1.TenantFindRequest{
-				Name: pointer.Pointer("tenant-2"),
+				Name: new("tenant-2"),
 			},
 			prepare: func() {
 				require.NoError(t, tenantStore.Create(ctx, testTenant1))
@@ -443,7 +442,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			name: "no memberships",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 			},
@@ -454,7 +453,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			name: "ignores foreign memberships",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}}))
@@ -471,7 +470,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			name: "direct membership including 0 inherited",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}}))
@@ -500,7 +499,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			name: "no direct membership in other namespace",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 				Namespace:        "other",
 			},
 			prepare: func() {
@@ -520,7 +519,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			name: "direct membership in a namespace",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 				Namespace:        "a",
 			},
 			prepare: func() {
@@ -551,7 +550,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			name: "direct membership excluding inherited",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(false),
+				IncludeInherited: new(false),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}}))
@@ -591,7 +590,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			name: "inherited membership",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "b"}))
@@ -617,7 +616,7 @@ func Test_tenantService_FindParticipatingProjects(t *testing.T) {
 			name: "direct and indirect memberships including inherited",
 			req: &v1.FindParticipatingProjectsRequest{
 				TenantId:         "req-tenant",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				require.NoError(t, projectStore.Create(ctx, &v1.Project{
@@ -744,7 +743,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			name: "no memberships",
 			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {},
 			want:    &v1.FindParticipatingTenantsResponse{},
@@ -754,7 +753,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			name: "ignore foreign memberships",
 			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "a"}})
@@ -773,7 +772,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			name: "direct membership",
 			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "b"}})
@@ -801,7 +800,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			name: "no direct membership when in different namespace",
 			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 				Namespace:        "other",
 			},
 			prepare: func() {
@@ -819,7 +818,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			name: "direct membership in namespace",
 			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 				Namespace:        "a",
 			},
 			prepare: func() {
@@ -848,7 +847,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			name: "indirect membership",
 			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "b"})
@@ -878,7 +877,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			name: "exclude inherited",
 			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "a",
-				IncludeInherited: pointer.Pointer(false),
+				IncludeInherited: new(false),
 			},
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "b"})
@@ -895,7 +894,7 @@ func Test_tenantService_FindParticipatingTenants(t *testing.T) {
 			name: "direct and indirect memberships (without interference with other namespaces)",
 			req: &v1.FindParticipatingTenantsRequest{
 				TenantId:         "req-tnt",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				require.NoError(t, tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "indirect-tnt"}}))
@@ -1028,7 +1027,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			name: "no members",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 			},
@@ -1039,7 +1038,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			name: "ignore foreign members",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "acme"}})
@@ -1058,7 +1057,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			name: "direct membership",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "azure"}})
@@ -1086,7 +1085,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			name: "no direct membership in other namespace",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 				Namespace:        "other",
 			},
 			prepare: func() {
@@ -1104,7 +1103,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			name: "direct membership in namespace",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 				Namespace:        "a",
 			},
 			prepare: func() {
@@ -1133,7 +1132,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			name: "indirect membership",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "acme"})
@@ -1165,7 +1164,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			name: "exclude inherited",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "acme",
-				IncludeInherited: pointer.Pointer(false),
+				IncludeInherited: new(false),
 			},
 			prepare: func() {
 				err := projectStore.Create(ctx, &v1.Project{Meta: &v1.Meta{Id: "1"}, TenantId: "acme"})
@@ -1182,7 +1181,7 @@ func Test_tenantService_ListTenantMembers(t *testing.T) {
 			name: "indirect membership in multiple projects",
 			req: &v1.ListTenantMembersRequest{
 				TenantId:         "github",
-				IncludeInherited: pointer.Pointer(true),
+				IncludeInherited: new(true),
 			},
 			prepare: func() {
 				err := tenantStore.Create(ctx, &v1.Tenant{Meta: &v1.Meta{Id: "github"}})

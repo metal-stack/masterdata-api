@@ -8,7 +8,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/metal-stack/metal-lib/pkg/testcommon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -234,7 +233,7 @@ func TestFindProjectMember(t *testing.T) {
 		{
 			name: "find by project",
 			req: &v1.ProjectMemberFindRequest{
-				ProjectId: pointer.Pointer("project-1"),
+				ProjectId: new("project-1"),
 				Namespace: "a",
 			},
 			prepare: func() {
@@ -257,7 +256,7 @@ func TestFindProjectMember(t *testing.T) {
 		{
 			name: "find by project id (no results) #1",
 			req: &v1.ProjectMemberFindRequest{
-				ProjectId: pointer.Pointer("no-result"),
+				ProjectId: new("no-result"),
 				Namespace: "a",
 			},
 			prepare: func() {
@@ -277,7 +276,7 @@ func TestFindProjectMember(t *testing.T) {
 		{
 			name: "find by project id (no results) #2",
 			req: &v1.ProjectMemberFindRequest{
-				ProjectId: pointer.Pointer("project-1"),
+				ProjectId: new("project-1"),
 				Namespace: "wrong-namespace",
 			},
 			prepare: func() {
@@ -297,7 +296,7 @@ func TestFindProjectMember(t *testing.T) {
 		{
 			name: "find by tenant",
 			req: &v1.ProjectMemberFindRequest{
-				TenantId:  pointer.Pointer("tenant-2"),
+				TenantId:  new("tenant-2"),
 				Namespace: "a",
 			},
 			prepare: func() {

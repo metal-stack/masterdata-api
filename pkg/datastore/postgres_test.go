@@ -509,7 +509,7 @@ func TestFind(t *testing.T) {
 	assert.Len(t, tfr, 1)
 
 	// create more
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		tcr := &v1.Tenant{
 			Meta:        &v1.Meta{Id: fmt.Sprintf("ftenant-%d", i)},
 			Name:        fmt.Sprintf("tenant-%d", i),
@@ -559,7 +559,7 @@ func TestFindWithPaging(t *testing.T) {
 	// create some tenants
 
 	count := 100
-	for i := 0; i < count; i++ {
+	for i := range count {
 		tn := &v1.Tenant{
 			Meta: &v1.Meta{Id: fmt.Sprintf("t-%d", i)},
 			Name: "paging",
@@ -575,14 +575,14 @@ func TestFindWithPaging(t *testing.T) {
 	assert.Len(t, ts, 100)
 
 	// Then find the first 60 results
-	ts, nextpage, err = tenantDS.Find(ctx, &v1.Paging{Count: pointer.Pointer(uint64(60))})
+	ts, nextpage, err = tenantDS.Find(ctx, &v1.Paging{Count: new(uint64(60))})
 	require.NoError(t, err)
 	assert.NotNil(t, nextpage)
 	assert.Equal(t, uint64(1), *nextpage)
 	assert.Len(t, ts, 60)
 
 	// At least the next 60, but only 40 left and no more pages
-	ts, nextpage, err = tenantDS.Find(ctx, &v1.Paging{Page: nextpage, Count: pointer.Pointer(uint64(60))})
+	ts, nextpage, err = tenantDS.Find(ctx, &v1.Paging{Page: nextpage, Count: new(uint64(60))})
 	require.NoError(t, err)
 	assert.Nil(t, nextpage)
 	assert.Len(t, ts, 40)
