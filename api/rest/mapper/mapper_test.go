@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	v1 "github.com/metal-stack/masterdata-api/api/rest/v1"
-	"github.com/metal-stack/metal-lib/pkg/pointer"
 )
 
 func TestTenantMapperRoundtrip(t *testing.T) {
@@ -37,30 +36,30 @@ func TestTenantMapperRoundtrip(t *testing.T) {
 				Description: "tnt is a test tenant",
 				DefaultQuotas: &v1.QuotaSet{
 					Cluster: &v1.Quota{
-						Quota: pointer.Pointer(int32(100)),
+						Quota: new(int32(100)),
 					},
 					Machine: &v1.Quota{
-						Quota: pointer.Pointer(int32(10)),
+						Quota: new(int32(10)),
 					},
 					Ip: &v1.Quota{
-						Quota: pointer.Pointer(int32(20)),
+						Quota: new(int32(20)),
 					},
 					Project: &v1.Quota{
-						Quota: pointer.Pointer(int32(11)),
+						Quota: new(int32(11)),
 					},
 				},
 				Quotas: &v1.QuotaSet{
 					Cluster: &v1.Quota{
-						Quota: pointer.Pointer(int32(100)),
+						Quota: new(int32(100)),
 					},
 					Machine: &v1.Quota{
-						Quota: pointer.Pointer(int32(72)),
+						Quota: new(int32(72)),
 					},
 					Ip: &v1.Quota{
-						Quota: pointer.Pointer(int32(30)),
+						Quota: new(int32(30)),
 					},
 					Project: &v1.Quota{
-						Quota: pointer.Pointer(int32(7)),
+						Quota: new(int32(7)),
 					},
 				},
 				IAMConfig: &v1.IAMConfig{
@@ -124,7 +123,6 @@ func TestTenantMapperRoundtrip(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
 			gotMdMV1 := ToMdmV1Tenant(tt.inAndOut)
@@ -139,13 +137,9 @@ func TestTenantMapperRoundtrip(t *testing.T) {
 }
 
 func mustParseTimeP(ts string) *time.Time {
-	t, err := time.Parse("2006-01-02", ts)
+	t, err := time.Parse("2006-01-02", ts) //nolint:staticcheck
 	if err != nil {
 		panic(err)
 	}
-	return timep(t)
-}
-
-func timep(t time.Time) *time.Time {
-	return &t
+	return new(t)
 }

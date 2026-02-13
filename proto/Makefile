@@ -1,5 +1,5 @@
 MAKEFLAGS += --no-print-directory
-BUF_VERSION := 1.57.2
+BUF_VERSION := 1.65.0
 
 _buf:
 	docker run --rm \

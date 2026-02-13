@@ -32,7 +32,7 @@ type Meta struct {
 type (
 	ProjectIDTime struct {
 		ProjectID string    `json:"project_id,omitempty" description:"projectID as returned by cloud-api (e.g. 10241dd7-a8de-4856-8ac0-b55830b22036)"`
-		Time      time.Time `json:"time,omitempty" description:"point in time"`
+		Time      time.Time `json:"time" description:"point in time"`
 	}
 
 	// cluster-identification e.g. from prometheus-metrics
@@ -81,7 +81,7 @@ func onlyOneOfPtrsSet(ptrs ...any) bool {
 	count := 0
 	for _, p := range ptrs {
 		rv := reflect.ValueOf(p)
-		if rv.Kind() != reflect.Ptr || !rv.IsNil() {
+		if rv.Kind() != reflect.Pointer || !rv.IsNil() {
 			count++
 		}
 	}
