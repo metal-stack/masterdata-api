@@ -19,7 +19,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/metal-stack/masterdata-api/api/v1"
-	"github.com/metal-stack/metal-lib/pkg/pointer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,7 +47,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 	defer func() {
-		err = c.Stop(context.Background(), pointer.Pointer(3*time.Second))
+		err = c.Stop(context.Background(), new(3*time.Second))
 		if err != nil {
 			panic(err)
 		}
@@ -60,7 +59,7 @@ func TestMain(m *testing.M) {
 func TestCRUD(t *testing.T) {
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 	tcr := &v1.Tenant{
 		Meta:        &v1.Meta{Id: "tenant-1"},
 		Name:        "A Tenant",
@@ -140,7 +139,7 @@ func TestCRUD(t *testing.T) {
 func TestUpdateOptimisticLock(t *testing.T) {
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 	tcr := &v1.Tenant{
 		Meta:        &v1.Meta{Id: "tenant-2"},
 		Name:        "A Tenant",
@@ -185,7 +184,7 @@ func TestCreate(t *testing.T) {
 	const t1 = "t1"
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 
 	tcr1 := &v1.Tenant{
 		Name:        "atenant",
@@ -275,7 +274,7 @@ func TestUpdate(t *testing.T) {
 	const t3 = "t3"
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// meta is nil
 	tcr1 := &v1.Tenant{
@@ -366,7 +365,7 @@ func TestGet(t *testing.T) {
 	const t4 = "t4"
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 	// unknown id
 	_, err := tenantDS.Get(ctx, "unknown-id")
 	require.Error(t, err)
@@ -396,7 +395,7 @@ func TestGetHistory(t *testing.T) {
 	const t5 = "t5"
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 
 	tsNow := time.Date(2020, 4, 30, 18, 0, 0, 0, time.UTC)
 
@@ -486,7 +485,7 @@ func TestFind(t *testing.T) {
 	const t6 = "t6"
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// create a tenant
 	tcr1 := &v1.Tenant{
@@ -554,7 +553,7 @@ func TestFindWithPaging(t *testing.T) {
 	// prevent side effects
 	db.MustExec("DELETE from tenants")
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// create some tenants
 
@@ -592,7 +591,7 @@ func TestDelete(t *testing.T) {
 	const t9 = "t9"
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// unknown id
 	tdr1 := &v1.Tenant{
@@ -638,7 +637,7 @@ func TestDeleteAll(t *testing.T) {
 	)
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// unknown id
 	tdr1 := &v1.Tenant{
@@ -697,7 +696,7 @@ func TestDeleteAll(t *testing.T) {
 func TestAnnotationsAndLabels(t *testing.T) {
 	tenantDS := New(slog.Default(), db, &v1.Tenant{})
 	assert.NotNil(t, tenantDS, "Datastore must not be nil")
-	ctx := context.Background()
+	ctx := t.Context()
 	tcr := &v1.Tenant{
 		Meta: &v1.Meta{
 			Id: "tenant-3",
