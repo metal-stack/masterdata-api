@@ -74,6 +74,64 @@ func MigrateDB(log *slog.Logger, db *sqlx.DB, healthServer *health.Server) error
 					return nil
 				},
 			},
+			&migrator.Migration{
+				Name: "Unique membership indexes",
+				Func: func(tx *sql.Tx) error {
+					var (
+						ctx = context.Background()
+						pms = New(log, db, &v1.ProjectMember{})
+						tms = New(log, db, &v1.TenantMember{})
+					)
+
+					projectMembers, _, err := pms.Find(ctx, nil)
+					if err != nil {
+						return err
+					}
+
+					seen := map[string]bool{}
+
+					for _, m := range projectMembers {
+						key := fmt.Sprintf("%s|%s|%s", m.GetProjectId(), m.GetTenantId(), m.GetNamespace())
+						if seen[key] {
+							if err := pms.Delete(ctx, m.Meta.GetId()); err != nil {
+								return err
+							}
+							continue
+						}
+						seen[key] = true
+					}
+
+					tenantMembers, _, err := tms.Find(ctx, nil)
+					if err != nil {
+						return err
+					}
+
+					seen = map[string]bool{}
+
+					for _, m := range tenantMembers {
+						key := fmt.Sprintf("%s|%s|%s", m.GetTenantId(), m.GetMemberId(), m.GetNamespace())
+						if seen[key] {
+							if err := tms.Delete(ctx, m.Meta.GetId()); err != nil {
+								return err
+							}
+							continue
+						}
+						seen[key] = true
+					}
+
+					_, err = tx.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS projectmembers_membership_idx ON projectmembers ((projectmember ->> 'project_id'), (projectmember ->> 'tenant_id'), (COALESCE(projectmember ->> 'namespace', '')))`)
+					if err != nil {
+						return err
+					}
+
+					_, err = tx.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS tenantmembers_membership_idx ON tenantmembers ((tenantmember ->> 'tenant_id'), (tenantmember ->> 'member_id'), (COALESCE(tenantmember ->> 'namespace', '')))`)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				},
+			},
 		),
 		migrator.WithLogger(migrator.LoggerFunc(func(msg string, args ...any) {
 			log.Info(fmt.Sprintf(msg, args...))
