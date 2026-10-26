@@ -81,7 +81,7 @@ func onlyOneOfPtrsSet(ptrs ...any) bool {
 	count := 0
 	for _, p := range ptrs {
 		rv := reflect.ValueOf(p)
-		if rv.Kind() != reflect.Ptr || !rv.IsNil() {
+		if rv.Kind() != reflect.Pointer || !rv.IsNil() {
 			count++
 		}
 	}
